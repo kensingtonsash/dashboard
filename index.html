@@ -327,39 +327,67 @@ function getProjectChecklist(proj){
   const hasIronmongery=proj.ironmongery===true||proj.ironmongery==='true';
   const isSchedA=sched==='A';
 
-  const steps=[];
-  steps.push('Deposit invoice raised');
-  steps.push('Deposit payment received');
+  const sections=[];
+
+  // Finance
+  sections.push({section:'Finance',items:['Deposit invoice raised','Deposit payment received']});
+
+  // Specification — Full Replacement only
   if(isReplacement){
-    steps.push('Ironmongery style confirmed');
-    steps.push('Ironmongery finish confirmed');
-    steps.push('Paint colour / finish confirmed');
-    steps.push('Supplier order placed');
-    steps.push('Supplier order confirmed & ETA received');
-    steps.push('Ironmongery ordered');
+    sections.push({section:'Specification',items:[
+      'Ironmongery style confirmed',
+      'Ironmongery finish confirmed',
+      'Paint colour / finish confirmed',
+    ]});
+  }
+  // Ironmongery only — Sash Repairs with ironmongery
+  if(isRepairs&&hasIronmongery){
+    sections.push({section:'Ironmongery',items:[
+      'Ironmongery style confirmed',
+      'Ironmongery finish confirmed',
+    ]});
+  }
+
+  // Ordering — Full Replacement only
+  if(isReplacement){
+    sections.push({section:'Ordering',items:[
+      'Supplier order placed',
+      'Supplier order confirmed & ETA received',
+      'Ironmongery ordered',
+    ]});
   }
   if(isRepairs&&hasIronmongery){
-    steps.push('Ironmongery style confirmed');
-    steps.push('Ironmongery finish confirmed');
-    steps.push('Ironmongery ordered');
+    sections.push({section:'Ordering',items:['Ironmongery ordered']});
   }
-  steps.push('Subcontractor booked');
-  steps.push('Calendar invite sent to client');
+
+  // Scheduling
+  const schedItems=['Subcontractor booked','Calendar invite sent to client'];
   if(isSchedA){
-    steps.push('Interim invoice raised (if Sch. A)');
-    steps.push('Interim payment received (if Sch. A)');
+    schedItems.push('Interim invoice raised (if Sch. A)');
+    schedItems.push('Interim payment received (if Sch. A)');
   }
-  steps.push('Installation complete');
-  steps.push('Snagging checked / PC sign-off');
-  steps.push('Final invoice raised');
-  steps.push('Final payment received');
-  steps.push('Warranty / close-out letter sent');
-  return steps;
+  sections.push({section:'Scheduling',items:schedItems});
+
+  // Installation
+  const installItems=[];
+  if(isReplacement) installItems.push('Materials delivered to depot');
+  installItems.push('Installation complete');
+  installItems.push('Snagging checked / PC sign-off');
+  sections.push({section:'Installation',items:installItems});
+
+  // Close-out
+  sections.push({section:'Close-out',items:[
+    'Final invoice raised',
+    'Final payment received',
+    'Warranty / close-out letter sent',
+  ]});
+
+  return sections;
 }
 
 let DATA={enq:[],inv:[],jobs:[],proj:[],clients:[]};
 let svcChart=null,clientFilter='all';
-const allItems=()=>getProjectChecklist({job_type:'Full Replacement',payment_schedule:'A',ironmongery:true});
+const allItems=()=>getProjectChecklist({job_type:'Full Replacement',payment_schedule:'A',ironmongery:true}).flatMap(s=>s.items);
 const fmt=n=>'£'+Number(n).toLocaleString('en-GB',{minimumFractionDigits:0,maximumFractionDigits:0});
 const fmtK=n=>'£'+Math.round(n/1000)+'k';
 const BC={'New':'b-new','Quoted':'b-quoted','Won':'b-won','Lost':'b-lost','Pending survey':'b-pending',
@@ -602,19 +630,21 @@ function renderProj(){
   if(!p.length){c.innerHTML='<div class="card"><div class="empty">No projects yet.</div></div>';return;}
   c.innerHTML='<div class="proj-list">'+p.map(proj=>{
     const ck=proj.checked||{};
-    const steps=getProjectChecklist(proj);
-    const done=steps.filter(i=>ck[i]).length;
-    const pct=Math.round(done/steps.length*100);const closed=proj.status==='Closed';
-    const clHTML=steps.map(item=>`<label class="cl-item ${ck[item]?'checked':''}">
+    const sections=getProjectChecklist(proj);
+    const allSteps=sections.flatMap(s=>s.items);
+    const done=allSteps.filter(i=>ck[i]).length;
+    const pct=Math.round(done/allSteps.length*100);const closed=proj.status==='Closed';
+    const clHTML=sections.map(sec=>`<div class="cl-section">${sec.section}</div>
+      ${sec.items.map(item=>`<label class="cl-item ${ck[item]?'checked':''}">
         <input type="checkbox" ${ck[item]?'checked':''} ${closed?'disabled':''} onchange="toggleCheck('${proj.id}','${item.replace(/'/g,"\\'")}',this.checked)">
-        ${item}</label>`).join('');
+        ${item}</label>`).join('')}`).join('');
     return `<div class="proj-card" id="pc-${proj.id}">
       <div class="proj-card-header" onclick="toggleProj('${proj.id}')">
         <div class="proj-header-left">
           <div class="proj-client">${proj.client} <span style="font-weight:400;color:#888;font-size:12px">— ${proj.quote_no}</span></div>
           <div class="proj-addr">${proj.address} · ${proj.job_type}</div>
           <div class="progress-wrap"><div class="progress-bar"><div class="progress-fill" style="width:${pct}%"></div></div>
-          <div class="progress-label">${done} of ${steps.length} steps · ${pct}%</div></div>
+          <div class="progress-label">${done} of ${allSteps.length} steps · ${pct}%</div></div>
         </div>
         <div class="proj-header-right">${badge(proj.status)}<i class="ti ti-chevron-down proj-chevron" id="chev-${proj.id}"></i></div>
       </div>
