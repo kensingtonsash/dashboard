@@ -319,9 +319,47 @@ const CHECKLIST_TEMPLATE=[
   {section:'Close-out',items:['Final invoice raised','Final payment received','Warranty / close-out letter sent']}
 ];
 
+function getProjectChecklist(proj){
+  const jt=proj.job_type||'';
+  const sched=proj.payment_schedule||proj.schedule||'';
+  const isReplacement=['Full Replacement','New Windows','New Doors'].some(t=>jt.includes(t));
+  const isRepairs=jt.includes('Sash Repairs');
+  const hasIronmongery=proj.ironmongery===true||proj.ironmongery==='true';
+  const isSchedA=sched==='A';
+
+  const steps=[];
+  steps.push('Deposit invoice raised');
+  steps.push('Deposit payment received');
+  if(isReplacement){
+    steps.push('Ironmongery style confirmed');
+    steps.push('Ironmongery finish confirmed');
+    steps.push('Paint colour / finish confirmed');
+    steps.push('Supplier order placed');
+    steps.push('Supplier order confirmed & ETA received');
+    steps.push('Ironmongery ordered');
+  }
+  if(isRepairs&&hasIronmongery){
+    steps.push('Ironmongery style confirmed');
+    steps.push('Ironmongery finish confirmed');
+    steps.push('Ironmongery ordered');
+  }
+  steps.push('Subcontractor booked');
+  steps.push('Calendar invite sent to client');
+  if(isSchedA){
+    steps.push('Interim invoice raised (if Sch. A)');
+    steps.push('Interim payment received (if Sch. A)');
+  }
+  steps.push('Installation complete');
+  steps.push('Snagging checked / PC sign-off');
+  steps.push('Final invoice raised');
+  steps.push('Final payment received');
+  steps.push('Warranty / close-out letter sent');
+  return steps;
+}
+
 let DATA={enq:[],inv:[],jobs:[],proj:[],clients:[]};
 let svcChart=null,clientFilter='all';
-const allItems=()=>CHECKLIST_TEMPLATE.flatMap(s=>s.items);
+const allItems=()=>getProjectChecklist({job_type:'Full Replacement',payment_schedule:'A',ironmongery:true});
 const fmt=n=>'£'+Number(n).toLocaleString('en-GB',{minimumFractionDigits:0,maximumFractionDigits:0});
 const fmtK=n=>'£'+Math.round(n/1000)+'k';
 const BC={'New':'b-new','Quoted':'b-quoted','Won':'b-won','Lost':'b-lost','Pending survey':'b-pending',
@@ -563,19 +601,20 @@ function renderProj(){
   const c=document.getElementById('proj-cards');
   if(!p.length){c.innerHTML='<div class="card"><div class="empty">No projects yet.</div></div>';return;}
   c.innerHTML='<div class="proj-list">'+p.map(proj=>{
-    const ck=proj.checked||{};const done=allItems().filter(i=>ck[i]).length;
-    const pct=Math.round(done/ti*100);const closed=proj.status==='Closed';
-    const clHTML=CHECKLIST_TEMPLATE.map(sec=>`<div class="cl-section">${sec.section}</div>
-      ${sec.items.map(item=>`<label class="cl-item ${ck[item]?'checked':''}">
+    const ck=proj.checked||{};
+    const steps=getProjectChecklist(proj);
+    const done=steps.filter(i=>ck[i]).length;
+    const pct=Math.round(done/steps.length*100);const closed=proj.status==='Closed';
+    const clHTML=steps.map(item=>`<label class="cl-item ${ck[item]?'checked':''}">
         <input type="checkbox" ${ck[item]?'checked':''} ${closed?'disabled':''} onchange="toggleCheck('${proj.id}','${item.replace(/'/g,"\\'")}',this.checked)">
-        ${item}</label>`).join('')}`).join('');
+        ${item}</label>`).join('');
     return `<div class="proj-card" id="pc-${proj.id}">
       <div class="proj-card-header" onclick="toggleProj('${proj.id}')">
         <div class="proj-header-left">
           <div class="proj-client">${proj.client} <span style="font-weight:400;color:#888;font-size:12px">— ${proj.quote_no}</span></div>
           <div class="proj-addr">${proj.address} · ${proj.job_type}</div>
           <div class="progress-wrap"><div class="progress-bar"><div class="progress-fill" style="width:${pct}%"></div></div>
-          <div class="progress-label">${done} of ${ti} steps · ${pct}%</div></div>
+          <div class="progress-label">${done} of ${steps.length} steps · ${pct}%</div></div>
         </div>
         <div class="proj-header-right">${badge(proj.status)}<i class="ti ti-chevron-down proj-chevron" id="chev-${proj.id}"></i></div>
       </div>
