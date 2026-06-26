@@ -654,7 +654,7 @@ Clients: ${DATA.clients.length} on record
 Company: Kensington Sash (Windows) Ltd, London-based timber sash window specialist. All prices net excl. VAT.`;
 
   try{
-    const res=await fetch('https://api.anthropic.com/v1/messages',{
+    const res=await fetch('/api/chat',{
       method:'POST',
       headers:{'Content-Type':'application/json'},
       body:JSON.stringify({model:'claude-sonnet-4-6',max_tokens:1000,system:sys,messages:chatHistory})
