@@ -1,0 +1,303 @@
+from docx import Document
+from docx.shared import Pt, RGBColor, Cm, Inches
+from docx.enum.text import WD_ALIGN_PARAGRAPH
+from docx.enum.table import WD_ALIGN_VERTICAL
+from docx.oxml.ns import qn
+from docx.oxml import OxmlElement
+import copy
+
+doc = Document()
+
+# Page margins
+for section in doc.sections:
+    section.top_margin = Cm(1.8)
+    section.bottom_margin = Cm(1.8)
+    section.left_margin = Cm(2.0)
+    section.right_margin = Cm(2.0)
+
+GREEN = RGBColor(0x34, 0x45, 0x3E)
+GREY = RGBColor(0x88, 0x88, 0x88)
+BLACK = RGBColor(0x1a, 0x1a, 0x1a)
+
+def set_font(run, name, size, bold=False, color=None, italic=False):
+    run.font.name = name
+    run.font.size = Pt(size)
+    run.font.bold = bold
+    run.font.italic = italic
+    if color:
+        run.font.color.rgb = color
+
+def add_hr(doc, color="888888", thickness=4):
+    p = doc.add_paragraph()
+    p.paragraph_format.space_before = Pt(2)
+    p.paragraph_format.space_after = Pt(2)
+    pPr = p._p.get_or_add_pPr()
+    pBdr = OxmlElement('w:pBdr')
+    bottom = OxmlElement('w:bottom')
+    bottom.set(qn('w:val'), 'single')
+    bottom.set(qn('w:sz'), str(thickness))
+    bottom.set(qn('w:space'), '1')
+    bottom.set(qn('w:color'), color)
+    pBdr.append(bottom)
+    pPr.append(pBdr)
+    return p
+
+def add_shading(cell, fill="F4F4F2"):
+    tc = cell._tc
+    tcPr = tc.get_or_add_tcPr()
+    shd = OxmlElement('w:shd')
+    shd.set(qn('w:val'), 'clear')
+    shd.set(qn('w:color'), 'auto')
+    shd.set(qn('w:fill'), fill)
+    tcPr.append(shd)
+
+def set_cell_border(cell, **kwargs):
+    tc = cell._tc
+    tcPr = tc.get_or_add_tcPr()
+    tcBorders = OxmlElement('w:tcBorders')
+    for side in ['top','left','bottom','right']:
+        border = OxmlElement(f'w:{side}')
+        border.set(qn('w:val'), kwargs.get(side, 'none'))
+        border.set(qn('w:sz'), kwargs.get('sz', '4'))
+        border.set(qn('w:space'), '0')
+        border.set(qn('w:color'), kwargs.get('color', 'DDDDDD'))
+        tcBorders.append(border)
+    tcPr.append(tcBorders)
+
+# ── LOGO + HEADER ──
+header_table = doc.add_table(rows=1, cols=2)
+header_table.autofit = False
+header_table.columns[0].width = Cm(10)
+header_table.columns[1].width = Cm(8)
+
+left = header_table.cell(0,0)
+p = left.paragraphs[0]
+run = p.add_run('KENSINGTON')
+set_font(run, 'Cambria', 18, bold=True, color=GREEN)
+run2 = p.add_run('SASH')
+set_font(run2, 'Cambria', 18, bold=False, color=GREEN)
+p2 = left.add_paragraph('Sash Window Specialists')
+set_font(p2.runs[0] if p2.runs else p2.add_run('Sash Window Specialists'), 'Calibri', 9, color=GREY)
+
+right = header_table.cell(0,1)
+right.paragraphs[0].alignment = WD_ALIGN_PARAGRAPH.RIGHT
+for line in ['Kensington Sash (Windows) Limited','1st Floor, 239 Kensington High Street','London W8 6SN','info@kensingtonsash.co.uk','020 3840 7255 | kensingtonsash.co.uk']:
+    p = right.add_paragraph(line) if line != right.paragraphs[0].text else right.paragraphs[0]
+    if not right.paragraphs[0].runs and line == 'Kensington Sash (Windows) Limited':
+        p = right.paragraphs[0]
+    p.alignment = WD_ALIGN_PARAGRAPH.RIGHT
+    r = p.add_run(line) if not p.runs else p.runs[0]
+    if not p.runs:
+        r = p.add_run(line)
+    set_font(r, 'Calibri', 9, color=GREY)
+
+add_hr(doc)
+
+# ── META BLOCK ──
+meta = doc.add_table(rows=2, cols=3)
+meta.autofit = False
+meta.columns[0].width = Cm(6)
+meta.columns[1].width = Cm(6)
+meta.columns[2].width = Cm(6)
+
+labels1 = ['Prepared For', 'Prepared By Surveyor', 'Quotation No.']
+values1 = ['Luca Davico', 'Luke Robertson', 'KS-1901']
+labels2 = ['Date', '', '']
+values2 = ['26 June 2026', '', '']
+
+for i,( l,v) in enumerate(zip(labels1, values1)):
+    c = meta.cell(0, i)
+    lp = c.paragraphs[0]
+    lr = lp.add_run(l)
+    set_font(lr, 'Calibri', 8, color=GREY)
+    vp = c.add_paragraph(v)
+    vr = vp.add_run(v) if not vp.runs else vp.runs[0]
+    if not vp.runs:
+        vr = vp.add_run(v)
+    set_font(vr, 'Calibri', 10, bold=True, color=BLACK)
+
+for i,(l,v) in enumerate(zip(labels2, values2)):
+    c = meta.cell(1, i)
+    if l:
+        lp = c.paragraphs[0]
+        lr = lp.add_run(l)
+        set_font(lr, 'Calibri', 8, color=GREY)
+        vp = c.add_paragraph(v)
+        vr = vp.add_run(v) if not vp.runs else vp.runs[0]
+        if not vp.runs:
+            vr = vp.add_run(v)
+        set_font(vr, 'Calibri', 10, bold=True, color=BLACK)
+
+doc.add_paragraph()
+add_hr(doc)
+doc.add_paragraph()
+
+# ── INTRO ──
+intro = doc.add_paragraph()
+intro.paragraph_format.space_after = Pt(8)
+r = intro.add_run('Dear Luca,')
+set_font(r, 'Calibri', 10.5, color=BLACK)
+
+body = doc.add_paragraph()
+body.paragraph_format.space_after = Pt(8)
+r = body.add_run(
+    'Thank you for getting in touch with Kensington Sash. Please find enclosed our proposal for sash window restoration works at 208 Old Brompton Road, SW5 0BP. '
+    'Our team will ensure all areas are fully protected with dust sheeting and dust extraction equipment throughout, leaving the property clean and tidy on completion.'
+)
+set_font(r, 'Calibri', 10.5, color=BLACK)
+
+doc.add_paragraph()
+
+# ── SECTION 01 ──
+s1 = doc.add_paragraph()
+r = s1.add_run('Section 01 — Window-by-Window Specification')
+set_font(r, 'Cambria', 12, bold=True, color=GREEN)
+add_hr(doc, color="34453E", thickness=6)
+doc.add_paragraph()
+
+windows = [
+    ('Window 1', 'Living Room'), ('Window 2', 'Living Room'), ('Window 3', 'Living Room'),
+    ('Window 4', 'Living Room'), ('Window 5', 'Living Room'),
+]
+
+for (wname, loc) in windows:
+    # Window heading
+    wh = doc.add_paragraph()
+    wr = wh.add_run(f'{wname}   ')
+    set_font(wr, 'Cambria', 11, bold=True, color=BLACK)
+    wr2 = wh.add_run('1.7–2.3m²')
+    set_font(wr2, 'Cambria', 9, color=GREY)
+
+    # Location line
+    lp = doc.add_paragraph()
+    lr = lp.add_run(f'Location: {loc}')
+    set_font(lr, 'Calibri', 9, color=GREY)
+    lp.paragraph_format.space_after = Pt(4)
+
+    # Service table
+    t = doc.add_table(rows=4, cols=4)
+    t.autofit = False
+    t.columns[0].width = Cm(7)
+    t.columns[1].width = Cm(5)
+    t.columns[2].width = Cm(1.5)
+    t.columns[3].width = Cm(4.5)
+
+    # Header row
+    hdrs = ['Service', 'Description', 'Qty', 'Price']
+    for i, h in enumerate(hdrs):
+        c = t.cell(0, i)
+        p = c.paragraphs[0]
+        r = p.add_run(h)
+        set_font(r, 'Calibri', 8, bold=True, color=GREY)
+        add_shading(c, 'F4F4F2')
+
+    rows_data = [
+        ('Overhaul & Draughtproof', 'Full overhaul, new sash cords, draught proofing', '1', '£476.00'),
+        ('Painting & Decorating', 'Sand & redecorate all woodwork, internal & external', '1', '£460.00'),
+        ('New Sash Ironmongery', '2× sash lifts, 1× sash fastener — supply & fit', '1', '£75.00'),
+    ]
+    for ri, (svc, desc, qty, price) in enumerate(rows_data):
+        row = t.rows[ri+1]
+        data = [svc, desc, qty, price]
+        for ci, val in enumerate(data):
+            c = row.cells[ci]
+            p = c.paragraphs[0]
+            r = p.add_run(val)
+            bold = ci == 0
+            set_font(r, 'Calibri', 9.5, bold=bold, color=BLACK)
+            if ci == 3:
+                p.alignment = WD_ALIGN_PARAGRAPH.RIGHT
+
+    # Window subtotal row — add as new row
+    subtotal_row = t.add_row()
+    sc = subtotal_row.cells[0]
+    sp = sc.paragraphs[0]
+    sr = sp.add_run('Window subtotal')
+    set_font(sr, 'Calibri', 9.5, bold=True, color=BLACK)
+    subtotal_row.cells[1].merge(subtotal_row.cells[2])
+    sc2 = subtotal_row.cells[3]
+    sp2 = sc2.paragraphs[0]
+    sr2 = sp2.add_run('£1,011.00')
+    set_font(sr2, 'Calibri', 9.5, bold=True, color=GREEN)
+    sp2.alignment = WD_ALIGN_PARAGRAPH.RIGHT
+    add_shading(sc, 'F4F4F2')
+    add_shading(subtotal_row.cells[1], 'F4F4F2')
+    add_shading(sc2, 'F4F4F2')
+
+    doc.add_paragraph()
+
+# ── INVESTMENT SUMMARY ──
+doc.add_paragraph()
+sh = doc.add_paragraph()
+sr = sh.add_run('Investment Summary')
+set_font(sr, 'Cambria', 12, bold=True, color=GREEN)
+add_hr(doc, color="34453E", thickness=6)
+doc.add_paragraph()
+
+inv_table = doc.add_table(rows=4, cols=2)
+inv_table.autofit = False
+inv_table.columns[0].width = Cm(12)
+inv_table.columns[1].width = Cm(6)
+
+inv_rows = [
+    ('Subtotal (net excl. VAT)', '£5,055.00'),
+    ('VAT', '£535.00'),
+    ('', ''),
+    ('Total Investment', '£5,590.00'),
+]
+for i, (label, val) in enumerate(inv_rows):
+    row = inv_table.rows[i]
+    lc = row.cells[0]
+    vc = row.cells[1]
+    lp = lc.paragraphs[0]
+    vp = vc.paragraphs[0]
+    lr = lp.add_run(label)
+    vr = vp.add_run(val)
+    bold = i == 3
+    set_font(lr, 'Calibri', 10.5 if bold else 10, bold=bold, color=BLACK)
+    set_font(vr, 'Calibri', 10.5 if bold else 10, bold=bold, color=GREEN if bold else BLACK)
+    vp.alignment = WD_ALIGN_PARAGRAPH.RIGHT
+    if bold:
+        add_shading(lc, 'F4F4F2')
+        add_shading(vc, 'F4F4F2')
+
+doc.add_paragraph()
+
+# ── PAYMENT TERMS ──
+pt = doc.add_paragraph()
+ptr = pt.add_run('Payment Terms')
+set_font(ptr, 'Cambria', 12, bold=True, color=GREEN)
+add_hr(doc, color="34453E", thickness=6)
+doc.add_paragraph()
+
+sched = doc.add_paragraph()
+sr = sched.add_run('Payment Schedule B — Major Works (installation 4+ days)')
+set_font(sr, 'Calibri', 10, bold=True, color=BLACK)
+
+for line in [
+    '50% deposit on acceptance — £2,527.50 inc. VAT',
+    '25% interim payment 7 days prior to installation — £1,397.50 inc. VAT',
+    '25% on Practical Completion — £1,397.50 inc. VAT',
+]:
+    p = doc.add_paragraph(style='List Bullet')
+    r = p.add_run(line)
+    set_font(r, 'Calibri', 10, color=BLACK)
+
+doc.add_paragraph()
+terms = doc.add_paragraph()
+tr = terms.add_run(
+    'This proposal is valid for 30 days from the date of issue. Works are subject to our standard Terms & Conditions, '
+    'a copy of which is enclosed. To accept this proposal, please sign and return the T&Cs.'
+)
+set_font(tr, 'Calibri', 10, color=GREY)
+
+doc.add_paragraph()
+sig = doc.add_paragraph()
+sr = sig.add_run('Luke Robertson')
+set_font(sr, 'Cambria', 11, bold=True, color=GREEN)
+sig2 = doc.add_paragraph()
+sr2 = sig2.add_run('Kensington Sash (Windows) Ltd')
+set_font(sr2, 'Calibri', 10, color=GREY)
+
+doc.save('/tmp/KS-1901-Luca-Davico-208-Old-Brompton-Road.docx')
+print("Quote generated: KS-1901-Luca-Davico-208-Old-Brompton-Road.docx")
