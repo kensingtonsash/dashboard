@@ -374,7 +374,16 @@ function renderHome(){
   const now=new Date();const k12c=[],k12p=[],k3c=[],k3p=[];
   for(let i=0;i<12;i++){const d=new Date(now.getFullYear(),now.getMonth()-i,1);k12c.push(mKey(d));k12p.push(mKey(new Date(d.getFullYear()-1,d.getMonth(),1)));}
   for(let i=0;i<3;i++){const d=new Date(now.getFullYear(),now.getMonth()-i,1);k3c.push(mKey(d));k3p.push(mKey(new Date(d.getFullYear(),d.getMonth()-3,1)));}
-  const r12c=hSum(k12c),r12p=hSum(k12p),r3c=hSum(k3c),r3p=hSum(k3p);
+
+  // Build monthly totals from real paid invoices
+  const invByMonth={};
+  DATA.inv.filter(i=>i.status==='Paid'&&i.created_at).forEach(i=>{
+    const k=mKey(new Date(i.created_at));
+    invByMonth[k]=(invByMonth[k]||0)+Number(i.amount||0);
+  });
+  const invSum=ks=>ks.reduce((s,k)=>s+(invByMonth[k]||0),0);
+
+  const r12c=invSum(k12c),r12p=invSum(k12p),r3c=invSum(k3c),r3p=invSum(k3p);
   const p12=gPct(r12c,r12p),p3=gPct(r3c,r3p);
   document.getElementById('home-growth').innerHTML=`
     <div class="growth-section"><div class="growth-label">Rolling 12 months</div><div class="growth-row">
@@ -386,11 +395,16 @@ function renderHome(){
       <div class="growth-period"><div class="growth-period-lbl">Prior quarter</div><div class="growth-period-val">${fmtK(r3p)}</div></div>
       <div><div class="growth-pct ${pCls(p3)}">${pStr(p3)}</div><div class="growth-pct-sub">QoQ</div></div></div></div>`;
   if(svcChart){svcChart.destroy();svcChart=null;}
-  const qLabels=['Q1 2024','Q2 2024','Q3 2024','Q4 2024','Q1 2025','Q2 2025'];
-  const qKeys=[['202401','202402','202403'],['202404','202405','202406'],['202407','202408','202409'],['202410','202411','202412'],['202501','202502','202503'],['202504','202505','202506']];
-  const rep=qKeys.map(ks=>Math.round(ks.reduce((s,k)=>s+(HIST[k]?.r||0),0)/1000));
-  const nas=qKeys.map(ks=>Math.round(ks.reduce((s,k)=>s+(HIST[k]?.n||0),0)/1000));
-  const ful=qKeys.map(ks=>Math.round(ks.reduce((s,k)=>s+(HIST[k]?.f||0),0)/1000));
+  const qLabels=[];const qKeys=[];
+  for(let i=5;i>=0;i--){
+    const d=new Date(now.getFullYear(),now.getMonth()-i*3,1);
+    const qs=[];for(let j=0;j<3;j++){const m=new Date(d.getFullYear(),d.getMonth()+j,1);qs.push(mKey(m));}
+    qKeys.push(qs);
+    qLabels.push(`Q${Math.ceil((d.getMonth()+1)/3)} ${d.getFullYear()}`);
+  }
+  const rep=qKeys.map(ks=>Math.round(ks.reduce((s,k)=>s+(invByMonth[k]||0),0)/1000));
+  const nas=qKeys.map(()=>0);
+  const ful=qKeys.map(()=>0);
   const ctx=document.getElementById('svc-chart');
   if(ctx){svcChart=new Chart(ctx,{type:'bar',data:{labels:qLabels,datasets:[
     {label:'Sash Repairs',data:rep,backgroundColor:'#34453E',stack:'s'},
