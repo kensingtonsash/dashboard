@@ -664,7 +664,17 @@ async function toggleCheck(pid,item,val){
 
 async function closeProj(id){
   await sb('projects','PATCH',{status:'Closed'},`?id=eq.${id}`);
-  await loadAll();
+  await // Password protection
+(function(){
+  const PASS='Kensington98';
+  if(sessionStorage.getItem('ks_auth')!=='1'){
+    const p=prompt('Enter password:');
+    if(p!==PASS){document.body.innerHTML='<div style="display:flex;align-items:center;justify-content:center;height:100vh;font-family:system-ui;color:#888">Access denied.</div>';return;}
+    sessionStorage.setItem('ks_auth','1');
+  }
+})();
+
+loadAll();
 }
 
 function switchTab(name,btn){
