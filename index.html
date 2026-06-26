@@ -335,16 +335,14 @@ function getProjectChecklist(proj){
   // Specification — Full Replacement only
   if(isReplacement){
     sections.push({section:'Specification',items:[
-      'Ironmongery style confirmed',
-      'Ironmongery finish confirmed',
+      'Ironmongery selected by client',
       'Paint colour / finish confirmed',
     ]});
   }
   // Ironmongery only — Sash Repairs with ironmongery
   if(isRepairs&&hasIronmongery){
     sections.push({section:'Ironmongery',items:[
-      'Ironmongery style confirmed',
-      'Ironmongery finish confirmed',
+      'Ironmongery selected by client',
     ]});
   }
 
