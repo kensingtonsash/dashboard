@@ -141,6 +141,11 @@ body{font-family:system-ui,sans-serif;background:#f5f5f3;color:#1a1a1a;font-size
 .client-filter{font-size:12px;padding:4px 12px;border-radius:20px;border:0.5px solid #ddd;background:transparent;color:#666;cursor:pointer;font-family:inherit}
 .client-filter.active{background:#34453E;color:#fff;border-color:#34453E}
 .last-act{font-size:12px;color:#888}
+.q-table{width:100%;border-collapse:collapse;font-size:13px}
+.q-table th{text-align:left;font-weight:500;font-size:11px;color:#888;padding:0 12px 10px 0;border-bottom:0.5px solid #eee;white-space:nowrap;text-transform:uppercase;letter-spacing:.04em}
+.q-table td{padding:10px 12px 10px 0;border-bottom:0.5px solid #eee;vertical-align:middle}
+.q-table tr:last-child td{border-bottom:none}
+.q-table tr:hover td{background:#fafaf9}
 @media(max-width:600px){.home-grid{grid-template-columns:1fr}.inv-table{font-size:12px}.topbar{flex-direction:column;align-items:flex-start}}
 </style>
 </head>
@@ -166,7 +171,6 @@ body{font-family:system-ui,sans-serif;background:#f5f5f3;color:#1a1a1a;font-size
     </div>
   </div>
 
-  <!-- HOME -->
   <div id="tab-home" class="section active">
     <div class="kpi-grid" id="kpi-home"></div>
     <div id="alerts-block"></div>
@@ -189,7 +193,6 @@ body{font-family:system-ui,sans-serif;background:#f5f5f3;color:#1a1a1a;font-size
     </div>
   </div>
 
-  <!-- CLIENTS -->
   <div id="tab-clients" class="section">
     <div class="kpi-grid" id="kpi-clients"></div>
     <div class="card">
@@ -211,7 +214,6 @@ body{font-family:system-ui,sans-serif;background:#f5f5f3;color:#1a1a1a;font-size
     </div>
   </div>
 
-  <!-- REQUESTS -->
   <div id="tab-requests" class="section">
     <div class="kpi-grid" id="kpi-req"></div>
     <div class="card"><div class="card-title"><i class="ti ti-inbox"></i> Requests</div>
@@ -219,15 +221,26 @@ body{font-family:system-ui,sans-serif;background:#f5f5f3;color:#1a1a1a;font-size
     </div>
   </div>
 
-  <!-- QUOTES -->
   <div id="tab-quotes" class="section">
     <div class="kpi-grid" id="kpi-quotes"></div>
     <div class="card"><div class="card-title"><i class="ti ti-file-text"></i> Quotes</div>
-      <div id="quotes-list"></div>
+      <div style="overflow-x:auto">
+        <table class="q-table">
+          <thead><tr>
+            <th>Client</th>
+            <th>Quote No.</th>
+            <th>Property</th>
+            <th>Created</th>
+            <th>Status</th>
+            <th style="text-align:right">Total (inc. VAT)</th>
+            <th></th>
+          </tr></thead>
+          <tbody id="quotes-list"></tbody>
+        </table>
+      </div>
     </div>
   </div>
 
-  <!-- INVOICES -->
   <div id="tab-invoices" class="section">
     <div class="kpi-grid" id="kpi-inv"></div>
     <div class="card"><div class="card-title"><i class="ti ti-file-invoice"></i> Invoice register</div>
@@ -235,7 +248,6 @@ body{font-family:system-ui,sans-serif;background:#f5f5f3;color:#1a1a1a;font-size
     </div>
   </div>
 
-  <!-- JOB SHEETS -->
   <div id="tab-jobs" class="section">
     <div class="kpi-grid" id="kpi-jobs"></div>
     <div class="card"><div class="card-title"><i class="ti ti-clipboard-list"></i> Job sheets</div>
@@ -243,7 +255,6 @@ body{font-family:system-ui,sans-serif;background:#f5f5f3;color:#1a1a1a;font-size
     </div>
   </div>
 
-  <!-- PROJECTS -->
   <div id="tab-projects" class="section">
     <div class="kpi-grid" id="kpi-proj"></div>
     <div id="proj-cards"></div>
@@ -434,7 +445,11 @@ function renderRequests(){
 }
 
 function renderQuotes(){
-  const e=DATA.enq.filter(x=>['Quoted','Won','Lost'].includes(x.status));
+  const e=[...DATA.enq.filter(x=>['Quoted','Won','Lost'].includes(x.status))].sort((a,b)=>{
+    const na=parseInt((a.quote_no||'').replace(/\D/g,''))||0;
+    const nb=parseInt((b.quote_no||'').replace(/\D/g,''))||0;
+    return nb-na;
+  });
   const won=e.filter(x=>x.status==='Won');
   const open=e.filter(x=>x.status==='Quoted');
   const lost=e.filter(x=>x.status==='Lost');
@@ -443,12 +458,21 @@ function renderQuotes(){
     <div class="kpi"><div class="kpi-label">Won</div><div class="kpi-val">${won.length}</div><div class="kpi-sub green">${fmt(won.reduce((s,x)=>s+(Number(x.value)||0),0))} secured</div></div>
     <div class="kpi"><div class="kpi-label">Win rate</div><div class="kpi-val">${e.length?Math.round(won.length/e.length*100):0}%</div><div class="kpi-sub">of quotes sent</div></div>
     <div class="kpi"><div class="kpi-label">Lost</div><div class="kpi-val">${lost.length}</div><div class="kpi-sub red">not converted</div></div>`;
-  const l=document.getElementById('quotes-list');
-  if(!e.length){l.innerHTML='<div class="empty">No quotes yet.</div>';return;}
-  l.innerHTML=e.map(x=>`<div class="row">
-    <div class="row-left"><div class="row-name">${x.client} <span style="font-weight:400;color:#888">— ${x.quote_no}</span></div>
-    <div class="row-sub">${x.address} · ${x.job_type} · ${fmt(Number(x.value))}</div></div>
-    <div class="row-actions">${x.drive_url?`<a href="${x.drive_url}" target="_blank"><button class="btn-sm">View quote</button></a>`:''} ${badge(x.status)}</div></div>`).join('');
+  const b=document.getElementById('quotes-list');
+  if(!e.length){b.innerHTML='<tr><td colspan="7" class="empty" style="padding:10px 0">No quotes yet.</td></tr>';return;}
+  b.innerHTML=e.map(x=>{
+    const totalIncVat=Math.round(Number(x.value||0)*1.2);
+    const dateStr=x.date?new Date(x.date).toLocaleDateString('en-GB',{day:'numeric',month:'short',year:'numeric'}):'—';
+    return `<tr>
+      <td style="font-weight:600;font-size:13px">${x.client}</td>
+      <td style="color:#185FA5;font-weight:500">#${(x.quote_no||'').replace('KS-','')}</td>
+      <td style="color:#555;font-size:12px">${x.address}</td>
+      <td style="color:#888;font-size:12px;white-space:nowrap">${dateStr}</td>
+      <td>${badge(x.status)}</td>
+      <td style="text-align:right;font-weight:600">${fmt(totalIncVat)}</td>
+      <td>${x.drive_url?`<a href="${x.drive_url}" target="_blank"><button class="btn-sm">View</button></a>`:''}</td>
+    </tr>`;
+  }).join('');
 }
 
 function renderInv(){
