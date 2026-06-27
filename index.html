@@ -490,7 +490,7 @@ function renderHome(){
   const rep=qKeys.map(ks=>Math.round(invSum(ks)/1000));
   const ctx=document.getElementById('svc-chart');
   if(ctx){svcChart=new Chart(ctx,{type:'bar',data:{labels:qLabels,datasets:[
-    {label:'Revenue',data:qData,backgroundColor:'#34453E',stack:'s'}
+    {label:'Revenue',data:rep,backgroundColor:'#34453E',stack:'s'}
   ]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false},tooltip:{callbacks:{label:c=>' £'+c.raw+'k'}}},
     scales:{x:{stacked:true,ticks:{font:{size:11}},grid:{display:false}},y:{stacked:true,ticks:{font:{size:11},callback:v=>'£'+v+'k'},grid:{color:'#f0f0ee'}}}}});}
 }
