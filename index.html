@@ -283,8 +283,6 @@ body{font-family:system-ui,sans-serif;background:#f0f0ee;color:#1a1a1a;font-size
       </div>
       <div id="sub-list"></div>
     </div>
-
-    <!-- Add/Edit form -->
     <div id="sub-form" style="display:none" class="card">
       <div class="card-title"><i class="ti ti-user-plus"></i> <span id="sub-form-title">Add subcontractor</span></div>
       <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px">
@@ -371,7 +369,7 @@ function getProjectChecklist(proj){
   return sections;
 }
 
-let DATA={enq:[],inv:[],jobs:[],proj:[],clients:[]};
+let DATA={enq:[],inv:[],jobs:[],proj:[],clients:[],sub:[]};
 let svcChart=null,clientFilter='all';
 const allItems=()=>getProjectChecklist({job_type:'Full Replacement',payment_schedule:'A',ironmongery:true}).flatMap(s=>s.items);
 const fmt=n=>'£'+Number(n).toLocaleString('en-GB',{minimumFractionDigits:0,maximumFractionDigits:0});
@@ -449,8 +447,6 @@ function renderHome(){
     <div class="stat-row"><span class="stat-label">Outstanding</span><span class="stat-val" style="color:${out>0?'#A32D2D':'#888'}">${fmt(out)}</span></div>
     <div class="stat-row"><span class="stat-label">Jobs won</span><span class="stat-val">${won.length}</span></div>
     <div class="stat-row"><span class="stat-label">Win rate</span><span class="stat-val">${e.length?Math.round(won.length/e.length*100):0}%</span></div>`;
-
-  // Growth card — use paid_date for correct monthly bucketing
   const now=new Date();
   const invByMonth={};
   DATA.inv.filter(i=>i.status==='Paid'&&i.paid_date).forEach(i=>{
@@ -472,9 +468,8 @@ function renderHome(){
       <div class="growth-period"><div class="growth-period-lbl">This quarter</div><div class="growth-period-val">${fmtK(r3c)}</div></div>
       <div class="growth-period"><div class="growth-period-lbl">Prior quarter</div><div class="growth-period-val">${fmtK(r3p)}</div></div>
       <div><div class="growth-pct ${pCls(p3)}">${pStr(p3)}</div><div class="growth-pct-sub">QoQ</div></div></div></div>`;
-
   if(svcChart){svcChart.destroy();svcChart=null;}
-  const qLabels=[];const qKeys=[];
+  const qLabels=[],qKeys=[];
   for(let i=5;i>=0;i--){
     const d=new Date(now.getFullYear(),now.getMonth()-i*3,1);
     const qs=[];for(let j=0;j<3;j++){const m=new Date(d.getFullYear(),d.getMonth()+j,1);qs.push(mKey(m));}
@@ -482,16 +477,9 @@ function renderHome(){
   }
   const rep=qKeys.map(ks=>Math.round(invSum(ks)/1000));
   const ctx=document.getElementById('svc-chart');
-  if(ctx){svcChart=new Chart(ctx,{type:'bar',data:{labels:qLabels,datasets:[
-    {label:'Revenue',data:rep,backgroundColor:'#34453E',stack:'s'}
-  ]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false},tooltip:{callbacks:{label:c=>' £'+c.raw+'k'}}},
+  if(ctx){svcChart=new Chart(ctx,{type:'bar',data:{labels:qLabels,datasets:[{label:'Revenue',data:rep,backgroundColor:'#34453E',stack:'s'}]},
+    options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false},tooltip:{callbacks:{label:c=>' £'+c.raw+'k'}}},
     scales:{x:{stacked:true,ticks:{font:{size:11}},grid:{display:false}},y:{stacked:true,ticks:{font:{size:11},callback:v=>'£'+v+'k'},grid:{color:'#f0f0ee'}}}}});}
-}
-
-function setClientFilter(f,btn){
-  clientFilter=f;
-  document.querySelectorAll('.client-filter').forEach(b=>b.classList.remove('active'));
-  btn.classList.add('active');renderClients();
 }
 
 function renderClients(){
@@ -499,30 +487,28 @@ function renderClients(){
   const all=DATA.clients;
   const parseDate=s=>{if(!s)return 0;const[d,m,y]=s.split('/');return new Date(`${y}-${m}-${d}`).getTime();};
   const sorted=[...all].sort((a,b)=>parseDate(b.last_activity)-parseDate(a.last_activity));
-  let filtered=clientFilter==='all'?sorted:sorted.filter(c=>c.status===clientFilter);
+  let filtered=sorted;
   if(search)filtered=filtered.filter(c=>((c.name||'')+(c.address||'')+(c.company||'')+(c.email||'')).toLowerCase().includes(search));
   const thisYear=new Date().getFullYear();
   const newThisYear=all.filter(c=>{if(!c.last_activity)return false;const[d,m,y]=c.last_activity.split('/');return parseInt(y)===thisYear;}).length;
-  const withOpenQuotes=DATA.enq.filter(x=>x.status==='Quoted').map(x=>x.client);
-  const openQuoteClients=new Set(withOpenQuotes).size;
+  const openQuoteClients=new Set(DATA.enq.filter(x=>x.status==='Quoted').map(x=>x.client)).size;
   document.getElementById('kpi-clients').innerHTML=`
     <div class="kpi"><div class="kpi-label">Total clients</div><div class="kpi-val">${all.length}</div><div class="kpi-sub">on record</div></div>
     <div class="kpi"><div class="kpi-label">Active this year</div><div class="kpi-val">${newThisYear}</div><div class="kpi-sub green">${thisYear}</div></div>
     <div class="kpi"><div class="kpi-label">Open quotes</div><div class="kpi-val">${openQuoteClients}</div><div class="kpi-sub">awaiting decision</div></div>`;
-  const spCls={Active:'sp-active',Lead:'sp-lead',Past:'sp-past'};
   const b=document.getElementById('client-body');
-  if(!filtered.length){b.innerHTML='<tr><td colspan="6" class="empty" style="padding:10px 0">No clients found.</td></tr>';return;}
+  if(!filtered.length){b.innerHTML='<tr><td colspan="5" class="empty" style="padding:10px 0">No clients found.</td></tr>';return;}
   b.innerHTML=filtered.map(c=>{
     const cInv=DATA.inv.filter(i=>i.client===c.name);
     const cQuotes=DATA.enq.filter(x=>x.client===c.name&&['Quoted','Won','Lost'].includes(x.status));
-    const detail=cInv.length||cQuotes.length?`
+    const hasDetail=cInv.length||cQuotes.length;
+    const detail=hasDetail?`
       <tr class="cl-detail" id="cd-${CSS.escape(c.name)}" style="display:none"><td colspan="5" style="padding:8px 0 12px 0;background:#fafaf9">
         ${cQuotes.length?`<div style="font-size:11px;font-weight:500;color:#888;text-transform:uppercase;letter-spacing:.04em;margin-bottom:6px">Quotes</div>
         ${cQuotes.map(q=>`<div style="display:flex;justify-content:space-between;font-size:12px;padding:3px 0;border-bottom:0.5px solid #eee"><span style="color:#185FA5;font-weight:500">${q.quote_no}</span><span style="color:#555">${q.address}</span><span>${badge(q.status)}</span><span style="font-weight:500">${fmt(Math.round(Number(q.value||0)*1.2))}</span></div>`).join('')}`:''}
         ${cInv.length?`<div style="font-size:11px;font-weight:500;color:#888;text-transform:uppercase;letter-spacing:.04em;margin:${cQuotes.length?'10px':0} 0 6px">Invoices</div>
         ${cInv.map(i=>`<div style="display:flex;justify-content:space-between;font-size:12px;padding:3px 0;border-bottom:0.5px solid #eee"><span style="color:#185FA5;font-weight:500">${i.invoice_no}</span><span style="color:#555">${i.subject||''}</span><span>${badge(i.status==='Overdue'?'Overdue':i.status)}</span><span style="font-weight:500">${fmt(Math.round(Number(i.amount||0)*1.2))}</span></div>`).join('')}`:''}
-      </td></tr>`:''
-    const hasDetail=cInv.length||cQuotes.length;
+      </td></tr>`:'';
     return `<tr style="cursor:${hasDetail?'pointer':'default'}" onclick="${hasDetail?`toggleClientDetail('${c.name.replace(/'/g,"\\'")}')`:''}" >
       <td><div class="cl-name">${c.name||''}</div>${c.company?`<div class="cl-company">${c.company}</div>`:''}</td>
       <td class="cl-contact">${c.address||''}</td>
@@ -534,20 +520,66 @@ function renderClients(){
 
 function renderRequests(){
   const all=DATA.enq;
-  const e=all.filter(x=>['New','Pending survey'].includes(x.status));
-  const totalReq=all.filter(x=>x.created_at).length;
-  const thisMonth=new Date();
-  const reqThisMonth=all.filter(x=>{if(!x.created_at)return false;const d=new Date(x.created_at);return d.getFullYear()===thisMonth.getFullYear()&&d.getMonth()===thisMonth.getMonth();}).length;
+  const active=all.filter(x=>['New','Pending survey'].includes(x.status));
+  const now=new Date();
+  const reqThisMonth=all.filter(x=>{if(!x.created_at)return false;const d=new Date(x.created_at);return d.getFullYear()===now.getFullYear()&&d.getMonth()===now.getMonth();}).length;
   document.getElementById('kpi-req').innerHTML=`
-    <div class="kpi"><div class="kpi-label">Total enquiries</div><div class="kpi-val">${totalReq}</div><div class="kpi-sub green">${reqThisMonth} this month</div></div>
-    <div class="kpi"><div class="kpi-label">Awaiting quote</div><div class="kpi-val">${e.length}</div><div class="kpi-sub">New or pending survey</div></div>
+    <div class="kpi"><div class="kpi-label">Total requests</div><div class="kpi-val">${all.length}</div><div class="kpi-sub green">${reqThisMonth} this month</div></div>
+    <div class="kpi"><div class="kpi-label">Awaiting quote</div><div class="kpi-val">${active.length}</div><div class="kpi-sub">New or pending survey</div></div>
     <div class="kpi"><div class="kpi-label">Survey requested</div><div class="kpi-val">${all.filter(x=>x.survey).length}</div><div class="kpi-sub">onsite visits</div></div>
-    <div class="kpi"><div class="kpi-label">Windows / doors</div><div class="kpi-val">${all.reduce((s,x)=>s+(parseInt(x.window_count)||0),0)}</div><div class="kpi-sub">across all enquiries</div></div>`;
+    <div class="kpi"><div class="kpi-label">Windows / doors</div><div class="kpi-val">${all.reduce((s,x)=>s+(parseInt(x.window_count)||0),0)}</div><div class="kpi-sub">across all requests</div></div>`;
   const l=document.getElementById('req-list');
-  if(!e.length){l.innerHTML='<div class="empty">No requests yet.</div>';return;}
-  l.innerHTML=e.map(x=>{
+  if(!all.length){l.innerHTML='<div class="empty">No requests yet.</div>';return;}
+  l.innerHTML=all.map(x=>{
+    const isActive=['New','Pending survey'].includes(x.status);
+    const dateStr=x.created_at?new Date(x.created_at).toLocaleDateString('en-GB',{day:'numeric',month:'short',year:'numeric'}):'—';
+    if(!isActive){
+      const services=(x.job_type||'').split(',').map(s=>s.trim()).filter(Boolean);
+      return `<div style="border-bottom:0.5px solid #eee">
+        <div style="display:flex;align-items:center;justify-content:space-between;padding:8px 0;gap:8px;cursor:pointer" onclick="toggleReq('${x.id}')">
+          <div style="flex:1;min-width:0">
+            <span style="font-size:13px;font-weight:500">${x.client}</span>
+            ${x.address?`<span style="font-size:12px;color:#888;margin-left:8px">${x.address}</span>`:''}
+          </div>
+          <div style="display:flex;align-items:center;gap:8px;flex-shrink:0">
+            <span style="font-size:11px;color:#888">${dateStr}</span>
+            ${badge(x.status)}
+            <i class="ti ti-chevron-down" id="reqchev-${x.id}" style="font-size:14px;color:#888;transition:transform .2s"></i>
+          </div>
+        </div>
+        <div id="reqbody-${x.id}" style="display:none;padding-bottom:12px">
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:10px">
+            <div>
+              <div style="font-size:11px;font-weight:500;color:#888;text-transform:uppercase;letter-spacing:.04em;margin-bottom:6px">Services requested</div>
+              <div style="display:flex;flex-wrap:wrap;gap:4px">
+                ${services.length?services.map(s=>`<span class="badge b-quoted">${s}</span>`).join(''):'<span style="font-size:12px;color:#888">—</span>'}
+              </div>
+            </div>
+            <div>
+              <div style="font-size:11px;font-weight:500;color:#888;text-transform:uppercase;letter-spacing:.04em;margin-bottom:6px">Project details</div>
+              <div style="font-size:12px;color:#555;display:flex;flex-direction:column;gap:3px">
+                ${x.window_count?`<span><i class="ti ti-window" style="font-size:11px;margin-right:4px;color:#34453E"></i>${x.window_count} window${x.window_count!='1'?'s':''}</span>`:''}
+                ${x.survey?`<span><i class="ti ti-calendar-check" style="font-size:11px;margin-right:4px;color:#34453E"></i>Onsite survey requested</span>`:''}
+                ${x.photo_estimate?`<span><i class="ti ti-camera" style="font-size:11px;margin-right:4px;color:#34453E"></i>Photo estimate requested</span>`:''}
+                ${x.phone?`<span><i class="ti ti-phone" style="font-size:11px;margin-right:4px;color:#34453E"></i>${x.phone}</span>`:''}
+                ${x.email?`<span><i class="ti ti-mail" style="font-size:11px;margin-right:4px;color:#34453E"></i><a href="mailto:${x.email}" style="color:#185FA5">${x.email}</a></span>`:''}
+              </div>
+            </div>
+          </div>
+          ${x.notes?`<div style="margin-bottom:10px">
+            <div style="font-size:11px;font-weight:500;color:#888;text-transform:uppercase;letter-spacing:.04em;margin-bottom:4px">Description</div>
+            <div style="font-size:12px;color:#555;line-height:1.6;white-space:pre-wrap">${x.notes}</div>
+          </div>`:''}
+          ${x.photo_urls&&x.photo_urls.length?`<div>
+            <div style="font-size:11px;font-weight:500;color:#888;text-transform:uppercase;letter-spacing:.04em;margin-bottom:6px">Photos (${x.photo_urls.length})</div>
+            <div style="display:flex;gap:6px;flex-wrap:wrap">
+              ${x.photo_urls.map(u=>`<a href="${u}" target="_blank"><img src="${u}" style="width:72px;height:72px;object-fit:cover;border-radius:6px;border:0.5px solid #ddd"></a>`).join('')}
+            </div>
+          </div>`:''}
+        </div>
+      </div>`;
+    }
     const services=(x.job_type||'').split(',').map(s=>s.trim()).filter(Boolean);
-    const dateStr=x.date?new Date(x.date).toLocaleDateString('en-GB',{day:'numeric',month:'short',year:'numeric'}):x.created_at?new Date(x.created_at).toLocaleDateString('en-GB',{day:'numeric',month:'short',year:'numeric'}):'—';
     return `<div class="card" style="margin-bottom:10px">
       <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:12px;flex-wrap:wrap">
         <div>
@@ -563,7 +595,6 @@ function renderRequests(){
           <span style="font-size:11px;color:#888">${dateStr}</span>
         </div>
       </div>
-
       <div style="margin-top:12px;padding-top:12px;border-top:0.5px solid #eee;display:grid;grid-template-columns:1fr 1fr;gap:12px">
         <div>
           <div style="font-size:11px;font-weight:500;color:#888;text-transform:uppercase;letter-spacing:.04em;margin-bottom:6px">Services requested</div>
@@ -580,19 +611,16 @@ function renderRequests(){
           </div>
         </div>
       </div>
-
       ${x.notes?`<div style="margin-top:10px;padding-top:10px;border-top:0.5px solid #eee">
         <div style="font-size:11px;font-weight:500;color:#888;text-transform:uppercase;letter-spacing:.04em;margin-bottom:4px">Description</div>
         <div style="font-size:12px;color:#555;line-height:1.6;white-space:pre-wrap">${x.notes}</div>
       </div>`:''}
-
       ${x.photo_urls&&x.photo_urls.length?`<div style="margin-top:10px;padding-top:10px;border-top:0.5px solid #eee">
         <div style="font-size:11px;font-weight:500;color:#888;text-transform:uppercase;letter-spacing:.04em;margin-bottom:6px">Photos (${x.photo_urls.length})</div>
         <div style="display:flex;gap:6px;flex-wrap:wrap">
           ${x.photo_urls.map(u=>`<a href="${u}" target="_blank"><img src="${u}" style="width:72px;height:72px;object-fit:cover;border-radius:6px;border:0.5px solid #ddd"></a>`).join('')}
         </div>
       </div>`:''}
-
       <div style="margin-top:12px;padding-top:12px;border-top:0.5px solid #eee;display:flex;gap:8px">
         <button class="btn-sm" onclick="updateEnqStatus('${x.id}','Pending survey')">Mark: Pending Survey</button>
         <button class="btn-sm" onclick="updateEnqStatus('${x.id}','Quoted')">Mark: Quoted</button>
@@ -602,7 +630,7 @@ function renderRequests(){
   }).join('');
 }
 
-async function updateEnqStatus(id, status){
+async function updateEnqStatus(id,status){
   await sb('enquiries','PATCH',{status},`?id=eq.${id}`);
   const enq=DATA.enq.find(e=>e.id===id);
   if(enq)enq.status=status;
@@ -636,15 +664,13 @@ function renderQuotes(){
       <td style="color:#888;font-size:12px;white-space:nowrap">${dateStr}</td>
       <td>${badge(x.status)}</td>
       <td style="text-align:right;font-weight:600">${fmt(totalIncVat)}</td>
-      <td style="display:flex;gap:6px;align-items:center">
-        <select onchange="updateQuoteStatus('${x.quote_no}',this.value)" style="font-size:11px;padding:2px 6px;border-radius:20px;border:0.5px solid #ddd;background:#fff;color:#666;font-family:inherit;cursor:pointer;outline:none">
-          <option value="" disabled selected>Status</option>
-          <option value="New" ${x.status==='New'?'selected':''}>New</option>
-          <option value="Quoted" ${x.status==='Quoted'?'selected':''}>Quoted</option>
-          <option value="Won" ${x.status==='Won'?'selected':''}>Won</option>
-          <option value="Lost" ${x.status==='Lost'?'selected':''}>Lost</option>
-        </select>
-      </td>
+      <td><select onchange="updateQuoteStatus('${x.quote_no}',this.value)" style="font-size:11px;padding:2px 6px;border-radius:20px;border:0.5px solid #ddd;background:#fff;color:#666;font-family:inherit;cursor:pointer;outline:none">
+        <option value="" disabled selected>Status</option>
+        <option value="New">New</option>
+        <option value="Quoted">Quoted</option>
+        <option value="Won">Won</option>
+        <option value="Lost">Lost</option>
+      </select></td>
     </tr>`;
   }).join('');
 }
@@ -663,8 +689,7 @@ function renderInv(){
     <div class="kpi"><div class="kpi-label">Outstanding</div><div class="kpi-val">${fmt(out)}</div><div class="kpi-sub ${out>0?'red':''}">${ovd>0?ovd+' overdue':'all current'}</div></div>
     <div class="kpi"><div class="kpi-label">Invoices raised</div><div class="kpi-val">${inv.length}</div><div class="kpi-sub">all time</div></div>`;
   const now=new Date();
-  const thisYear=now.getFullYear();
-  const thisMonth=now.getMonth();
+  const thisYear=now.getFullYear(),thisMonth=now.getMonth();
   const paidInv=inv.filter(i=>i.status==='Paid'&&i.paid_date);
   const thisYearCol=paidInv.filter(i=>new Date(i.paid_date).getFullYear()===thisYear).reduce((s,i)=>s+Number(i.amount||0),0);
   const thisMonthCol=paidInv.filter(i=>{const d=new Date(i.paid_date);return d.getFullYear()===thisYear&&d.getMonth()===thisMonth;}).reduce((s,i)=>s+Number(i.amount||0),0);
@@ -679,7 +704,7 @@ function renderInv(){
     <div class="kpi"><div class="kpi-label">This year</div><div class="kpi-val">${fmt(Math.round(thisYearCol))}</div><div class="kpi-sub">net excl. VAT · ${thisYear}</div></div>
     <div class="kpi"><div class="kpi-label">YoY growth</div><div class="kpi-val" style="color:${yoyCls}">${yoyStr}</div><div class="kpi-sub">vs same period ${thisYear-1}</div></div>`;
   const b=document.getElementById('inv-body');
-  if(!inv.length){b.innerHTML='<tr><td colspan="8" class="empty" style="padding:8px 0">No invoices yet.</td></tr>';return;}
+  if(!inv.length){b.innerHTML='<tr><td colspan="9" class="empty" style="padding:8px 0">No invoices yet.</td></tr>';return;}
   b.innerHTML=inv.map(i=>{
     const totalIncVat=Math.round(Number(i.amount||0)*1.2);
     const balance=i.balance!==undefined&&i.balance!==null?Number(i.balance):i.status==='Paid'?0:totalIncVat;
@@ -723,7 +748,7 @@ function renderJobs(){
 }
 
 function renderProj(){
-  const p=DATA.proj;const ti=allItems().length;
+  const p=DATA.proj;
   document.getElementById('kpi-proj').innerHTML=`
     <div class="kpi"><div class="kpi-label">Active projects</div><div class="kpi-val">${p.filter(x=>x.status!=='Closed').length}</div><div class="kpi-sub">in progress</div></div>
     <div class="kpi"><div class="kpi-label">Closed</div><div class="kpi-val">${p.filter(x=>x.status==='Closed').length}</div><div class="kpi-sub">completed</div></div>
@@ -735,7 +760,8 @@ function renderProj(){
     const sections=getProjectChecklist(proj);
     const allSteps=sections.flatMap(s=>s.items);
     const done=allSteps.filter(i=>ck[i]).length;
-    const pct=Math.round(done/allSteps.length*100);const closed=proj.status==='Closed';
+    const pct=Math.round(done/allSteps.length*100);
+    const closed=proj.status==='Closed';
     const clHTML=sections.map(sec=>`<div class="cl-section">${sec.section}</div>
       ${sec.items.map(item=>`<label class="cl-item ${ck[item]?'checked':''}">
         <input type="checkbox" ${ck[item]?'checked':''} ${closed?'disabled':''} onchange="toggleCheck('${proj.id}','${item.replace(/'/g,"\\'")}',this.checked)">
@@ -783,150 +809,20 @@ function switchTab(name,btn){
   btn.classList.add('active');
 }
 
-
-
-// Chat
-let chatHistory=[];
-let chatBusy=false;
-
-function toggleChat(){
-  const p=document.getElementById('chat-panel');
-  p.classList.toggle('open');
-  if(p.classList.contains('open'))document.getElementById('chat-input').focus();
-}
-
-function chatKey(e){if(e.key==='Enter'&&!e.shiftKey){e.preventDefault();sendChat();}}
-
-function addMsg(role,text,cls){
-  const el=document.createElement('div');
-  el.className='chat-msg '+(cls||role);
-  el.textContent=text;
-  const msgs=document.getElementById('chat-messages');
-  msgs.appendChild(el);msgs.scrollTop=msgs.scrollHeight;
-  return el;
-}
-
-async function sendChat(){
-  if(chatBusy)return;
-  const input=document.getElementById('chat-input');
-  const txt=input.value.trim();if(!txt)return;
-  input.value='';
-  addMsg('user',txt);
-  chatHistory.push({role:'user',content:txt});
-  chatBusy=true;
-  document.getElementById('chat-send').disabled=true;
-  const thinking=addMsg('','Thinking…','thinking');
-
-  const sys=`You are the Kensington Sash (Windows) Ltd operational assistant embedded in the company dashboard. Be concise and direct — London trade tone.
-
-Live data:
-Enquiries: ${JSON.stringify(DATA.enq)}
-Invoices: ${JSON.stringify(DATA.inv)}
-Projects: ${JSON.stringify(DATA.proj)}
-Clients: ${DATA.clients.length} on record
-Subcontractors: ${JSON.stringify(DATA.sub||[])}
-
-Company: Kensington Sash (Windows) Ltd, London-based timber sash window specialist. All prices net excl. VAT.
-
-IMPORTANT: You can perform actions on the dashboard. Rules:
-
-1. For SIMPLE updates (mark invoice paid, change enquiry status) — execute immediately with an <ACTION> block, no questions needed.
-
-2. For ADDING a subcontractor — you MUST collect all key details before executing. If any are missing, ask for ALL of them in a single message. Ask for: phone, email, company name, day rate (if not mentioned), UTR number, whether they have a van (yes/no), and any notes (what they're good for, tools etc). Phone and email are the minimum essentials — do not save without at least those two. Once you have everything, output a brief summary of what you're saving then the <ACTION> block. Store UTR number and van info in the notes field.
-
-3. Once all details are confirmed, respond with a JSON block in this exact format:
-
-<ACTION>
-{
-  "action": "add_subcontractor" | "update_subcontractor" | "mark_invoice_paid" | "update_enquiry_status" | "add_client",
-  "data": { ... relevant fields ... },
-  "confirm_message": "Human-readable confirmation of what you did"
-}
-</ACTION>
-
-For add_subcontractor, data fields: name, company, role, phone, email, pricing (text description), day_rate (number), status ("Active"|"Inactive"), notes
-For update_subcontractor, data fields: id (required), plus any fields to change
-For mark_invoice_paid, data fields: invoice_no, paid_date (YYYY-MM-DD)
-For update_enquiry_status, data fields: quote_no, status ("New"|"Quoted"|"Won"|"Lost")
-For add_client, data fields: name, company, email, phone, address, last_activity (DD/MM/YYYY)
-
-If the user is just asking a question or having a conversation, reply normally as plain text with NO <ACTION> block.`;
-
-  try{
-    const res=await fetch('/api/chat',{
-      method:'POST',
-      headers:{'Content-Type':'application/json'},
-      body:JSON.stringify({model:'claude-sonnet-4-6',max_tokens:1000,system:sys,messages:chatHistory})
-    });
-    const d=await res.json();
-    const reply=d.content?.find(b=>b.type==='text')?.text||'Sorry, no response.';
-    chatHistory.push({role:'assistant',content:reply});
-
-    // Check for action block
-    const actionMatch=reply.match(/<ACTION>([\s\S]*?)<\/ACTION>/);
-    if(actionMatch){
-      try{
-        const parsed=JSON.parse(actionMatch[1].trim());
-        await executeAction(parsed);
-        thinking.className='chat-msg assistant';
-        thinking.textContent=parsed.confirm_message||'Done.';
-      }catch(e){
-        thinking.className='chat-msg assistant';
-        thinking.textContent='Action failed: '+e.message;
-      }
-    } else {
-      thinking.className='chat-msg assistant';
-      thinking.textContent=reply;
-    }
-  }catch(err){
-    thinking.className='chat-msg assistant';
-    thinking.textContent='Error: '+err.message;
-  }
-  chatBusy=false;
-  document.getElementById('chat-send').disabled=false;
-}
-
-async function executeAction(parsed){
-  const {action,data}=parsed;
-  if(action==='add_subcontractor'){
-    const res=await sb('subcontractors','POST',data);
-    if(res&&res[0])DATA.sub=[...(DATA.sub||[]),res[0]];
-    renderSub();
-  }
-  else if(action==='update_subcontractor'){
-    const {id,...rest}=data;
-    await sb('subcontractors','PATCH',rest,`?id=eq.${id}`);
-    const idx=(DATA.sub||[]).findIndex(x=>x.id===id);
-    if(idx>-1)DATA.sub[idx]={...DATA.sub[idx],...rest};
-    renderSub();
-  }
-  else if(action==='mark_invoice_paid'){
-    await sb('invoices','PATCH',{status:'Paid',paid_date:data.paid_date,balance:0},`?invoice_no=eq.${data.invoice_no}`);
-    const inv=DATA.inv.find(i=>i.invoice_no===data.invoice_no);
-    if(inv){inv.status='Paid';inv.paid_date=data.paid_date;inv.balance=0;}
-    renderInv();renderHome();
-  }
-  else if(action==='update_enquiry_status'){
-    await sb('enquiries','PATCH',{status:data.status},`?quote_no=eq.${data.quote_no}`);
-    const enq=DATA.enq.find(e=>e.quote_no===data.quote_no);
-    if(enq)enq.status=data.status;
-    renderQuotes();renderRequests();renderHome();
-  }
-  else if(action==='add_client'){
-    const res=await sb('clients','POST',data);
-    if(res&&res[0])DATA.clients=[...(DATA.clients||[]),res[0]];
-    renderClients();
-  }
-  else throw new Error('Unknown action: '+action);
-}
-
 function toggleClientDetail(name){
   const row=document.getElementById('cd-'+CSS.escape(name));
   if(!row)return;
   row.style.display=row.style.display==='none'?'table-row':'none';
 }
 
-// ── Subcontractors ────────────────────────────────────────────────────────
+async function updateQuoteStatus(quoteNo,status){
+  await sb('enquiries','PATCH',{status},`?quote_no=eq.${quoteNo}`);
+  const enq=DATA.enq.find(e=>e.quote_no===quoteNo);
+  if(enq)enq.status=status;
+  renderQuotes();renderRequests();renderHome();
+}
+
+// Subcontractors
 let editingSubId=null;
 
 function renderSub(){
@@ -952,9 +848,7 @@ function renderSub(){
         ${s.pricing?`<div style="font-size:12px;color:#34453E;margin-top:4px"><i class="ti ti-currency-pound" style="font-size:11px;margin-right:3px"></i>${s.pricing}</div>`:''}
         ${s.notes?`<div style="font-size:12px;color:#888;margin-top:4px">${s.notes}</div>`:''}
       </div>
-      <div class="row-actions">
-        <button class="btn-sm" onclick="editSub('${s.id}')">Edit</button>
-      </div>
+      <div class="row-actions"><button class="btn-sm" onclick="editSub('${s.id}')">Edit</button></div>
     </div>`).join('');
 }
 
@@ -999,7 +893,7 @@ async function saveSub(){
     await sb('subcontractors','PATCH',payload,`?id=eq.${editingSubId}`);
     const idx=(DATA.sub||[]).findIndex(x=>x.id===editingSubId);
     if(idx>-1)DATA.sub[idx]={...DATA.sub[idx],...payload};
-  } else {
+  }else{
     const res=await sb('subcontractors','POST',payload);
     if(res&&res[0])DATA.sub=[...(DATA.sub||[]),res[0]];
   }
@@ -1009,11 +903,135 @@ async function saveSub(){
 
 function cancelSub(){document.getElementById('sub-form').style.display='none';}
 
-async function updateQuoteStatus(quoteNo, status){
-  await sb('enquiries','PATCH',{status},`?quote_no=eq.${quoteNo}`);
-  const enq=DATA.enq.find(e=>e.quote_no===quoteNo);
-  if(enq)enq.status=status;
-  renderQuotes();renderRequests();renderHome();
+// Chat
+let chatHistory=[],chatBusy=false;
+
+function toggleChat(){
+  const p=document.getElementById('chat-panel');
+  p.classList.toggle('open');
+  if(p.classList.contains('open'))document.getElementById('chat-input').focus();
+}
+
+function chatKey(e){if(e.key==='Enter'&&!e.shiftKey){e.preventDefault();sendChat();}}
+
+function addMsg(role,text,cls){
+  const el=document.createElement('div');
+  el.className='chat-msg '+(cls||role);
+  el.textContent=text;
+  const msgs=document.getElementById('chat-messages');
+  msgs.appendChild(el);msgs.scrollTop=msgs.scrollHeight;
+  return el;
+}
+
+async function sendChat(){
+  if(chatBusy)return;
+  const input=document.getElementById('chat-input');
+  const txt=input.value.trim();if(!txt)return;
+  input.value='';
+  addMsg('user',txt);
+  chatHistory.push({role:'user',content:txt});
+  chatBusy=true;
+  document.getElementById('chat-send').disabled=true;
+  const thinking=addMsg('','Thinking…','thinking');
+  const sys=`You are the Kensington Sash (Windows) Ltd operational assistant embedded in the company dashboard. Be concise and direct — London trade tone.
+
+Live data:
+Enquiries: ${JSON.stringify(DATA.enq)}
+Invoices: ${JSON.stringify(DATA.inv)}
+Projects: ${JSON.stringify(DATA.proj)}
+Clients: ${DATA.clients.length} on record
+Subcontractors: ${JSON.stringify(DATA.sub||[])}
+
+Company: Kensington Sash (Windows) Ltd, London-based timber sash window specialist. All prices net excl. VAT.
+
+IMPORTANT: You can perform actions on the dashboard. Rules:
+
+1. For SIMPLE updates (mark invoice paid, change enquiry status) — execute immediately with an <ACTION> block, no questions needed.
+
+2. For ADDING a subcontractor — you MUST collect all key details before executing. If any are missing, ask for ALL of them in a single message. Ask for: phone, email, company name, day rate (if not mentioned), UTR number, whether they have a van (yes/no), and any notes (what they're good for, tools etc). Phone and email are the minimum essentials — do not save without at least those two. Once you have everything, output a brief summary of what you're saving then the <ACTION> block. Store UTR number and van info in the notes field.
+
+3. Once all details are confirmed, respond with a JSON block in this exact format:
+
+<ACTION>
+{
+  "action": "add_subcontractor" | "update_subcontractor" | "mark_invoice_paid" | "update_enquiry_status" | "add_client",
+  "data": { ... relevant fields ... },
+  "confirm_message": "Human-readable confirmation of what you did"
+}
+</ACTION>
+
+For add_subcontractor, data fields: name, company, role, phone, email, pricing (text description), day_rate (number), status ("Active"|"Inactive"), notes
+For update_subcontractor, data fields: id (required), plus any fields to change
+For mark_invoice_paid, data fields: invoice_no, paid_date (YYYY-MM-DD)
+For update_enquiry_status, data fields: quote_no, status ("New"|"Quoted"|"Won"|"Lost")
+For add_client, data fields: name, company, email, phone, address, last_activity (DD/MM/YYYY)
+
+If the user is just asking a question or having a conversation, reply normally as plain text with NO <ACTION> block.`;
+  try{
+    const res=await fetch('/api/chat',{method:'POST',headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({model:'claude-sonnet-4-6',max_tokens:1000,system:sys,messages:chatHistory})});
+    const d=await res.json();
+    const reply=d.content?.find(b=>b.type==='text')?.text||'Sorry, no response.';
+    chatHistory.push({role:'assistant',content:reply});
+    const actionMatch=reply.match(/<ACTION>([\s\S]*?)<\/ACTION>/);
+    if(actionMatch){
+      try{
+        const parsed=JSON.parse(actionMatch[1].trim());
+        await executeAction(parsed);
+        thinking.className='chat-msg assistant';
+        thinking.textContent=parsed.confirm_message||'Done.';
+      }catch(e){
+        thinking.className='chat-msg assistant';
+        thinking.textContent='Action failed: '+e.message;
+      }
+    }else{
+      thinking.className='chat-msg assistant';
+      thinking.textContent=reply;
+    }
+  }catch(err){
+    thinking.className='chat-msg assistant';
+    thinking.textContent='Error: '+err.message;
+  }
+  chatBusy=false;
+  document.getElementById('chat-send').disabled=false;
+}
+
+async function executeAction(parsed){
+  const{action,data}=parsed;
+  if(action==='add_subcontractor'){
+    const res=await sb('subcontractors','POST',data);
+    if(res&&res[0])DATA.sub=[...(DATA.sub||[]),res[0]];
+    renderSub();
+  }else if(action==='update_subcontractor'){
+    const{id,...rest}=data;
+    await sb('subcontractors','PATCH',rest,`?id=eq.${id}`);
+    const idx=(DATA.sub||[]).findIndex(x=>x.id===id);
+    if(idx>-1)DATA.sub[idx]={...DATA.sub[idx],...rest};
+    renderSub();
+  }else if(action==='mark_invoice_paid'){
+    await sb('invoices','PATCH',{status:'Paid',paid_date:data.paid_date,balance:0},`?invoice_no=eq.${data.invoice_no}`);
+    const inv=DATA.inv.find(i=>i.invoice_no===data.invoice_no);
+    if(inv){inv.status='Paid';inv.paid_date=data.paid_date;inv.balance=0;}
+    renderInv();renderHome();
+  }else if(action==='update_enquiry_status'){
+    await sb('enquiries','PATCH',{status:data.status},`?quote_no=eq.${data.quote_no}`);
+    const enq=DATA.enq.find(e=>e.quote_no===data.quote_no);
+    if(enq)enq.status=data.status;
+    renderQuotes();renderRequests();renderHome();
+  }else if(action==='add_client'){
+    const res=await sb('clients','POST',data);
+    if(res&&res[0])DATA.clients=[...(DATA.clients||[]),res[0]];
+    renderClients();
+  }else throw new Error('Unknown action: '+action);
+}
+
+function toggleReq(id){
+  const body=document.getElementById('reqbody-'+id);
+  const chev=document.getElementById('reqchev-'+id);
+  if(!body)return;
+  const open=body.style.display==='none';
+  body.style.display=open?'block':'none';
+  if(chev)chev.style.transform=open?'rotate(180deg)':'';
 }
 
 loadAll();
