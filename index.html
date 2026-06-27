@@ -182,6 +182,7 @@ body{font-family:system-ui,sans-serif;background:#f0f0ee;color:#1a1a1a;font-size
       <button class="tab" onclick="switchTab('jobs',this)">Job Sheets</button>
       <button class="tab" onclick="switchTab('projects',this)">Projects</button>
       <button class="tab" onclick="switchTab('schedule',this)">Schedule</button>
+      <button class="tab" onclick="switchTab('subcontractors',this)">Subcontractors</button>
     </div>
   </div>
 
@@ -272,6 +273,39 @@ body{font-family:system-ui,sans-serif;background:#f0f0ee;color:#1a1a1a;font-size
       <iframe src="https://calendar.google.com/calendar/embed?src=info%40kensingtonsash.co.uk&ctz=Europe%2FLondon&showTitle=0&showNav=1&showDate=1&showPrint=0&showTabs=1&showCalendars=0&mode=WEEK" style="width:100%;height:700px;border:none" frameborder="0" scrolling="no"></iframe>
     </div>
   </div>
+
+  <div id="tab-subcontractors" class="section">
+    <div class="kpi-grid" id="kpi-sub"></div>
+    <div class="card">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px">
+        <div class="card-title" style="margin-bottom:0"><i class="ti ti-hard-hat"></i> Subcontractors</div>
+        <button class="btn-main" style="margin-top:0" onclick="showAddSub()">+ Add</button>
+      </div>
+      <div id="sub-list"></div>
+    </div>
+
+    <!-- Add/Edit form -->
+    <div id="sub-form" style="display:none" class="card">
+      <div class="card-title"><i class="ti ti-user-plus"></i> <span id="sub-form-title">Add subcontractor</span></div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px">
+        <div><div style="font-size:11px;color:#888;margin-bottom:4px">Name</div><input id="sf-name" style="width:100%;padding:7px 10px;border:0.5px solid #ddd;border-radius:8px;font-size:13px;font-family:inherit;outline:none"></div>
+        <div><div style="font-size:11px;color:#888;margin-bottom:4px">Trade / Role</div><input id="sf-role" style="width:100%;padding:7px 10px;border:0.5px solid #ddd;border-radius:8px;font-size:13px;font-family:inherit;outline:none"></div>
+        <div><div style="font-size:11px;color:#888;margin-bottom:4px">Phone</div><input id="sf-phone" style="width:100%;padding:7px 10px;border:0.5px solid #ddd;border-radius:8px;font-size:13px;font-family:inherit;outline:none"></div>
+        <div><div style="font-size:11px;color:#888;margin-bottom:4px">Email</div><input id="sf-email" style="width:100%;padding:7px 10px;border:0.5px solid #ddd;border-radius:8px;font-size:13px;font-family:inherit;outline:none"></div>
+        <div><div style="font-size:11px;color:#888;margin-bottom:4px">Day rate (£ net)</div><input id="sf-rate" type="number" style="width:100%;padding:7px 10px;border:0.5px solid #ddd;border-radius:8px;font-size:13px;font-family:inherit;outline:none"></div>
+        <div><div style="font-size:11px;color:#888;margin-bottom:4px">Status</div>
+          <select id="sf-status" style="width:100%;padding:7px 10px;border:0.5px solid #ddd;border-radius:8px;font-size:13px;font-family:inherit;outline:none;background:#fff">
+            <option>Active</option><option>Inactive</option>
+          </select>
+        </div>
+      </div>
+      <div style="margin-top:10px"><div style="font-size:11px;color:#888;margin-bottom:4px">Notes</div><textarea id="sf-notes" rows="2" style="width:100%;padding:7px 10px;border:0.5px solid #ddd;border-radius:8px;font-size:13px;font-family:inherit;outline:none;resize:vertical"></textarea></div>
+      <div style="display:flex;gap:8px;margin-top:12px">
+        <button class="btn-main" onclick="saveSub()">Save</button>
+        <button class="btn-main" style="border-color:#ddd;color:#888" onclick="cancelSub()">Cancel</button>
+      </div>
+    </div>
+  </div>
 </div>
 
 <button class="chat-fab" onclick="toggleChat()" title="Ask Claude"><i class="ti ti-message-circle"></i></button>
@@ -351,20 +385,21 @@ function setStatus(msg){document.getElementById('sync-status').textContent=msg;}
 async function loadAll(){
   setStatus('Loading...');
   try{
-    const [enq,inv,jobs,proj,clients]=await Promise.all([
+    const [enq,inv,jobs,proj,clients,sub]=await Promise.all([
       sb('enquiries','GET',null,'?order=created_at.desc'),
       sb('invoices','GET',null,'?order=invoice_no.desc'),
       sb('jobs','GET',null,'?order=created_at.desc'),
       sb('projects','GET',null,'?order=created_at.desc'),
-      sb('clients','GET',null,'?order=created_at.desc')
+      sb('clients','GET',null,'?order=created_at.desc'),
+      sb('subcontractors','GET',null,'?order=name.asc')
     ]);
-    DATA.enq=enq||[];DATA.inv=inv||[];DATA.jobs=jobs||[];DATA.proj=proj||[];DATA.clients=clients||[];
+    DATA.enq=enq||[];DATA.inv=inv||[];DATA.jobs=jobs||[];DATA.proj=proj||[];DATA.clients=clients||[];DATA.sub=sub||[];
     render();
     setStatus('Updated '+new Date().toLocaleTimeString('en-GB',{hour:'2-digit',minute:'2-digit'}));
   }catch(e){setStatus('Error: '+e.message);}
 }
 
-function render(){renderHome();renderClients();renderRequests();renderQuotes();renderInv();renderJobs();renderProj();}
+function render(){renderHome();renderClients();renderRequests();renderQuotes();renderInv();renderJobs();renderProj();renderSub();}
 
 function mKey(d){return d.getFullYear()+''+String(d.getMonth()+1).padStart(2,'0');}
 function gPct(c,p){if(!p)return null;return Math.round(((c-p)/p)*100);}
@@ -741,6 +776,86 @@ function toggleClientDetail(name){
   if(!row)return;
   row.style.display=row.style.display==='none'?'table-row':'none';
 }
+
+// ── Subcontractors ────────────────────────────────────────────────────────
+let editingSubId=null;
+
+function renderSub(){
+  const subs=DATA.sub||[];
+  const active=subs.filter(s=>s.status==='Active').length;
+  document.getElementById('kpi-sub').innerHTML=`
+    <div class="kpi"><div class="kpi-label">Total</div><div class="kpi-val">${subs.length}</div><div class="kpi-sub">on record</div></div>
+    <div class="kpi"><div class="kpi-label">Active</div><div class="kpi-val">${active}</div><div class="kpi-sub green">available</div></div>
+    <div class="kpi"><div class="kpi-label">Inactive</div><div class="kpi-val">${subs.length-active}</div><div class="kpi-sub">not in use</div></div>`;
+  const l=document.getElementById('sub-list');
+  if(!subs.length){l.innerHTML='<div class="empty">No subcontractors yet.</div>';return;}
+  l.innerHTML=subs.map(s=>`
+    <div class="row">
+      <div class="row-left">
+        <div class="row-name">${s.name} ${s.role?`<span style="font-weight:400;color:#888;font-size:12px">— ${s.role}</span>`:''}
+          <span class="badge ${s.status==='Active'?'b-active':'b-complete'}" style="margin-left:6px">${s.status||'Active'}</span>
+        </div>
+        <div class="row-sub" style="display:flex;gap:14px;flex-wrap:wrap;margin-top:4px">
+          ${s.phone?`<span><i class="ti ti-phone" style="font-size:11px;margin-right:3px"></i>${s.phone}</span>`:''}
+          ${s.email?`<span><i class="ti ti-mail" style="font-size:11px;margin-right:3px"></i><a href="mailto:${s.email}" style="color:#185FA5">${s.email}</a></span>`:''}
+          ${s.day_rate?`<span><i class="ti ti-currency-pound" style="font-size:11px;margin-right:3px"></i>${fmt(s.day_rate)}/day</span>`:''}
+        </div>
+        ${s.notes?`<div style="font-size:12px;color:#888;margin-top:4px">${s.notes}</div>`:''}
+      </div>
+      <div class="row-actions">
+        <button class="btn-sm" onclick="editSub('${s.id}')">Edit</button>
+      </div>
+    </div>`).join('');
+}
+
+function showAddSub(){
+  editingSubId=null;
+  document.getElementById('sub-form-title').textContent='Add subcontractor';
+  ['name','role','phone','email','rate','notes'].forEach(f=>document.getElementById('sf-'+f).value='');
+  document.getElementById('sf-status').value='Active';
+  document.getElementById('sub-form').style.display='block';
+  document.getElementById('sf-name').focus();
+}
+
+function editSub(id){
+  const s=(DATA.sub||[]).find(x=>x.id===id);if(!s)return;
+  editingSubId=id;
+  document.getElementById('sub-form-title').textContent='Edit subcontractor';
+  document.getElementById('sf-name').value=s.name||'';
+  document.getElementById('sf-role').value=s.role||'';
+  document.getElementById('sf-phone').value=s.phone||'';
+  document.getElementById('sf-email').value=s.email||'';
+  document.getElementById('sf-rate').value=s.day_rate||'';
+  document.getElementById('sf-status').value=s.status||'Active';
+  document.getElementById('sf-notes').value=s.notes||'';
+  document.getElementById('sub-form').style.display='block';
+  document.getElementById('sf-name').focus();
+}
+
+async function saveSub(){
+  const payload={
+    name:document.getElementById('sf-name').value.trim(),
+    role:document.getElementById('sf-role').value.trim(),
+    phone:document.getElementById('sf-phone').value.trim(),
+    email:document.getElementById('sf-email').value.trim(),
+    day_rate:parseFloat(document.getElementById('sf-rate').value)||null,
+    status:document.getElementById('sf-status').value,
+    notes:document.getElementById('sf-notes').value.trim()
+  };
+  if(!payload.name)return alert('Name is required.');
+  if(editingSubId){
+    await sb('subcontractors','PATCH',payload,`?id=eq.${editingSubId}`);
+    const idx=(DATA.sub||[]).findIndex(x=>x.id===editingSubId);
+    if(idx>-1)DATA.sub[idx]={...DATA.sub[idx],...payload};
+  } else {
+    const res=await sb('subcontractors','POST',payload);
+    if(res&&res[0])DATA.sub=[...(DATA.sub||[]),res[0]];
+  }
+  document.getElementById('sub-form').style.display='none';
+  renderSub();
+}
+
+function cancelSub(){document.getElementById('sub-form').style.display='none';}
 
 loadAll();
 </script>
