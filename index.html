@@ -572,7 +572,16 @@ function renderQuotes(){
       <td style="color:#888;font-size:12px;white-space:nowrap">${dateStr}</td>
       <td>${badge(x.status)}</td>
       <td style="text-align:right;font-weight:600">${fmt(totalIncVat)}</td>
-      <td>${x.drive_url?`<a href="${x.drive_url}" target="_blank"><button class="btn-sm">View</button></a>`:''}</td>
+      <td style="display:flex;gap:6px;align-items:center">
+        ${x.drive_url?`<a href="${x.drive_url}" target="_blank"><button class="btn-sm">View</button></a>`:''}
+        <select onchange="updateQuoteStatus('${x.quote_no}',this.value)" style="font-size:11px;padding:2px 6px;border-radius:20px;border:0.5px solid #ddd;background:#fff;color:#666;font-family:inherit;cursor:pointer;outline:none">
+          <option value="" disabled selected>Status</option>
+          <option value="New" ${x.status==='New'?'selected':''}>New</option>
+          <option value="Quoted" ${x.status==='Quoted'?'selected':''}>Quoted</option>
+          <option value="Won" ${x.status==='Won'?'selected':''}>Won</option>
+          <option value="Lost" ${x.status==='Lost'?'selected':''}>Lost</option>
+        </select>
+      </td>
     </tr>`;
   }).join('');
 }
@@ -936,6 +945,13 @@ async function saveSub(){
 }
 
 function cancelSub(){document.getElementById('sub-form').style.display='none';}
+
+async function updateQuoteStatus(quoteNo, status){
+  await sb('enquiries','PATCH',{status},`?quote_no=eq.${quoteNo}`);
+  const enq=DATA.enq.find(e=>e.quote_no===quoteNo);
+  if(enq)enq.status=status;
+  renderQuotes();renderRequests();renderHome();
+}
 
 loadAll();
 </script>
