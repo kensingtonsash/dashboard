@@ -359,7 +359,7 @@ async function loadAll(){
       sb('invoices','GET',null,'?order=invoice_no.desc'),
       sb('jobs','GET',null,'?order=created_at.desc'),
       sb('projects','GET',null,'?order=created_at.desc'),
-      sb('clients','GET',null,'?order=name.asc')
+      sb('clients','GET',null,'?order=last_activity.desc')
     ]);
     DATA.enq=enq||[];DATA.inv=inv||[];DATA.jobs=jobs||[];DATA.proj=proj||[];DATA.clients=clients||[];
     render();
