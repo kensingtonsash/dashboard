@@ -533,12 +533,16 @@ function renderClients(){
 }
 
 function renderRequests(){
-  const e=DATA.enq.filter(x=>['New','Pending survey'].includes(x.status));
+  const all=DATA.enq;
+  const e=all.filter(x=>['New','Pending survey'].includes(x.status));
+  const totalReq=all.filter(x=>x.created_at).length;
+  const thisMonth=new Date();
+  const reqThisMonth=all.filter(x=>{if(!x.created_at)return false;const d=new Date(x.created_at);return d.getFullYear()===thisMonth.getFullYear()&&d.getMonth()===thisMonth.getMonth();}).length;
   document.getElementById('kpi-req').innerHTML=`
-    <div class="kpi"><div class="kpi-label">New requests</div><div class="kpi-val">${e.length}</div><div class="kpi-sub">awaiting quote</div></div>
-    <div class="kpi"><div class="kpi-label">Survey requested</div><div class="kpi-val">${e.filter(x=>x.survey).length}</div><div class="kpi-sub">onsite visits needed</div></div>
-    <div class="kpi"><div class="kpi-label">Photo estimate</div><div class="kpi-val">${e.filter(x=>x.photo_estimate).length}</div><div class="kpi-sub">remote quotes</div></div>
-    <div class="kpi"><div class="kpi-label">Windows / doors</div><div class="kpi-val">${e.reduce((s,x)=>s+(parseInt(x.window_count)||0),0)}</div><div class="kpi-sub">across all requests</div></div>`;
+    <div class="kpi"><div class="kpi-label">Total enquiries</div><div class="kpi-val">${totalReq}</div><div class="kpi-sub green">${reqThisMonth} this month</div></div>
+    <div class="kpi"><div class="kpi-label">Awaiting quote</div><div class="kpi-val">${e.length}</div><div class="kpi-sub">New or pending survey</div></div>
+    <div class="kpi"><div class="kpi-label">Survey requested</div><div class="kpi-val">${all.filter(x=>x.survey).length}</div><div class="kpi-sub">onsite visits</div></div>
+    <div class="kpi"><div class="kpi-label">Windows / doors</div><div class="kpi-val">${all.reduce((s,x)=>s+(parseInt(x.window_count)||0),0)}</div><div class="kpi-sub">across all enquiries</div></div>`;
   const l=document.getElementById('req-list');
   if(!e.length){l.innerHTML='<div class="empty">No requests yet.</div>';return;}
   l.innerHTML=e.map(x=>{
