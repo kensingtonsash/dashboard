@@ -544,7 +544,8 @@ function renderRequests(){
     <div class="kpi"><div class="kpi-label">Survey requested</div><div class="kpi-val">${all.filter(x=>x.survey).length}</div><div class="kpi-sub">onsite visits</div></div>
     <div class="kpi"><div class="kpi-label">Windows / doors</div><div class="kpi-val">${all.reduce((s,x)=>s+(parseInt(x.window_count)||0),0)}</div><div class="kpi-sub">across all enquiries</div></div>`;
   const l=document.getElementById('req-list');
-  if(!e.length){l.innerHTML='<div class="empty">No requests yet.</div>';return;}
+  if(!all.length){l.innerHTML='<div class="empty">No requests yet.</div>';return;}
+  const e=all;
   l.innerHTML=e.map(x=>{
     const services=(x.job_type||'').split(',').map(s=>s.trim()).filter(Boolean);
     const dateStr=x.date?new Date(x.date).toLocaleDateString('en-GB',{day:'numeric',month:'short',year:'numeric'}):x.created_at?new Date(x.created_at).toLocaleDateString('en-GB',{day:'numeric',month:'short',year:'numeric'}):'—';
