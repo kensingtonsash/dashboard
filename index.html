@@ -254,7 +254,7 @@ body{font-family:system-ui,sans-serif;background:#f0f0ee;color:#1a1a1a;font-size
   <div id="tab-invoices" class="section">
     <div class="kpi-grid" id="kpi-inv"></div>
     <div class="card"><div class="card-title"><i class="ti ti-file-invoice"></i> Invoice register</div>
-      <div style="overflow-x:auto"><table class="inv-table"><thead><tr><th>Invoice</th><th>Client</th><th>Type</th><th>Stage</th><th>Net amount</th><th>Status</th><th></th></tr></thead><tbody id="inv-body"></tbody></table></div>
+      <div style="overflow-x:auto"><table class="inv-table"><thead><tr><th>Client</th><th>Invoice No.</th><th>Due date</th><th>Subject</th><th>Status</th><th style="text-align:right">Total (inc. VAT)</th><th style="text-align:right">Balance</th><th></th></tr></thead><tbody id="inv-body"></tbody></table></div>
     </div>
   </div>
 
@@ -571,25 +571,33 @@ function renderQuotes(){
 
 function renderInv(){
   const inv=DATA.inv;
-  const tot=inv.reduce((s,i)=>s+(Number(i.amount)||0),0);
-  const col=inv.filter(i=>i.status==='Paid').reduce((s,i)=>s+(Number(i.amount)||0),0);
-  const out=tot-col;
-  const ovd=inv.filter(i=>i.status==='Overdue').length;
+  const tot=inv.reduce((s,i)=>s+(Number(i.amount)||0)*1.2,0);
+  const col=inv.filter(i=>i.status==='Paid').reduce((s,i)=>s+(Number(i.amount)||0)*1.2,0);
+  const out=inv.filter(i=>i.status!=='Paid').reduce((s,i)=>s+(Number(i.balance||i.amount)||0),0);
+  const ovd=inv.filter(i=>i.status==='Overdue'||i.status==='Past due').length;
   document.getElementById('kpi-inv').innerHTML=`
-    <div class="kpi"><div class="kpi-label">Total invoiced</div><div class="kpi-val">${fmt(tot)}</div><div class="kpi-sub">net excl. VAT</div></div>
+    <div class="kpi"><div class="kpi-label">Total invoiced</div><div class="kpi-val">${fmt(tot)}</div><div class="kpi-sub">inc. VAT</div></div>
     <div class="kpi"><div class="kpi-label">Collected</div><div class="kpi-val">${fmt(col)}</div><div class="kpi-sub green">${tot?Math.round(col/tot*100):0}% of invoiced</div></div>
     <div class="kpi"><div class="kpi-label">Outstanding</div><div class="kpi-val">${fmt(out)}</div><div class="kpi-sub ${out>0?'red':''}">${ovd>0?ovd+' overdue':'all current'}</div></div>
     <div class="kpi"><div class="kpi-label">Invoices raised</div><div class="kpi-val">${inv.length}</div><div class="kpi-sub">across all jobs</div></div>`;
-  const sl={D:'Deposit',I:'Interim',C:'Completion'};
   const b=document.getElementById('inv-body');
-  if(!inv.length){b.innerHTML='<tr><td colspan="7" class="empty" style="padding:8px 0">No invoices yet.</td></tr>';return;}
-  b.innerHTML=inv.map(i=>`<tr>
-    <td class="inv-no">${i.invoice_no}</td><td>${i.client}</td>
-    <td style="color:#888;font-size:12px">${i.job_type}</td>
-    <td>${badge(sl[i.stage_code]||'')}</td>
-    <td class="amt">${fmt(Number(i.amount))}</td>
-    <td>${badge(i.status)}</td>
-    <td>${i.drive_url?`<a href="${i.drive_url}" target="_blank"><button class="btn-sm">View</button></a>`:''}</td></tr>`).join('');
+  if(!inv.length){b.innerHTML='<tr><td colspan="8" class="empty" style="padding:8px 0">No invoices yet.</td></tr>';return;}
+  b.innerHTML=inv.map(i=>{
+    const totalIncVat=Math.round(Number(i.amount||0)*1.2);
+    const balance=i.balance!==undefined&&i.balance!==null?Number(i.balance):i.status==='Paid'?0:totalIncVat;
+    const dueDateStr=i.due_date?new Date(i.due_date).toLocaleDateString('en-GB',{day:'numeric',month:'short',year:'numeric'}):'—';
+    const isOverdue=i.status==='Overdue'||i.status==='Past due';
+    return `<tr>
+      <td style="font-weight:600">${i.client}</td>
+      <td class="inv-no">${i.invoice_no}</td>
+      <td style="color:${isOverdue?'#A32D2D':'#888'};font-size:12px;white-space:nowrap">${dueDateStr}</td>
+      <td style="color:#555;font-size:12px">${i.subject||i.job_type||''}</td>
+      <td>${badge(isOverdue?'Overdue':i.status)}</td>
+      <td style="text-align:right;font-weight:600">${fmt(totalIncVat)}</td>
+      <td style="text-align:right;color:${balance>0?'#A32D2D':'#888'};font-weight:${balance>0?'600':'400'}">${fmt(balance)}</td>
+      <td>${i.drive_url?`<a href="${i.drive_url}" target="_blank"><button class="btn-sm">View</button></a>`:''}</td>
+    </tr>`;
+  }).join('');
 }
 
 function renderJobs(){
