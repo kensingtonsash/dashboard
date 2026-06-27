@@ -587,11 +587,11 @@ function renderInv(){
   const now=new Date();
   const thisYear=now.getFullYear();
   const thisMonth=now.getMonth();
-  const paidInv=inv.filter(i=>i.status==='Paid'&&i.due_date);
-  const thisYearCol=paidInv.filter(i=>new Date(i.due_date).getFullYear()===thisYear).reduce((s,i)=>s+Number(i.amount||0),0);
-  const thisMonthCol=paidInv.filter(i=>{const d=new Date(i.due_date);return d.getFullYear()===thisYear&&d.getMonth()===thisMonth;}).reduce((s,i)=>s+Number(i.amount||0),0);
-  const lastMonthCol=paidInv.filter(i=>{const d=new Date(i.due_date);const lm=thisMonth===0?11:thisMonth-1;const ly=thisMonth===0?thisYear-1:thisYear;return d.getFullYear()===ly&&d.getMonth()===lm;}).reduce((s,i)=>s+Number(i.amount||0),0);
-  const lastYearYTD=paidInv.filter(i=>{const d=new Date(i.due_date);return d.getFullYear()===thisYear-1&&(d.getMonth()<thisMonth||(d.getMonth()===thisMonth&&d.getDate()<=now.getDate()));}).reduce((s,i)=>s+Number(i.amount||0),0);
+  const paidInv=inv.filter(i=>i.status==='Paid'&&i.paid_date);
+  const thisYearCol=paidInv.filter(i=>new Date(i.paid_date).getFullYear()===thisYear).reduce((s,i)=>s+Number(i.amount||0),0);
+  const thisMonthCol=paidInv.filter(i=>{const d=new Date(i.paid_date);return d.getFullYear()===thisYear&&d.getMonth()===thisMonth;}).reduce((s,i)=>s+Number(i.amount||0),0);
+  const lastMonthCol=paidInv.filter(i=>{const d=new Date(i.paid_date);const lm=thisMonth===0?11:thisMonth-1;const ly=thisMonth===0?thisYear-1:thisYear;return d.getFullYear()===ly&&d.getMonth()===lm;}).reduce((s,i)=>s+Number(i.amount||0),0);
+  const lastYearYTD=paidInv.filter(i=>{const d=new Date(i.paid_date);return d.getFullYear()===thisYear-1&&(d.getMonth()<thisMonth||(d.getMonth()===thisMonth&&d.getDate()<=now.getDate()));}).reduce((s,i)=>s+Number(i.amount||0),0);
   const yoyPct=lastYearYTD?Math.round(((thisYearCol-lastYearYTD)/lastYearYTD)*100):null;
   const yoyStr=yoyPct===null?'—':(yoyPct>=0?'+':'')+yoyPct+'%';
   const yoyCls=yoyPct===null?'#888':yoyPct>=0?'#34453E':'#A32D2D';
