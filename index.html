@@ -760,7 +760,7 @@ IMPORTANT: You can perform actions on the dashboard. Rules:
 
 1. For SIMPLE updates (mark invoice paid, change enquiry status) — execute immediately with an <ACTION> block, no questions needed.
 
-2. For ADDING a subcontractor or client — you MUST collect all key details before executing. If any are missing, ask for them conversationally one message at a time. Do not save until you have: name, role/trade, phone, email, day rate (subbies) or address (clients). Once you have everything, confirm with a summary and then output the <ACTION> block.
+2. For ADDING a subcontractor — you MUST collect all key details before executing. If any are missing, ask for ALL of them in a single message. Ask for: phone, email, company name, day rate (if not mentioned), UTR number, whether they have a van (yes/no), and any notes (what they're good for, tools etc). Phone and email are the minimum essentials — do not save without at least those two. Once you have everything, output a brief summary of what you're saving then the <ACTION> block. Store UTR number and van info in the notes field.
 
 3. Once all details are confirmed, respond with a JSON block in this exact format:
 
