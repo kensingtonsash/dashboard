@@ -233,6 +233,7 @@ body{font-family:system-ui,sans-serif;background:#f0f0ee;color:#1a1a1a;font-size
   <div id="tab-quotes" class="section">
     <div class="kpi-grid" id="kpi-quotes"></div>
     <div class="card"><div class="card-title"><i class="ti ti-file-text"></i> Quotes</div>
+      <input type="text" id="quote-search" placeholder="Search quotes..." oninput="renderQuotes()" style="margin-bottom:12px;padding:6px 12px;border:0.5px solid #ddd;border-radius:8px;font-size:13px;font-family:inherit;width:240px;outline:none">
       <div style="overflow-x:auto">
         <table class="q-table">
           <thead><tr>
@@ -249,6 +250,7 @@ body{font-family:system-ui,sans-serif;background:#f0f0ee;color:#1a1a1a;font-size
     <div class="kpi-grid" id="kpi-inv"></div>
     <div class="kpi-grid" id="kpi-inv2"></div>
     <div class="card"><div class="card-title"><i class="ti ti-file-invoice"></i> Invoice register</div>
+      <input type="text" id="inv-search" placeholder="Search invoices..." oninput="renderInv()" style="margin-bottom:12px;padding:6px 12px;border:0.5px solid #ddd;border-radius:8px;font-size:13px;font-family:inherit;width:240px;outline:none">
       <div style="overflow-x:auto"><table class="inv-table"><thead><tr><th>Client</th><th>Invoice No.</th><th>Due date</th><th>Paid date</th><th>Subject</th><th>Status</th><th style="text-align:right">Total (inc. VAT)</th><th style="text-align:right">Balance</th><th></th></tr></thead><tbody id="inv-body"></tbody></table></div>
     </div>
   </div>
@@ -463,23 +465,35 @@ function renderClients(){
   const sorted=[...all].sort((a,b)=>parseDate(b.last_activity)-parseDate(a.last_activity));
   let filtered=clientFilter==='all'?sorted:sorted.filter(c=>c.status===clientFilter);
   if(search)filtered=filtered.filter(c=>((c.name||'')+(c.address||'')+(c.company||'')+(c.email||'')).toLowerCase().includes(search));
-  const active=all.filter(c=>c.status==='Active').length;
-  const leads=all.filter(c=>c.status==='Lead').length;
-  const past=all.filter(c=>c.status==='Past').length;
+  const thisYear=new Date().getFullYear();
+  const newThisYear=all.filter(c=>{if(!c.last_activity)return false;const[d,m,y]=c.last_activity.split('/');return parseInt(y)===thisYear;}).length;
+  const withOpenQuotes=DATA.enq.filter(x=>x.status==='Quoted').map(x=>x.client);
+  const openQuoteClients=new Set(withOpenQuotes).size;
   document.getElementById('kpi-clients').innerHTML=`
     <div class="kpi"><div class="kpi-label">Total clients</div><div class="kpi-val">${all.length}</div><div class="kpi-sub">on record</div></div>
-    <div class="kpi"><div class="kpi-label">Active</div><div class="kpi-val">${active}</div><div class="kpi-sub green">current jobs</div></div>
-    <div class="kpi"><div class="kpi-label">Leads</div><div class="kpi-val">${leads}</div><div class="kpi-sub">awaiting quote</div></div>
-    <div class="kpi"><div class="kpi-label">Past</div><div class="kpi-val">${past}</div><div class="kpi-sub">completed jobs</div></div>`;
+    <div class="kpi"><div class="kpi-label">Active this year</div><div class="kpi-val">${newThisYear}</div><div class="kpi-sub green">${thisYear}</div></div>
+    <div class="kpi"><div class="kpi-label">Open quotes</div><div class="kpi-val">${openQuoteClients}</div><div class="kpi-sub">awaiting decision</div></div>`;
   const spCls={Active:'sp-active',Lead:'sp-lead',Past:'sp-past'};
   const b=document.getElementById('client-body');
   if(!filtered.length){b.innerHTML='<tr><td colspan="6" class="empty" style="padding:10px 0">No clients found.</td></tr>';return;}
-  b.innerHTML=filtered.map(c=>`<tr>
-    <td><div class="cl-name">${c.name||''}</div>${c.company?`<div class="cl-company">${c.company}</div>`:''}</td>
-    <td class="cl-contact">${c.address||''}</td>
-    <td class="cl-contact"><a href="mailto:${c.email||''}">${c.email||''}</a></td>
-    <td class="cl-contact">${c.phone||''}</td>
-    <td class="last-act">${c.last_activity||''}</td></tr>`).join('');
+  b.innerHTML=filtered.map(c=>{
+    const cInv=DATA.inv.filter(i=>i.client===c.name);
+    const cQuotes=DATA.enq.filter(x=>x.client===c.name&&['Quoted','Won','Lost'].includes(x.status));
+    const detail=cInv.length||cQuotes.length?`
+      <tr class="cl-detail" id="cd-${CSS.escape(c.name)}" style="display:none"><td colspan="5" style="padding:8px 0 12px 0;background:#fafaf9">
+        ${cQuotes.length?`<div style="font-size:11px;font-weight:500;color:#888;text-transform:uppercase;letter-spacing:.04em;margin-bottom:6px">Quotes</div>
+        ${cQuotes.map(q=>`<div style="display:flex;justify-content:space-between;font-size:12px;padding:3px 0;border-bottom:0.5px solid #eee"><span style="color:#185FA5;font-weight:500">${q.quote_no}</span><span style="color:#555">${q.address}</span><span>${badge(q.status)}</span><span style="font-weight:500">${fmt(Math.round(Number(q.value||0)*1.2))}</span></div>`).join('')}`:''}
+        ${cInv.length?`<div style="font-size:11px;font-weight:500;color:#888;text-transform:uppercase;letter-spacing:.04em;margin:${cQuotes.length?'10px':0} 0 6px">Invoices</div>
+        ${cInv.map(i=>`<div style="display:flex;justify-content:space-between;font-size:12px;padding:3px 0;border-bottom:0.5px solid #eee"><span style="color:#185FA5;font-weight:500">${i.invoice_no}</span><span style="color:#555">${i.subject||''}</span><span>${badge(i.status==='Overdue'?'Overdue':i.status)}</span><span style="font-weight:500">${fmt(Math.round(Number(i.amount||0)*1.2))}</span></div>`).join('')}`:''}
+      </td></tr>`:''
+    const hasDetail=cInv.length||cQuotes.length;
+    return `<tr style="cursor:${hasDetail?'pointer':'default'}" onclick="${hasDetail?`toggleClientDetail('${c.name.replace(/'/g,"\\'")}')`:''}" >
+      <td><div class="cl-name">${c.name||''}</div>${c.company?`<div class="cl-company">${c.company}</div>`:''}</td>
+      <td class="cl-contact">${c.address||''}</td>
+      <td class="cl-contact"><a href="mailto:${c.email||''}" onclick="event.stopPropagation()">${c.email||''}</a></td>
+      <td class="cl-contact">${c.phone||''}</td>
+      <td class="last-act">${c.last_activity||''}</td></tr>${detail}`;
+  }).join('');
 }
 
 function renderRequests(){
@@ -496,7 +510,8 @@ function renderRequests(){
 }
 
 function renderQuotes(){
-  const e=[...DATA.enq.filter(x=>['Quoted','Won','Lost'].includes(x.status))].sort((a,b)=>{
+  const qSearch=(document.getElementById('quote-search')?.value||'').toLowerCase();
+  const e=[...DATA.enq.filter(x=>['Quoted','Won','Lost'].includes(x.status)&&(!qSearch||((x.client||'')+(x.quote_no||'')+(x.address||'')+(x.job_type||'')).toLowerCase().includes(qSearch)))].sort((a,b)=>{
     const na=parseInt((a.quote_no||'').replace(/\D/g,''))||0;
     const nb=parseInt((b.quote_no||'').replace(/\D/g,''))||0;
     return nb-na;
@@ -527,7 +542,8 @@ function renderQuotes(){
 }
 
 function renderInv(){
-  const inv=DATA.inv;
+  const iSearch=(document.getElementById('inv-search')?.value||'').toLowerCase();
+  const inv=DATA.inv.filter(i=>!iSearch||((i.client||'')+(i.invoice_no||'')+(i.subject||'')).toLowerCase().includes(iSearch));
   const tot=inv.reduce((s,i)=>s+(Number(i.amount)||0)*1.2,0);
   const col=inv.filter(i=>i.status==='Paid').reduce((s,i)=>s+(Number(i.amount)||0)*1.2,0);
   const out=inv.filter(i=>i.status!=='Paid').reduce((s,i)=>s+(Number(i.balance||i.amount)||0),0);
@@ -718,6 +734,12 @@ Company: Kensington Sash (Windows) Ltd, London-based timber sash window speciali
   }
   chatBusy=false;
   document.getElementById('chat-send').disabled=false;
+}
+
+function toggleClientDetail(name){
+  const row=document.getElementById('cd-'+CSS.escape(name));
+  if(!row)return;
+  row.style.display=row.style.display==='none'?'table-row':'none';
 }
 
 loadAll();
