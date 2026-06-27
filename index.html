@@ -359,7 +359,7 @@ async function loadAll(){
       sb('invoices','GET',null,'?order=invoice_no.desc'),
       sb('jobs','GET',null,'?order=created_at.desc'),
       sb('projects','GET',null,'?order=created_at.desc'),
-      sb('clients','GET',null,'?order=last_activity.desc')
+      sb('clients','GET',null,'?order=created_at.desc')
     ]);
     DATA.enq=enq||[];DATA.inv=inv||[];DATA.jobs=jobs||[];DATA.proj=proj||[];DATA.clients=clients||[];
     render();
@@ -464,7 +464,9 @@ function setClientFilter(f,btn){
 function renderClients(){
   const search=(document.getElementById('client-search')?.value||'').toLowerCase();
   const all=DATA.clients;
-  let filtered=clientFilter==='all'?[...all]:all.filter(c=>c.status===clientFilter);
+  const parseDate=s=>{if(!s)return 0;const[d,m,y]=s.split('/');return new Date(`${y}-${m}-${d}`).getTime();};
+  const sorted=[...all].sort((a,b)=>parseDate(b.last_activity)-parseDate(a.last_activity));
+  let filtered=clientFilter==='all'?sorted:sorted.filter(c=>c.status===clientFilter);
   if(search)filtered=filtered.filter(c=>((c.name||'')+(c.address||'')+(c.company||'')+(c.email||'')).toLowerCase().includes(search));
   const active=all.filter(c=>c.status==='Active').length;
   const leads=all.filter(c=>c.status==='Lead').length;
