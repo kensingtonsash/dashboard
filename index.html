@@ -591,12 +591,15 @@ function renderInv(){
   const thisYearCol=paidInv.filter(i=>new Date(i.due_date).getFullYear()===thisYear).reduce((s,i)=>s+Number(i.amount||0),0);
   const thisMonthCol=paidInv.filter(i=>{const d=new Date(i.due_date);return d.getFullYear()===thisYear&&d.getMonth()===thisMonth;}).reduce((s,i)=>s+Number(i.amount||0),0);
   const lastMonthCol=paidInv.filter(i=>{const d=new Date(i.due_date);const lm=thisMonth===0?11:thisMonth-1;const ly=thisMonth===0?thisYear-1:thisYear;return d.getFullYear()===ly&&d.getMonth()===lm;}).reduce((s,i)=>s+Number(i.amount||0),0);
-  const avgMonthly=thisYearCol?(Math.round(thisYearCol/(thisMonth+1))):0;
+  const lastYearYTD=paidInv.filter(i=>{const d=new Date(i.due_date);return d.getFullYear()===thisYear-1&&(d.getMonth()<thisMonth||(d.getMonth()===thisMonth&&d.getDate()<=now.getDate()));}).reduce((s,i)=>s+Number(i.amount||0),0);
+  const yoyPct=lastYearYTD?Math.round(((thisYearCol-lastYearYTD)/lastYearYTD)*100):null;
+  const yoyStr=yoyPct===null?'—':(yoyPct>=0?'+':'')+yoyPct+'%';
+  const yoyCls=yoyPct===null?'#888':yoyPct>=0?'#34453E':'#A32D2D';
   document.getElementById('kpi-inv2').innerHTML=`
     <div class="kpi"><div class="kpi-label">This month</div><div class="kpi-val">${fmt(Math.round(thisMonthCol))}</div><div class="kpi-sub">net excl. VAT · ${now.toLocaleString('en-GB',{month:'long'})}</div></div>
     <div class="kpi"><div class="kpi-label">Last month</div><div class="kpi-val">${fmt(Math.round(lastMonthCol))}</div><div class="kpi-sub">net excl. VAT</div></div>
     <div class="kpi"><div class="kpi-label">This year</div><div class="kpi-val">${fmt(Math.round(thisYearCol))}</div><div class="kpi-sub">net excl. VAT · ${thisYear}</div></div>
-    <div class="kpi"><div class="kpi-label">Monthly avg</div><div class="kpi-val">${fmt(avgMonthly)}</div><div class="kpi-sub">net excl. VAT · ${thisYear}</div></div>`;
+    <div class="kpi"><div class="kpi-label">YoY growth</div><div class="kpi-val" style="color:${yoyCls}">${yoyStr}</div><div class="kpi-sub">vs same period ${thisYear-1}</div></div>`;
   const b=document.getElementById('inv-body');
   if(!inv.length){b.innerHTML='<tr><td colspan="8" class="empty" style="padding:8px 0">No invoices yet.</td></tr>';return;}
   b.innerHTML=inv.map(i=>{
