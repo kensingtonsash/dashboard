@@ -536,13 +536,73 @@ function renderRequests(){
   const e=DATA.enq.filter(x=>['New','Pending survey'].includes(x.status));
   document.getElementById('kpi-req').innerHTML=`
     <div class="kpi"><div class="kpi-label">New requests</div><div class="kpi-val">${e.length}</div><div class="kpi-sub">awaiting quote</div></div>
-    <div class="kpi"><div class="kpi-label">Estimated value</div><div class="kpi-val">${fmt(e.reduce((s,x)=>s+(Number(x.value)||0),0))}</div><div class="kpi-sub">pipeline</div></div>`;
+    <div class="kpi"><div class="kpi-label">Survey requested</div><div class="kpi-val">${e.filter(x=>x.survey).length}</div><div class="kpi-sub">onsite visits needed</div></div>
+    <div class="kpi"><div class="kpi-label">Photo estimate</div><div class="kpi-val">${e.filter(x=>x.photo_estimate).length}</div><div class="kpi-sub">remote quotes</div></div>
+    <div class="kpi"><div class="kpi-label">Windows / doors</div><div class="kpi-val">${e.reduce((s,x)=>s+(parseInt(x.window_count)||0),0)}</div><div class="kpi-sub">across all requests</div></div>`;
   const l=document.getElementById('req-list');
   if(!e.length){l.innerHTML='<div class="empty">No requests yet.</div>';return;}
-  l.innerHTML=e.map(x=>`<div class="row">
-    <div class="row-left"><div class="row-name">${x.client} <span style="font-weight:400;color:#888">— ${x.quote_no}</span></div>
-    <div class="row-sub">${x.address} · ${x.job_type} · ${x.date}</div></div>
-    <div class="row-actions">${badge(x.status)}</div></div>`).join('');
+  l.innerHTML=e.map(x=>{
+    const services=(x.job_type||'').split(',').map(s=>s.trim()).filter(Boolean);
+    const dateStr=x.date?new Date(x.date).toLocaleDateString('en-GB',{day:'numeric',month:'short',year:'numeric'}):x.created_at?new Date(x.created_at).toLocaleDateString('en-GB',{day:'numeric',month:'short',year:'numeric'}):'—';
+    return `<div class="card" style="margin-bottom:10px">
+      <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:12px;flex-wrap:wrap">
+        <div>
+          <div style="font-size:15px;font-weight:600">${x.client}${x.company?` <span style="font-weight:400;font-size:13px;color:#888">· ${x.company}</span>`:''}</div>
+          <div style="font-size:12px;color:#888;margin-top:3px;display:flex;gap:14px;flex-wrap:wrap">
+            ${x.address?`<span><i class="ti ti-map-pin" style="font-size:11px;margin-right:3px"></i>${x.address}</span>`:''}
+            ${x.phone?`<span><i class="ti ti-phone" style="font-size:11px;margin-right:3px"></i>${x.phone}</span>`:''}
+            ${x.email?`<span><i class="ti ti-mail" style="font-size:11px;margin-right:3px"></i><a href="mailto:${x.email}" style="color:#185FA5">${x.email}</a></span>`:''}
+          </div>
+        </div>
+        <div style="display:flex;align-items:center;gap:8px;flex-shrink:0">
+          ${badge(x.status)}
+          <span style="font-size:11px;color:#888">${dateStr}</span>
+        </div>
+      </div>
+
+      <div style="margin-top:12px;padding-top:12px;border-top:0.5px solid #eee;display:grid;grid-template-columns:1fr 1fr;gap:12px">
+        <div>
+          <div style="font-size:11px;font-weight:500;color:#888;text-transform:uppercase;letter-spacing:.04em;margin-bottom:6px">Services requested</div>
+          <div style="display:flex;flex-wrap:wrap;gap:4px">
+            ${services.length?services.map(s=>`<span class="badge b-quoted">${s}</span>`).join(''):'<span style="font-size:12px;color:#888">—</span>'}
+          </div>
+        </div>
+        <div>
+          <div style="font-size:11px;font-weight:500;color:#888;text-transform:uppercase;letter-spacing:.04em;margin-bottom:6px">Project details</div>
+          <div style="font-size:12px;color:#555;display:flex;flex-direction:column;gap:3px">
+            ${x.window_count?`<span><i class="ti ti-window" style="font-size:11px;margin-right:4px;color:#34453E"></i>${x.window_count} window${x.window_count!='1'?'s':''}</span>`:''}
+            ${x.survey?`<span><i class="ti ti-calendar-check" style="font-size:11px;margin-right:4px;color:#34453E"></i>Onsite survey requested</span>`:''}
+            ${x.photo_estimate?`<span><i class="ti ti-camera" style="font-size:11px;margin-right:4px;color:#34453E"></i>Photo estimate requested</span>`:''}
+          </div>
+        </div>
+      </div>
+
+      ${x.notes?`<div style="margin-top:10px;padding-top:10px;border-top:0.5px solid #eee">
+        <div style="font-size:11px;font-weight:500;color:#888;text-transform:uppercase;letter-spacing:.04em;margin-bottom:4px">Description</div>
+        <div style="font-size:12px;color:#555;line-height:1.6;white-space:pre-wrap">${x.notes}</div>
+      </div>`:''}
+
+      ${x.photo_urls&&x.photo_urls.length?`<div style="margin-top:10px;padding-top:10px;border-top:0.5px solid #eee">
+        <div style="font-size:11px;font-weight:500;color:#888;text-transform:uppercase;letter-spacing:.04em;margin-bottom:6px">Photos (${x.photo_urls.length})</div>
+        <div style="display:flex;gap:6px;flex-wrap:wrap">
+          ${x.photo_urls.map(u=>`<a href="${u}" target="_blank"><img src="${u}" style="width:72px;height:72px;object-fit:cover;border-radius:6px;border:0.5px solid #ddd"></a>`).join('')}
+        </div>
+      </div>`:''}
+
+      <div style="margin-top:12px;padding-top:12px;border-top:0.5px solid #eee;display:flex;gap:8px">
+        <button class="btn-sm" onclick="updateEnqStatus('${x.id}','Pending survey')">Mark: Pending Survey</button>
+        <button class="btn-sm" onclick="updateEnqStatus('${x.id}','Quoted')">Mark: Quoted</button>
+        <button class="btn-sm" style="border-color:#A32D2D;color:#A32D2D" onclick="updateEnqStatus('${x.id}','Lost')">Dismiss</button>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+async function updateEnqStatus(id, status){
+  await sb('enquiries','PATCH',{status},`?id=eq.${id}`);
+  const enq=DATA.enq.find(e=>e.id===id);
+  if(enq)enq.status=status;
+  renderRequests();renderQuotes();renderHome();
 }
 
 function renderQuotes(){
