@@ -744,6 +744,7 @@ async function sendChat(){
   chatBusy=true;
   document.getElementById('chat-send').disabled=true;
   const thinking=addMsg('','Thinking…','thinking');
+
   const sys=`You are the Kensington Sash (Windows) Ltd operational assistant embedded in the company dashboard. Be concise and direct — London trade tone.
 
 Live data:
@@ -751,8 +752,28 @@ Enquiries: ${JSON.stringify(DATA.enq)}
 Invoices: ${JSON.stringify(DATA.inv)}
 Projects: ${JSON.stringify(DATA.proj)}
 Clients: ${DATA.clients.length} on record
+Subcontractors: ${JSON.stringify(DATA.sub||[])}
 
-Company: Kensington Sash (Windows) Ltd, London-based timber sash window specialist. All prices net excl. VAT.`;
+Company: Kensington Sash (Windows) Ltd, London-based timber sash window specialist. All prices net excl. VAT.
+
+IMPORTANT: You can perform actions on the dashboard. When the user wants to CREATE or UPDATE data, respond with a JSON block in this exact format (and nothing else outside it):
+
+<ACTION>
+{
+  "action": "add_subcontractor" | "update_subcontractor" | "mark_invoice_paid" | "update_enquiry_status" | "add_client",
+  "data": { ... relevant fields ... },
+  "confirm_message": "Human-readable confirmation of what you did"
+}
+</ACTION>
+
+For add_subcontractor, data fields: name, company, role, phone, email, pricing, day_rate (number), status ("Active"|"Inactive"), notes
+For update_subcontractor, data fields: id (required), plus any fields to change
+For mark_invoice_paid, data fields: invoice_no, paid_date (YYYY-MM-DD)
+For update_enquiry_status, data fields: quote_no, status ("New"|"Quoted"|"Won"|"Lost")
+For add_client, data fields: name, company, email, phone, address, last_activity (DD/MM/YYYY)
+
+If the user is just asking a question or having a conversation, reply normally as plain text with NO <ACTION> block.`;
+
   try{
     const res=await fetch('/api/chat',{
       method:'POST',
@@ -762,14 +783,63 @@ Company: Kensington Sash (Windows) Ltd, London-based timber sash window speciali
     const d=await res.json();
     const reply=d.content?.find(b=>b.type==='text')?.text||'Sorry, no response.';
     chatHistory.push({role:'assistant',content:reply});
-    thinking.className='chat-msg assistant';
-    thinking.textContent=reply;
+
+    // Check for action block
+    const actionMatch=reply.match(/<ACTION>([\s\S]*?)<\/ACTION>/);
+    if(actionMatch){
+      try{
+        const parsed=JSON.parse(actionMatch[1].trim());
+        await executeAction(parsed);
+        thinking.className='chat-msg assistant';
+        thinking.textContent=parsed.confirm_message||'Done.';
+      }catch(e){
+        thinking.className='chat-msg assistant';
+        thinking.textContent='Action failed: '+e.message;
+      }
+    } else {
+      thinking.className='chat-msg assistant';
+      thinking.textContent=reply;
+    }
   }catch(err){
     thinking.className='chat-msg assistant';
     thinking.textContent='Error: '+err.message;
   }
   chatBusy=false;
   document.getElementById('chat-send').disabled=false;
+}
+
+async function executeAction(parsed){
+  const {action,data}=parsed;
+  if(action==='add_subcontractor'){
+    const res=await sb('subcontractors','POST',data);
+    if(res&&res[0])DATA.sub=[...(DATA.sub||[]),res[0]];
+    renderSub();
+  }
+  else if(action==='update_subcontractor'){
+    const {id,...rest}=data;
+    await sb('subcontractors','PATCH',rest,`?id=eq.${id}`);
+    const idx=(DATA.sub||[]).findIndex(x=>x.id===id);
+    if(idx>-1)DATA.sub[idx]={...DATA.sub[idx],...rest};
+    renderSub();
+  }
+  else if(action==='mark_invoice_paid'){
+    await sb('invoices','PATCH',{status:'Paid',paid_date:data.paid_date,balance:0},`?invoice_no=eq.${data.invoice_no}`);
+    const inv=DATA.inv.find(i=>i.invoice_no===data.invoice_no);
+    if(inv){inv.status='Paid';inv.paid_date=data.paid_date;inv.balance=0;}
+    renderInv();renderHome();
+  }
+  else if(action==='update_enquiry_status'){
+    await sb('enquiries','PATCH',{status:data.status},`?quote_no=eq.${data.quote_no}`);
+    const enq=DATA.enq.find(e=>e.quote_no===data.quote_no);
+    if(enq)enq.status=data.status;
+    renderQuotes();renderRequests();renderHome();
+  }
+  else if(action==='add_client'){
+    const res=await sb('clients','POST',data);
+    if(res&&res[0])DATA.clients=[...(DATA.clients||[]),res[0]];
+    renderClients();
+  }
+  else throw new Error('Unknown action: '+action);
 }
 
 function toggleClientDetail(name){
