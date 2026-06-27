@@ -396,7 +396,7 @@ async function loadAll(){
   try{
     const [enq,inv,jobs,proj,clients]=await Promise.all([
       sb('enquiries','GET',null,'?order=created_at.desc'),
-      sb('invoices','GET',null,'?order=created_at.desc'),
+      sb('invoices','GET',null,'?order=invoice_no.desc'),
       sb('jobs','GET',null,'?order=created_at.desc'),
       sb('projects','GET',null,'?order=created_at.desc'),
       sb('clients','GET',null,'?order=name.asc')
