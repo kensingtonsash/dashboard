@@ -211,17 +211,12 @@ body{font-family:system-ui,sans-serif;background:#f0f0ee;color:#1a1a1a;font-size
     <div class="kpi-grid" id="kpi-clients"></div>
     <div class="card">
       <div style="display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:14px;flex-wrap:wrap">
-        <div style="display:flex;gap:8px;flex-wrap:wrap">
-          <button class="client-filter active" onclick="setClientFilter('all',this)">All</button>
-          <button class="client-filter" onclick="setClientFilter('Active',this)">Active</button>
-          <button class="client-filter" onclick="setClientFilter('Lead',this)">Leads</button>
-          <button class="client-filter" onclick="setClientFilter('Past',this)">Past</button>
-        </div>
+        <div></div>
         <input type="text" id="client-search" placeholder="Search clients..." oninput="renderClients()" style="padding:6px 12px;border:0.5px solid #ddd;border-radius:8px;font-size:13px;font-family:inherit;width:200px;outline:none">
       </div>
       <div style="overflow-x:auto">
         <table class="cl-table">
-          <thead><tr><th>Name</th><th>Address</th><th>Email</th><th>Phone</th><th>Status</th><th>Last activity</th></tr></thead>
+          <thead><tr><th>Name</th><th>Address</th><th>Email</th><th>Phone</th><th>Last activity</th></tr></thead>
           <tbody id="client-body"></tbody>
         </table>
       </div>
@@ -484,7 +479,6 @@ function renderClients(){
     <td class="cl-contact">${c.address||''}</td>
     <td class="cl-contact"><a href="mailto:${c.email||''}">${c.email||''}</a></td>
     <td class="cl-contact">${c.phone||''}</td>
-    <td><span class="status-pill ${spCls[c.status]||'sp-past'}">${c.status||''}</span></td>
     <td class="last-act">${c.last_activity||''}</td></tr>`).join('');
 }
 
