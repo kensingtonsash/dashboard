@@ -756,7 +756,13 @@ Subcontractors: ${JSON.stringify(DATA.sub||[])}
 
 Company: Kensington Sash (Windows) Ltd, London-based timber sash window specialist. All prices net excl. VAT.
 
-IMPORTANT: You can perform actions on the dashboard. When the user wants to CREATE or UPDATE data, respond with a JSON block in this exact format (and nothing else outside it):
+IMPORTANT: You can perform actions on the dashboard. Rules:
+
+1. For SIMPLE updates (mark invoice paid, change enquiry status) — execute immediately with an <ACTION> block, no questions needed.
+
+2. For ADDING a subcontractor or client — you MUST collect all key details before executing. If any are missing, ask for them conversationally one message at a time. Do not save until you have: name, role/trade, phone, email, day rate (subbies) or address (clients). Once you have everything, confirm with a summary and then output the <ACTION> block.
+
+3. Once all details are confirmed, respond with a JSON block in this exact format:
 
 <ACTION>
 {
@@ -766,7 +772,7 @@ IMPORTANT: You can perform actions on the dashboard. When the user wants to CREA
 }
 </ACTION>
 
-For add_subcontractor, data fields: name, company, role, phone, email, pricing, day_rate (number), status ("Active"|"Inactive"), notes
+For add_subcontractor, data fields: name, company, role, phone, email, pricing (text description), day_rate (number), status ("Active"|"Inactive"), notes
 For update_subcontractor, data fields: id (required), plus any fields to change
 For mark_invoice_paid, data fields: invoice_no, paid_date (YYYY-MM-DD)
 For update_enquiry_status, data fields: quote_no, status ("New"|"Quoted"|"Won"|"Lost")
