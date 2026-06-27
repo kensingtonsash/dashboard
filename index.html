@@ -576,6 +576,7 @@ function renderInv(){
   const out=inv.filter(i=>i.status!=='Paid').reduce((s,i)=>s+(Number(i.balance||i.amount)||0),0);
   const ovd=inv.filter(i=>i.status==='Overdue'||i.status==='Past due').length;
   document.getElementById('kpi-inv').innerHTML=`
+    <div class="kpi"><div class="kpi-label">Collected (net)</div><div class="kpi-val">${fmt(Math.round(col/1.2))}</div><div class="kpi-sub green">excl. VAT</div></div>
     <div class="kpi"><div class="kpi-label">Total invoiced</div><div class="kpi-val">${fmt(tot)}</div><div class="kpi-sub">inc. VAT</div></div>
     <div class="kpi"><div class="kpi-label">Collected</div><div class="kpi-val">${fmt(col)}</div><div class="kpi-sub green">${tot?Math.round(col/tot*100):0}% of invoiced</div></div>
     <div class="kpi"><div class="kpi-label">Outstanding</div><div class="kpi-val">${fmt(out)}</div><div class="kpi-sub ${out>0?'red':''}">${ovd>0?ovd+' overdue':'all current'}</div></div>
