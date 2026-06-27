@@ -255,7 +255,7 @@ body{font-family:system-ui,sans-serif;background:#f0f0ee;color:#1a1a1a;font-size
     <div class="kpi-grid" id="kpi-inv"></div>
     <div class="kpi-grid" id="kpi-inv2"></div>
     <div class="card"><div class="card-title"><i class="ti ti-file-invoice"></i> Invoice register</div>
-      <div style="overflow-x:auto"><table class="inv-table"><thead><tr><th>Client</th><th>Invoice No.</th><th>Due date</th><th>Subject</th><th>Status</th><th style="text-align:right">Total (inc. VAT)</th><th style="text-align:right">Balance</th><th></th></tr></thead><tbody id="inv-body"></tbody></table></div>
+      <div style="overflow-x:auto"><table class="inv-table"><thead><tr><th>Client</th><th>Invoice No.</th><th>Due date</th><th>Paid date</th><th>Subject</th><th>Status</th><th style="text-align:right">Total (inc. VAT)</th><th style="text-align:right">Balance</th><th></th></tr></thead><tbody id="inv-body"></tbody></table></div>
     </div>
   </div>
 
@@ -607,10 +607,12 @@ function renderInv(){
     const balance=i.balance!==undefined&&i.balance!==null?Number(i.balance):i.status==='Paid'?0:totalIncVat;
     const dueDateStr=i.due_date?new Date(i.due_date).toLocaleDateString('en-GB',{day:'numeric',month:'short',year:'numeric'}):'—';
     const isOverdue=i.status==='Overdue'||i.status==='Past due';
+    const paidDateStr=i.paid_date?new Date(i.paid_date).toLocaleDateString('en-GB',{day:'numeric',month:'short',year:'numeric'}):'—';
     return `<tr>
       <td style="font-weight:600">${i.client}</td>
       <td class="inv-no">${i.invoice_no}</td>
       <td style="color:${isOverdue?'#A32D2D':'#888'};font-size:12px;white-space:nowrap">${dueDateStr}</td>
+      <td style="color:#888;font-size:12px;white-space:nowrap">${paidDateStr}</td>
       <td style="color:#555;font-size:12px">${i.subject||i.job_type||''}</td>
       <td>${badge(isOverdue?'Overdue':i.status)}</td>
       <td style="text-align:right;font-weight:600">${fmt(totalIncVat)}</td>
