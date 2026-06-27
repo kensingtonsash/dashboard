@@ -253,6 +253,7 @@ body{font-family:system-ui,sans-serif;background:#f0f0ee;color:#1a1a1a;font-size
 
   <div id="tab-invoices" class="section">
     <div class="kpi-grid" id="kpi-inv"></div>
+    <div class="kpi-grid" id="kpi-inv2"></div>
     <div class="card"><div class="card-title"><i class="ti ti-file-invoice"></i> Invoice register</div>
       <div style="overflow-x:auto"><table class="inv-table"><thead><tr><th>Client</th><th>Invoice No.</th><th>Due date</th><th>Subject</th><th>Status</th><th style="text-align:right">Total (inc. VAT)</th><th style="text-align:right">Balance</th><th></th></tr></thead><tbody id="inv-body"></tbody></table></div>
     </div>
@@ -576,11 +577,26 @@ function renderInv(){
   const out=inv.filter(i=>i.status!=='Paid').reduce((s,i)=>s+(Number(i.balance||i.amount)||0),0);
   const ovd=inv.filter(i=>i.status==='Overdue'||i.status==='Past due').length;
   document.getElementById('kpi-inv').innerHTML=`
-    <div class="kpi"><div class="kpi-label">Collected (net)</div><div class="kpi-val">${fmt(Math.round(col/1.2))}</div><div class="kpi-sub green">excl. VAT</div></div>
-    <div class="kpi"><div class="kpi-label">Total invoiced</div><div class="kpi-val">${fmt(tot)}</div><div class="kpi-sub">inc. VAT</div></div>
+    <div class="kpi"><div class="kpi-label">Collected (net)</div><div class="kpi-val">${fmt(Math.round(col/1.2))}</div><div class="kpi-sub green">excl. VAT · all time</div></div>
+    <div class="kpi"><div class="kpi-label">Total invoiced</div><div class="kpi-val">${fmt(tot)}</div><div class="kpi-sub">inc. VAT · all time</div></div>
     <div class="kpi"><div class="kpi-label">Collected</div><div class="kpi-val">${fmt(col)}</div><div class="kpi-sub green">${tot?Math.round(col/tot*100):0}% of invoiced</div></div>
     <div class="kpi"><div class="kpi-label">Outstanding</div><div class="kpi-val">${fmt(out)}</div><div class="kpi-sub ${out>0?'red':''}">${ovd>0?ovd+' overdue':'all current'}</div></div>
-    <div class="kpi"><div class="kpi-label">Invoices raised</div><div class="kpi-val">${inv.length}</div><div class="kpi-sub">across all jobs</div></div>`;
+    <div class="kpi"><div class="kpi-label">Invoices raised</div><div class="kpi-val">${inv.length}</div><div class="kpi-sub">all time</div></div>`;
+
+  // Second row — period metrics
+  const now=new Date();
+  const thisYear=now.getFullYear();
+  const thisMonth=now.getMonth();
+  const paidInv=inv.filter(i=>i.status==='Paid'&&i.due_date);
+  const thisYearCol=paidInv.filter(i=>new Date(i.due_date).getFullYear()===thisYear).reduce((s,i)=>s+Number(i.amount||0)*1.2,0);
+  const thisMonthCol=paidInv.filter(i=>{const d=new Date(i.due_date);return d.getFullYear()===thisYear&&d.getMonth()===thisMonth;}).reduce((s,i)=>s+Number(i.amount||0)*1.2,0);
+  const lastMonthCol=paidInv.filter(i=>{const d=new Date(i.due_date);const lm=thisMonth===0?11:thisMonth-1;const ly=thisMonth===0?thisYear-1:thisYear;return d.getFullYear()===ly&&d.getMonth()===lm;}).reduce((s,i)=>s+Number(i.amount||0)*1.2,0);
+  const avgMonthly=thisYearCol?(Math.round(thisYearCol/(thisMonth+1))):0;
+  document.getElementById('kpi-inv2').innerHTML=`
+    <div class="kpi"><div class="kpi-label">This month</div><div class="kpi-val">${fmt(Math.round(thisMonthCol))}</div><div class="kpi-sub">inc. VAT · ${now.toLocaleString('en-GB',{month:'long'})}</div></div>
+    <div class="kpi"><div class="kpi-label">Last month</div><div class="kpi-val">${fmt(Math.round(lastMonthCol))}</div><div class="kpi-sub">inc. VAT</div></div>
+    <div class="kpi"><div class="kpi-label">This year</div><div class="kpi-val">${fmt(Math.round(thisYearCol))}</div><div class="kpi-sub">inc. VAT · ${thisYear}</div></div>
+    <div class="kpi"><div class="kpi-label">Monthly avg</div><div class="kpi-val">${fmt(avgMonthly)}</div><div class="kpi-sub">${thisYear} average</div></div>`;
   const b=document.getElementById('inv-body');
   if(!inv.length){b.innerHTML='<tr><td colspan="8" class="empty" style="padding:8px 0">No invoices yet.</td></tr>';return;}
   b.innerHTML=inv.map(i=>{
