@@ -1,216 +1,38 @@
-<!DOCTYPE html>
-<html>
-<head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Request a Quote — Kensington Sash</title>
-<style>
-*{box-sizing:border-box;margin:0;padding:0}
-body{font-family:system-ui,sans-serif;background:#f0f0ee;color:#1a1a1a;font-size:15px;padding:2rem 1rem}
-.wrap{max-width:620px;margin:0 auto}
-.logo{margin-bottom:2rem;text-align:center}
-.logo img{height:52px;width:auto}
-.card{background:#fff;border:0.5px solid #ddd;border-radius:14px;padding:2rem;margin-bottom:1.5rem}
-.intro{font-size:14px;color:#444;line-height:1.7;margin-bottom:0}
-.section-title{font-size:13px;font-weight:600;text-transform:uppercase;letter-spacing:.06em;color:#34453E;margin-bottom:1.25rem;padding-bottom:.5rem;border-bottom:0.5px solid #eee}
-.field{margin-bottom:1.1rem}
-.field label{display:block;font-size:13px;font-weight:500;color:#444;margin-bottom:5px}
-.field input,.field textarea,.field select{width:100%;border:0.5px solid #ccc;border-radius:8px;padding:10px 12px;font-size:14px;font-family:inherit;outline:none;background:#fff;color:#1a1a1a;transition:border-color .15s}
-.field input:focus,.field textarea:focus,.field select:focus{border-color:#34453E}
-.field textarea{resize:vertical;min-height:100px}
-.row{display:grid;grid-template-columns:1fr 1fr;gap:12px}
-.row3{display:grid;grid-template-columns:2fr 1fr 1fr;gap:12px}
-.checkbox-group{display:flex;flex-direction:column;gap:10px}
-.checkbox-item{display:flex;align-items:flex-start;gap:10px;cursor:pointer}
-.checkbox-item input[type=checkbox]{accent-color:#34453E;width:16px;height:16px;margin-top:2px;flex-shrink:0;cursor:pointer}
-.checkbox-item span{font-size:14px;color:#333;line-height:1.4}
-.toggle-row{display:flex;align-items:center;justify-content:space-between;padding:10px 0;border-bottom:0.5px solid #f0f0ee}
-.toggle-row:last-child{border-bottom:none}
-.toggle-row label{font-size:14px;color:#333}
-.toggle{position:relative;display:inline-block;width:44px;height:24px;flex-shrink:0}
-.toggle input{opacity:0;width:0;height:0}
-.slider{position:absolute;cursor:pointer;inset:0;background:#ccc;border-radius:24px;transition:.2s}
-.slider:before{content:'';position:absolute;height:18px;width:18px;left:3px;bottom:3px;background:#fff;border-radius:50%;transition:.2s}
-.toggle input:checked+.slider{background:#34453E}
-.toggle input:checked+.slider:before{transform:translateX(20px)}
-.submit-btn{width:100%;background:#34453E;color:#fff;border:none;border-radius:10px;padding:14px;font-size:15px;font-weight:500;font-family:inherit;cursor:pointer;transition:background .15s}
-.submit-btn:hover{background:#2a3830}
-.submit-btn:disabled{opacity:0.6;cursor:not-allowed}
-.success{display:none;text-align:center;padding:2rem}
-.success-icon{font-size:48px;margin-bottom:1rem}
-.success h2{font-size:20px;font-weight:600;color:#34453E;margin-bottom:8px}
-.success p{font-size:14px;color:#666;line-height:1.6}
-.required{color:#A32D2D}
-@media(max-width:500px){.row,.row3{grid-template-columns:1fr}}
-</style>
-</head>
-<body>
-<div class="wrap">
-  <div class="logo">
-    <img src="/Logo%20slogan%202.png" alt="Kensington Sash">
-  </div>
+// REPLACE this block in request.html:
 
-  <div class="card">
-    <p class="intro">Thank you for getting in touch with Kensington Sash. Please complete the form below with as much detail as possible — this helps us provide you with an accurate quotation as quickly as possible.<br><br>For existing clients or project follow-ups, please email us directly at <strong>info@kensingtonsash.co.uk</strong>.<br><br>Thank you, Kensington Sash</p>
-  </div>
-
-  <form id="req-form">
-    <!-- Contact -->
-    <div class="card">
-      <div class="section-title">Contact Information</div>
-      <div class="row">
-        <div class="field"><label>First name <span class="required">*</span></label><input type="text" name="first_name" required placeholder="First name"></div>
-        <div class="field"><label>Last name <span class="required">*</span></label><input type="text" name="last_name" required placeholder="Last name"></div>
-      </div>
-      <div class="field"><label>Company name <span style="color:#888;font-weight:400">(optional)</span></label><input type="text" name="company" placeholder="Company name"></div>
-      <div class="field"><label>Email <span class="required">*</span></label><input type="email" name="email" required placeholder="your@email.com"></div>
-      <div class="field"><label>Phone <span class="required">*</span></label><input type="tel" name="phone" required placeholder="+44"></div>
-    </div>
-
-    <!-- Address -->
-    <div class="card">
-      <div class="section-title">Property Address</div>
-      <div class="field"><label>Street address <span class="required">*</span></label><input type="text" name="street" required placeholder="Street address"></div>
-      <div class="field"><label>Flat / unit <span style="color:#888;font-weight:400">(optional)</span></label><input type="text" name="unit" placeholder="Flat, apartment, suite etc."></div>
-      <div class="row3">
-        <div class="field"><label>City <span class="required">*</span></label><input type="text" name="city" required placeholder="London"></div>
-        <div class="field"><label>County</label><input type="text" name="county" placeholder="County"></div>
-        <div class="field"><label>Postcode <span class="required">*</span></label><input type="text" name="postcode" required placeholder="SW1A 1AA"></div>
-      </div>
-    </div>
-
-    <!-- Services -->
-    <div class="card">
-      <div class="section-title">Services Required</div>
-      <p style="font-size:13px;color:#888;margin-bottom:1rem">Please select all that apply</p>
-      <div class="checkbox-group">
-        <label class="checkbox-item"><input type="checkbox" name="service" value="New Windows and Doors"><span>New Windows and Doors</span></label>
-        <label class="checkbox-item"><input type="checkbox" name="service" value="Sash-Only Replacement"><span>Sash-Only Replacement — new double glazed sashes into existing frames</span></label>
-        <label class="checkbox-item"><input type="checkbox" name="service" value="Sash Window Repairs"><span>Sash Window Repairs</span></label>
-        <label class="checkbox-item"><input type="checkbox" name="service" value="Sash Window Painting"><span>Sash Window Painting</span></label>
-        <label class="checkbox-item"><input type="checkbox" name="service" value="Vacuum Glazing"><span>Vacuum Glazing</span></label>
-        <label class="checkbox-item"><input type="checkbox" name="service" value="New Ironmongery and Locks"><span>New Ironmongery and Locks</span></label>
-        <label class="checkbox-item"><input type="checkbox" name="service" value="General Enquiry"><span>General Enquiry</span></label>
-      </div>
-    </div>
-
-    <!-- Details -->
-    <div class="card">
-      <div class="section-title">Project Details</div>
-      <div class="field"><label>Number of windows / doors</label><input type="number" name="window_count" min="1" placeholder="e.g. 4"></div>
-      <div class="field"><label>Please describe the work required</label><textarea name="notes" placeholder="Please provide as much detail as possible — window sizes, condition, any access considerations, listed building status etc."></textarea></div>
-    </div>
-
-    <!-- Photos -->
-    <div class="card">
-      <div class="section-title">Photos <span style="font-weight:400;color:#888;text-transform:none;letter-spacing:0;font-size:12px">Up to 10 images</span></div>
-      <div class="field">
-        <label>Share images of the work to be done</label>
-        <input type="file" name="photos" id="photo-input" accept="image/*" multiple style="border:0.5px dashed #ccc;border-radius:8px;padding:12px;background:#fafafa;cursor:pointer">
-        <div id="photo-preview" style="display:flex;flex-wrap:wrap;gap:8px;margin-top:10px"></div>
-      </div>
-    </div>
-
-    <!-- Preferences -->
-    <div class="card">
-      <div class="section-title">Preferences</div>
-      <div class="toggle-row">
-        <label>Would you like to book a free onsite survey?</label>
-        <label class="toggle"><input type="checkbox" name="survey" checked><span class="slider"></span></label>
-      </div>
-      <div class="toggle-row">
-        <label>Would you prefer an estimate based on photos?</label>
-        <label class="toggle"><input type="checkbox" name="photo_estimate"><span class="slider"></span></label>
-      </div>
-    </div>
-
-    <button type="submit" class="submit-btn" id="submit-btn">Submit Request</button>
-  </form>
-
-  <div class="success" id="success-msg">
-    <div class="success-icon">✅</div>
-    <h2>Request received</h2>
-    <p>Thank you — we'll be in touch shortly to discuss your project.<br>For urgent enquiries call us on <strong>020 3840 7255</strong>.</p>
-  </div>
-</div>
-
-<script>
-const SUPABASE_URL='https://wuzcvgucszxoefcscqkd.supabase.co/rest/v1';
-const SUPABASE_BASE='https://wuzcvgucszxoefcscqkd.supabase.co';
-const SUPABASE_KEY='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Ind1emN2Z3Vjc3p4b2VmY3NjcWtkIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODI0ODU3NjAsImV4cCI6MjA5ODA2MTc2MH0.rnibj12j6stQHFbS3lkKhNSvKYmCi_sM5s-vLLmTg88';
-
-// Photo preview
-document.getElementById('photo-input').addEventListener('change',function(){
-  const preview=document.getElementById('photo-preview');
-  preview.innerHTML='';
-  const files=[...this.files].slice(0,10);
-  files.forEach(f=>{
-    const url=URL.createObjectURL(f);
-    const img=document.createElement('img');
-    img.src=url;img.style.cssText='width:80px;height:80px;object-fit:cover;border-radius:6px;border:0.5px solid #ddd';
-    preview.appendChild(img);
-  });
-});
-
-document.getElementById('req-form').addEventListener('submit',async function(e){
-  e.preventDefault();
-  const btn=document.getElementById('submit-btn');
-  btn.disabled=true;btn.textContent='Submitting...';
-  const fd=new FormData(this);
-  const services=[...document.querySelectorAll('input[name=service]:checked')].map(i=>i.value);
-  const first=fd.get('first_name')||'';
-  const last=fd.get('last_name')||'';
-  const client=`${first} ${last}`.trim();
-  const street=fd.get('street')||'';
-  const unit=fd.get('unit')?`, ${fd.get('unit')}`:'';
-  const city=fd.get('city')||'';
-  const postcode=fd.get('postcode')||'';
-  const address=`${street}${unit}, ${city} ${postcode}`.trim();
-  const jobType=services.length?services.join(', '):'General Enquiry';
-  const id='req_'+Date.now();
-
-  // Upload photos
-  const photoFiles=[...document.getElementById('photo-input').files].slice(0,10);
-  const photoUrls=[];
-  for(const file of photoFiles){
-    try{
-      const ext=file.name.split('.').pop();
-      const path=`${id}/${Date.now()}.${ext}`;
-      const res=await fetch(`${SUPABASE_BASE}/storage/v1/object/request-photos/${path}`,{
-        method:'POST',
-        headers:{'apikey':SUPABASE_KEY,'Authorization':'Bearer '+SUPABASE_KEY,'Content-Type':file.type},
-        body:file
-      });
-      if(res.ok){
-        photoUrls.push(`${SUPABASE_BASE}/storage/v1/object/public/request-photos/${path}`);
-      }
-    }catch(err){console.warn('Photo upload failed',err);}
-  }
-
-  const record={
-    id,quote_no:'TBC',client,address,job_type:jobType,value:0,status:'New',
-    date:new Date().toISOString().split('T')[0],drive_url:'',
-    notes:fd.get('notes')||'',email:fd.get('email')||'',phone:fd.get('phone')||'',
-    company:fd.get('company')||'',window_count:fd.get('window_count')||'',
-    survey:document.querySelector('input[name=survey]').checked,
-    photo_estimate:document.querySelector('input[name=photo_estimate]').checked,
-    photo_urls:photoUrls.length?photoUrls:null,
-  };
-  try{
-    const res=await fetch(`${SUPABASE_URL}/enquiries`,{
-      method:'POST',
-      headers:{'Content-Type':'application/json','apikey':SUPABASE_KEY,'Authorization':'Bearer '+SUPABASE_KEY,'Prefer':'return=minimal'},
-      body:JSON.stringify(record)
-    });
     if(!res.ok)throw new Error(await res.text());
     document.getElementById('req-form').style.display='none';
     document.getElementById('success-msg').style.display='block';
-  }catch(err){
-    btn.disabled=false;btn.textContent='Submit Request';
-    alert('Something went wrong. Please try again or email info@kensingtonsash.co.uk');
-    console.error(err);
-  }
-});
-</script>
-</body>
-</html>
+
+// WITH:
+
+    if(!res.ok)throw new Error(await res.text());
+
+    // Auto-add client if not already on record
+    const today=new Date();
+    const dd=String(today.getDate()).padStart(2,'0');
+    const mm=String(today.getMonth()+1).padStart(2,'0');
+    const yyyy=today.getFullYear();
+    const clientRecord={
+      name:client,
+      company:fd.get('company')||'',
+      email:fd.get('email')||'',
+      phone:fd.get('phone')||'',
+      address:address,
+      last_activity:`${dd}/${mm}/${yyyy}`
+    };
+    // Only insert if no client with same email already exists
+    const existing=await fetch(`${SUPABASE_URL}/clients?email=eq.${encodeURIComponent(clientRecord.email)}&limit=1`,{
+      headers:{'apikey':SUPABASE_KEY,'Authorization':'Bearer '+SUPABASE_KEY}
+    });
+    const existingData=await existing.json();
+    if(!existingData.length){
+      await fetch(`${SUPABASE_URL}/clients`,{
+        method:'POST',
+        headers:{'Content-Type':'application/json','apikey':SUPABASE_KEY,'Authorization':'Bearer '+SUPABASE_KEY,'Prefer':'return=minimal'},
+        body:JSON.stringify(clientRecord)
+      });
+    }
+
+    document.getElementById('req-form').style.display='none';
+    document.getElementById('success-msg').style.display='block';
