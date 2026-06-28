@@ -506,7 +506,7 @@ function renderClients(){
     const detail=hasDetail?`
       <tr class="cl-detail" id="cd-${CSS.escape(c.name)}" style="display:none"><td colspan="5" style="padding:8px 0 12px 0;background:#fafaf9">
         ${cQuotes.length?`<div style="font-size:11px;font-weight:500;color:#888;text-transform:uppercase;letter-spacing:.04em;margin-bottom:6px">Quotes</div>
-        ${cQuotes.map(q=>`<div style="display:flex;justify-content:space-between;font-size:12px;padding:3px 0;border-bottom:0.5px solid #eee"><span style="color:#185FA5;font-weight:500">${q.quote_no}</span><span style="color:#555">${q.address}</span><span>${badge(q.status)}</span><span style="font-weight:500">${fmt(Math.round(Number(q.value||0)*1.2))}</span></div>`).join('')}`:''}
+        ${cQuotes.map(q=>`<div style="display:flex;justify-content:space-between;font-size:12px;padding:3px 0;border-bottom:0.5px solid #eee"><span style="color:#185FA5;font-weight:500">${q.quote_no}</span><span style="color:#555">${q.address}</span><span>${badge(q.status)}</span><span style="font-weight:500">${fmt(Number(q.value||0))}</span></div>`).join('')}`:''}
         ${cInv.length?`<div style="font-size:11px;font-weight:500;color:#888;text-transform:uppercase;letter-spacing:.04em;margin:${cQuotes.length?'10px':0} 0 6px">Invoices</div>
         ${cInv.map(i=>`<div style="display:flex;justify-content:space-between;font-size:12px;padding:3px 0;border-bottom:0.5px solid #eee"><span style="color:#185FA5;font-weight:500">${i.invoice_no}</span><span style="color:#555">${i.subject||''}</span><span>${badge(i.status==='Overdue'?'Overdue':i.status)}</span><span style="font-weight:500">${fmt(Number(i.amount||0))}</span></div>`).join('')}`:''}
       </td></tr>`:'';
@@ -656,7 +656,7 @@ function renderQuotes(){
   const b=document.getElementById('quotes-list');
   if(!e.length){b.innerHTML='<tr><td colspan="7" class="empty" style="padding:10px 0">No quotes yet.</td></tr>';return;}
   b.innerHTML=e.map(x=>{
-    const totalIncVat=Math.round(Number(x.value||0)*1.2);
+    const totalIncVat=Math.round(Number(x.value||0));
     const dateStr=x.date?new Date(x.date).toLocaleDateString('en-GB',{day:'numeric',month:'short',year:'numeric'}):'—';
     return `<tr>
       <td style="font-weight:600;font-size:13px">${x.client}</td>
