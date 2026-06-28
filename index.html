@@ -713,7 +713,7 @@ function renderInv(){
     const paidDateStr=i.paid_date?new Date(i.paid_date).toLocaleDateString('en-GB',{day:'numeric',month:'short',year:'numeric'}):'—';
     return `<tr>
       <td style="font-weight:600">${i.client}</td>
-      <td>${i.drive_url?`<a href="${i.drive_url}" target="_blank" style="color:#185FA5;font-weight:500;font-size:12px;text-decoration:none" onmouseover="this.style.textDecoration='underline'" onmouseout="this.style.textDecoration='none'">${i.invoice_no}</a>`:`<span class="inv-no">${i.invoice_no}</span>`}</td>
+      <td>${i.drive_url?`<a href="${i.drive_url}" target="_blank" style="color:#185FA5;font-weight:500;font-size:12px;text-decoration:none" onmouseover="this.style.textDecoration='underline'" onmouseout="this.style.textDecoration='none'">${i.invoice_no}</a>`:`<span style="color:#185FA5;font-weight:500;font-size:12px">${i.invoice_no}</span>`}</td>
       <td style="color:${isOverdue?'#A32D2D':'#888'};font-size:12px;white-space:nowrap">${dueDateStr}</td>
       <td style="color:#888;font-size:12px;white-space:nowrap">${paidDateStr}</td>
       <td style="color:#555;font-size:12px">${i.subject||i.job_type||''}</td>
