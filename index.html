@@ -239,7 +239,7 @@ body{font-family:system-ui,sans-serif;background:#f0f0ee;color:#1a1a1a;font-size
         <table class="q-table">
           <thead><tr>
             <th>Client</th><th>Quote No.</th><th>Property</th><th>Date</th><th>Status</th>
-            <th style="text-align:right">Value (net)</th><th></th>
+            <th style="text-align:right">Total (inc. VAT)</th><th></th>
           </tr></thead>
           <tbody id="quotes-list"></tbody>
         </table>
@@ -668,7 +668,7 @@ function renderQuotes(){
       <td style="color:#555;font-size:12px">${x.address||''}</td>
       <td style="color:#888;font-size:12px;white-space:nowrap">${dateStr}</td>
       <td>${badge(x.status)}</td>
-      <td style="text-align:right;font-weight:600">${fmt(Number(x.value||0))}</td>
+      <td style="text-align:right;font-weight:600">${fmt(Number(x.total_inc_vat||0))}</td>
       <td><select onchange="updateQuoteStatus('${x.quote_no}',this.value)" style="font-size:11px;padding:2px 6px;border-radius:20px;border:0.5px solid #ddd;background:#fff;color:#666;font-family:inherit;cursor:pointer;outline:none">
         <option value="" disabled selected>Status</option>
         <option value="Sent">Sent</option>
