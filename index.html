@@ -656,7 +656,7 @@ function renderQuotes(){
   document.getElementById('kpi-quotes').innerHTML=`
     <div class="kpi"><div class="kpi-label">Total quotes</div><div class="kpi-val">${e.length}</div><div class="kpi-sub">${open.length} open</div></div>
     <div class="kpi"><div class="kpi-label">Won</div><div class="kpi-val">${won.length}</div><div class="kpi-sub green">${fmt(won.reduce((s,x)=>s+(Number(x.value)||0),0))} secured</div></div>
-    <div class="kpi"><div class="kpi-label">Win rate</div><div class="kpi-val">${(won.length+lost.length)?Math.round(won.length/(won.length+lost.length)*100):0}%</div><div class="kpi-sub">of decided quotes</div></div>
+    <div class="kpi"><div class="kpi-label">Win rate</div><div class="kpi-val">${e.length?Math.round(won.length/e.length*100):0}%</div><div class="kpi-sub">of all quotes</div></div>
     <div class="kpi"><div class="kpi-label">Archived</div><div class="kpi-val">${archived.length}</div><div class="kpi-sub">not converted</div></div>`;
   const b=document.getElementById('quotes-list');
   if(!e.length){b.innerHTML='<tr><td colspan="7" class="empty" style="padding:10px 0">No quotes yet.</td></tr>';return;}
