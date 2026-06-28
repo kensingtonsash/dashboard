@@ -452,7 +452,7 @@ function renderHome(){
   const invByMonth={};
   DATA.inv.filter(i=>i.status==='Paid'&&i.paid_date).forEach(i=>{
     const k=mKey(new Date(i.paid_date));
-    invByMonth[k]=(invByMonth[k]||0)+Number(i.amount||0);
+    invByMonth[k]=(invByMonth[k]||0)+Number(i.ex_vat||i.amount||0);
   });
   const invSum=ks=>ks.reduce((s,k)=>s+(invByMonth[k]||0),0);
   const k12c=[],k12p=[],k3c=[],k3p=[];
@@ -508,7 +508,7 @@ function renderClients(){
         ${cQuotes.length?`<div style="font-size:11px;font-weight:500;color:#888;text-transform:uppercase;letter-spacing:.04em;margin-bottom:6px">Quotes</div>
         ${cQuotes.map(q=>`<div style="display:flex;justify-content:space-between;font-size:12px;padding:3px 0;border-bottom:0.5px solid #eee"><span style="color:#185FA5;font-weight:500">${q.quote_no}</span><span style="color:#555">${q.address}</span><span>${badge(q.status)}</span><span style="font-weight:500">${fmt(Math.round(Number(q.value||0)*1.2))}</span></div>`).join('')}`:''}
         ${cInv.length?`<div style="font-size:11px;font-weight:500;color:#888;text-transform:uppercase;letter-spacing:.04em;margin:${cQuotes.length?'10px':0} 0 6px">Invoices</div>
-        ${cInv.map(i=>`<div style="display:flex;justify-content:space-between;font-size:12px;padding:3px 0;border-bottom:0.5px solid #eee"><span style="color:#185FA5;font-weight:500">${i.invoice_no}</span><span style="color:#555">${i.subject||''}</span><span>${badge(i.status==='Overdue'?'Overdue':i.status)}</span><span style="font-weight:500">${fmt(Math.round(Number(i.amount||0)*1.2))}</span></div>`).join('')}`:''}
+        ${cInv.map(i=>`<div style="display:flex;justify-content:space-between;font-size:12px;padding:3px 0;border-bottom:0.5px solid #eee"><span style="color:#185FA5;font-weight:500">${i.invoice_no}</span><span style="color:#555">${i.subject||''}</span><span>${badge(i.status==='Overdue'?'Overdue':i.status)}</span><span style="font-weight:500">${fmt(Number(i.amount||0))}</span></div>`).join('')}`:''}
       </td></tr>`:'';
     return `<tr style="cursor:${hasDetail?'pointer':'default'}" onclick="${hasDetail?`toggleClientDetail('${c.name.replace(/'/g,"\\'")}')`:''}" >
       <td><div class="cl-name">${c.name||''}</div>${c.company?`<div class="cl-company">${c.company}</div>`:''}</td>
@@ -679,12 +679,14 @@ function renderQuotes(){
 function renderInv(){
   const iSearch=(document.getElementById('inv-search')?.value||'').toLowerCase();
   const inv=DATA.inv.filter(i=>!iSearch||((i.client||'')+(i.invoice_no||'')+(i.subject||'')).toLowerCase().includes(iSearch));
-  const tot=inv.reduce((s,i)=>s+(Number(i.amount)||0)*1.2,0);
-  const col=inv.filter(i=>i.status==='Paid').reduce((s,i)=>s+(Number(i.amount)||0)*1.2,0);
+  // amount = inc VAT, ex_vat = net (falls back to amount for records without ex_vat)
+  const tot=inv.reduce((s,i)=>s+(Number(i.amount)||0),0);
+  const col=inv.filter(i=>i.status==='Paid').reduce((s,i)=>s+(Number(i.amount)||0),0);
+  const colNet=inv.filter(i=>i.status==='Paid').reduce((s,i)=>s+(Number(i.ex_vat)||Number(i.amount)/1.2||0),0);
   const out=inv.filter(i=>i.status!=='Paid').reduce((s,i)=>s+(Number(i.balance||i.amount)||0),0);
   const ovd=inv.filter(i=>i.status==='Overdue'||i.status==='Past due').length;
   document.getElementById('kpi-inv').innerHTML=`
-    <div class="kpi"><div class="kpi-label">Collected (net)</div><div class="kpi-val">${fmt(Math.round(col/1.2))}</div><div class="kpi-sub green">excl. VAT · all time</div></div>
+    <div class="kpi"><div class="kpi-label">Collected (net)</div><div class="kpi-val">${fmt(Math.round(colNet))}</div><div class="kpi-sub green">excl. VAT · all time</div></div>
     <div class="kpi"><div class="kpi-label">Total invoiced</div><div class="kpi-val">${fmt(tot)}</div><div class="kpi-sub">inc. VAT · all time</div></div>
     <div class="kpi"><div class="kpi-label">Collected</div><div class="kpi-val">${fmt(col)}</div><div class="kpi-sub green">${tot?Math.round(col/tot*100):0}% of invoiced</div></div>
     <div class="kpi"><div class="kpi-label">Outstanding</div><div class="kpi-val">${fmt(out)}</div><div class="kpi-sub ${out>0?'red':''}">${ovd>0?ovd+' overdue':'all current'}</div></div>
@@ -692,10 +694,10 @@ function renderInv(){
   const now=new Date();
   const thisYear=now.getFullYear(),thisMonth=now.getMonth();
   const paidInv=inv.filter(i=>i.status==='Paid'&&i.paid_date);
-  const thisYearCol=paidInv.filter(i=>new Date(i.paid_date).getFullYear()===thisYear).reduce((s,i)=>s+Number(i.amount||0),0);
-  const thisMonthCol=paidInv.filter(i=>{const d=new Date(i.paid_date);return d.getFullYear()===thisYear&&d.getMonth()===thisMonth;}).reduce((s,i)=>s+Number(i.amount||0),0);
-  const lastMonthCol=paidInv.filter(i=>{const d=new Date(i.paid_date);const lm=thisMonth===0?11:thisMonth-1;const ly=thisMonth===0?thisYear-1:thisYear;return d.getFullYear()===ly&&d.getMonth()===lm;}).reduce((s,i)=>s+Number(i.amount||0),0);
-  const lastYearYTD=paidInv.filter(i=>{const d=new Date(i.paid_date);return d.getFullYear()===thisYear-1&&(d.getMonth()<thisMonth||(d.getMonth()===thisMonth&&d.getDate()<=now.getDate()));}).reduce((s,i)=>s+Number(i.amount||0),0);
+  const thisYearCol=paidInv.filter(i=>new Date(i.paid_date).getFullYear()===thisYear).reduce((s,i)=>s+Number(i.ex_vat||i.amount||0),0);
+  const thisMonthCol=paidInv.filter(i=>{const d=new Date(i.paid_date);return d.getFullYear()===thisYear&&d.getMonth()===thisMonth;}).reduce((s,i)=>s+Number(i.ex_vat||i.amount||0),0);
+  const lastMonthCol=paidInv.filter(i=>{const d=new Date(i.paid_date);const lm=thisMonth===0?11:thisMonth-1;const ly=thisMonth===0?thisYear-1:thisYear;return d.getFullYear()===ly&&d.getMonth()===lm;}).reduce((s,i)=>s+Number(i.ex_vat||i.amount||0),0);
+  const lastYearYTD=paidInv.filter(i=>{const d=new Date(i.paid_date);return d.getFullYear()===thisYear-1&&(d.getMonth()<thisMonth||(d.getMonth()===thisMonth&&d.getDate()<=now.getDate()));}).reduce((s,i)=>s+Number(i.ex_vat||i.amount||0),0);
   const yoyPct=lastYearYTD?Math.round(((thisYearCol-lastYearYTD)/lastYearYTD)*100):null;
   const yoyStr=yoyPct===null?'—':(yoyPct>=0?'+':'')+yoyPct+'%';
   const yoyCls=yoyPct===null?'#888':yoyPct>=0?'#34453E':'#A32D2D';
@@ -707,7 +709,7 @@ function renderInv(){
   const b=document.getElementById('inv-body');
   if(!inv.length){b.innerHTML='<tr><td colspan="9" class="empty" style="padding:8px 0">No invoices yet.</td></tr>';return;}
   b.innerHTML=inv.map(i=>{
-    const totalIncVat=Math.round(Number(i.amount||0)*1.2);
+    const totalIncVat=Math.round(Number(i.amount||0));
     const balance=i.balance!==undefined&&i.balance!==null?Number(i.balance):i.status==='Paid'?0:totalIncVat;
     const dueDateStr=i.due_date?new Date(i.due_date).toLocaleDateString('en-GB',{day:'numeric',month:'short',year:'numeric'}):'—';
     const isOverdue=i.status==='Overdue'||i.status==='Past due';
@@ -823,7 +825,6 @@ async function updateQuoteStatus(quoteNo,status){
   renderQuotes();renderRequests();renderHome();
 }
 
-// Subcontractors
 let editingSubId=null;
 
 function renderSub(){
@@ -904,7 +905,6 @@ async function saveSub(){
 
 function cancelSub(){document.getElementById('sub-form').style.display='none';}
 
-// Chat
 let chatHistory=[],chatBusy=false;
 
 function toggleChat(){
