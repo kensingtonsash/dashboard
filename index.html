@@ -713,14 +713,14 @@ function renderInv(){
     const paidDateStr=i.paid_date?new Date(i.paid_date).toLocaleDateString('en-GB',{day:'numeric',month:'short',year:'numeric'}):'—';
     return `<tr>
       <td style="font-weight:600">${i.client}</td>
-      <td class="inv-no">${i.invoice_no}</td>
+      <td>${i.drive_url?`<a href="${i.drive_url}" target="_blank" style="color:#185FA5;font-weight:500;font-size:12px;text-decoration:none" onmouseover="this.style.textDecoration='underline'" onmouseout="this.style.textDecoration='none'">${i.invoice_no}</a>`:`<span class="inv-no">${i.invoice_no}</span>`}</td>
       <td style="color:${isOverdue?'#A32D2D':'#888'};font-size:12px;white-space:nowrap">${dueDateStr}</td>
       <td style="color:#888;font-size:12px;white-space:nowrap">${paidDateStr}</td>
       <td style="color:#555;font-size:12px">${i.subject||i.job_type||''}</td>
       <td>${badge(isOverdue?'Overdue':i.status)}</td>
       <td style="text-align:right;font-weight:600">${fmt(totalIncVat)}</td>
       <td style="text-align:right;color:${balance>0?'#A32D2D':'#888'};font-weight:${balance>0?'600':'400'}">${fmt(balance)}</td>
-      <td>${i.drive_url?`<a href="${i.drive_url}" target="_blank"><button class="btn-sm">View</button></a>`:''}</td>
+      <td></td>
     </tr>`;
   }).join('');
 }
@@ -1028,10 +1028,10 @@ async function executeAction(parsed){
 function toggleReq(id){
   const body=document.getElementById('reqbody-'+id);
   const chev=document.getElementById('reqchev-'+id);
-  if(!body)return;
-  const open=body.style.display==='none';
-  body.style.display=open?'block':'none';
-  if(chev)chev.style.transform=open?'rotate(180deg)':'';
+  if(!body){console.error('reqbody not found for id:',id);return;}
+  const isHidden=body.style.display==='none'||body.style.display==='';
+  body.style.display=isHidden?'block':'none';
+  if(chev)chev.style.transform=isHidden?'rotate(180deg)':'rotate(0deg)';
 }
 
 loadAll();
