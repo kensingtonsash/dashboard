@@ -252,7 +252,7 @@ body{font-family:system-ui,sans-serif;background:#f0f0ee;color:#1a1a1a;font-size
     <div class="kpi-grid" id="kpi-inv2"></div>
     <div class="card"><div class="card-title"><i class="ti ti-file-invoice"></i> Invoice register</div>
       <input type="text" id="inv-search" placeholder="Search invoices..." oninput="renderInv()" style="margin-bottom:12px;padding:6px 12px;border:0.5px solid #ddd;border-radius:8px;font-size:13px;font-family:inherit;width:240px;outline:none">
-      <div style="overflow-x:auto"><table class="inv-table"><thead><tr><th>Client</th><th>Invoice No.</th><th>Due date</th><th>Paid date</th><th>Subject</th><th>Status</th><th style="text-align:right">Total (inc. VAT)</th><th style="text-align:right">Balance</th><th></th></tr></thead><tbody id="inv-body"></tbody></table></div>
+      <div style="overflow-x:auto"><table class="inv-table"><thead><tr><th>Client</th><th>Invoice No.</th><th>Due date</th><th>Paid date</th><th>Subject</th><th>Status</th><th style="text-align:right">Net (ex. VAT)</th><th style="text-align:right">Total (inc. VAT)</th><th style="text-align:right">Balance</th><th></th></tr></thead><tbody id="inv-body"></tbody></table></div>
     </div>
   </div>
 
@@ -721,6 +721,7 @@ function renderInv(){
       <td style="color:#888;font-size:12px;white-space:nowrap">${paidDateStr}</td>
       <td style="color:#555;font-size:12px">${i.subject||i.job_type||''}</td>
       <td>${badge(isOverdue?'Overdue':i.status)}</td>
+      <td style="text-align:right;color:#888">${i.ex_vat?fmt(Number(i.ex_vat)):'—'}</td>
       <td style="text-align:right;font-weight:600">${fmt(totalIncVat)}</td>
       <td style="text-align:right;color:${balance>0?'#A32D2D':'#888'};font-weight:${balance>0?'600':'400'}">${fmt(balance)}</td>
       <td></td>
