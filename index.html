@@ -410,7 +410,8 @@ function renderHome(){
   const won=e.filter(x=>x.status==='Won');
   const open=e.filter(x=>['Quoted','New','Pending survey'].includes(x.status));
   const totInv=inv.reduce((s,i)=>s+(Number(i.amount)||0),0);
-  const coll=inv.filter(i=>i.status==='Paid').reduce((s,i)=>s+(Number(i.amount)||0),0);
+  const thisYr=new Date().getFullYear();
+  const coll=inv.filter(i=>i.status==='Paid'&&i.paid_date&&new Date(i.paid_date).getFullYear()===thisYr).reduce((s,i)=>s+(Number(i.amount)||0),0);
   const out=totInv-coll;
   const ovd=inv.filter(i=>i.status==='Overdue');
   const ap=proj.filter(p=>p.status!=='Closed');
