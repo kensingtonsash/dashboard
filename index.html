@@ -211,6 +211,10 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Inter',system-ui,sans-serif;b
 .proj-row-clickable:hover .home-proj-name span {text-decoration:underline}
 
 .row:hover .proj-name-link{text-decoration:underline}
+
+.inv-pill{font-size:12px;padding:4px 12px;border-radius:20px;border:1px solid #E8E6E1;background:#fff;color:#888;cursor:pointer;font-family:inherit;font-weight:500;transition:all .15s}
+.inv-pill:hover{border-color:#34453E;color:#34453E}
+.inv-pill.active{background:#34453E;color:#fff;border-color:#34453E}
 </style>
 </head>
 <body>
@@ -301,7 +305,16 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Inter',system-ui,sans-serif;b
     <div class="kpi-grid" id="kpi-inv"></div>
     <div class="kpi-grid" id="kpi-inv2"></div>
     <div class="card"><div class="card-title"><i class="ti ti-file-invoice"></i> Invoice register</div>
-      <input type="text" id="inv-search" placeholder="Search invoices..." oninput="renderInv()" style="margin-bottom:12px;padding:6px 12px;border:0.5px solid #ddd;border-radius:8px;font-size:13px;font-family:inherit;width:240px;outline:none">
+      <div style="display:flex;align-items:center;gap:8px;margin-bottom:14px;flex-wrap:wrap">
+        <input type="text" id="inv-search" placeholder="Search invoices..." oninput="setInvFilter('all');renderInv()" style="padding:6px 12px;border:1px solid #E8E6E1;border-radius:8px;font-size:13px;font-family:inherit;width:200px;outline:none">
+        <div style="display:flex;gap:4px;flex-wrap:wrap" id="inv-filter-pills">
+          <button class="inv-pill active" onclick="setInvFilter('all')" data-filter="all">All</button>
+          <button class="inv-pill" onclick="setInvFilter('outstanding')" data-filter="outstanding">Outstanding</button>
+          <button class="inv-pill" onclick="setInvFilter('Overdue')" data-filter="Overdue">Overdue</button>
+          <button class="inv-pill" onclick="setInvFilter('Awaiting')" data-filter="Awaiting">Awaiting</button>
+          <button class="inv-pill" onclick="setInvFilter('Paid')" data-filter="Paid">Paid</button>
+        </div>
+      </div>
       <div style="overflow-x:auto"><table class="inv-table"><thead><tr><th>Client</th><th>Invoice No.</th><th>Due date</th><th>Paid date</th><th>Subject</th><th>Status</th><th style="text-align:right">Net (ex. VAT)</th><th style="text-align:right">Total (inc. VAT)</th><th style="text-align:right">Balance</th><th></th></tr></thead><tbody id="inv-body"></tbody></table></div>
     </div>
   </div>
@@ -766,9 +779,22 @@ function renderQuotes(){
   }).join('');
 }
 
+let invFilter='all';
+function setInvFilter(f){
+  invFilter=f;
+  document.querySelectorAll('.inv-pill').forEach(p=>{
+    p.classList.toggle('active', p.dataset.filter===f);
+  });
+  renderInv();
+}
+
 function renderInv(){
   const iSearch=(document.getElementById('inv-search')?.value||'').toLowerCase();
-  const inv=DATA.inv.filter(i=>!iSearch||((i.client||'')+(i.invoice_no||'')+(i.subject||'')).toLowerCase().includes(iSearch));
+  let inv=DATA.inv.filter(i=>!iSearch||((i.client||'')+(i.invoice_no||'')+(i.subject||'')).toLowerCase().includes(iSearch));
+  if(invFilter==='outstanding') inv=inv.filter(i=>i.status!=='Paid');
+  else if(invFilter==='Overdue') inv=inv.filter(i=>i.status==='Overdue'||i.status==='Past due');
+  else if(invFilter==='Awaiting') inv=inv.filter(i=>i.status==='Awaiting');
+  else if(invFilter==='Paid') inv=inv.filter(i=>i.status==='Paid');
   const tot=inv.reduce((s,i)=>s+(Number(i.amount)||0),0);
   const col=inv.filter(i=>i.status==='Paid').reduce((s,i)=>s+(Number(i.amount)||0),0);
   const colNet=inv.filter(i=>i.status==='Paid').reduce((s,i)=>s+(Number(i.ex_vat)||Number(i.amount)/1.2||0),0);
@@ -998,20 +1024,9 @@ function goToOverdueInvoices(){
   document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));
   document.getElementById('tab-invoices').classList.add('active');
   invBtn.classList.add('active');
-  // Filter to overdue/awaiting
   const searchEl=document.getElementById('inv-search');
-  if(searchEl){searchEl.value='';renderInv();}
-  // Highlight overdue rows after render
-  setTimeout(()=>{
-    const rows=document.querySelectorAll('#inv-body tr');
-    rows.forEach(r=>{
-      const text=r.textContent;
-      if(text.includes('Overdue')||text.includes('Awaiting')){
-        r.style.background='#FFF8F8';
-        r.scrollIntoView({behavior:'smooth',block:'center'});
-      }
-    });
-  },50);
+  if(searchEl)searchEl.value='';
+  setInvFilter('outstanding');
 }
 
 function goToInvoice(invoiceNo){
