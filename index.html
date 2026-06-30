@@ -196,7 +196,7 @@ body{font-family:system-ui,sans-serif;background:#f0f0ee;color:#1a1a1a;font-size
     <div id="alerts-block"></div>
     <div class="home-grid">
       <div class="card"><div class="card-title"><i class="ti ti-layout-kanban"></i> Active projects</div><div id="home-projects"></div></div>
-      <div class="card"><div class="card-title"><i class="ti ti-list"></i> Open quotes</div><div id="home-quotes"></div></div>
+      <div class="card"><div class="card-title"><i class="ti ti-calendar-due"></i> Needs booking</div><div id="home-unbooked"></div></div>
     </div>
     <div class="home-grid">
       <div class="card"><div class="card-title"><i class="ti ti-trending-up"></i> Revenue summary</div><div id="home-revenue"></div></div>
@@ -446,11 +446,24 @@ function renderHome(){
       <div class="home-proj-bar"><div class="progress-bar"><div class="progress-fill" style="width:${pct}%"></div></div>
       <div class="home-proj-pct">${pct}%</div></div></div>`;
   }).join('');
-  const hq=document.getElementById('home-quotes');
-  if(!open.length){hq.innerHTML='<div class="empty">No open quotes.</div>';}
-  else hq.innerHTML=open.map(x=>`<div class="row"><div class="row-left"><div class="row-name"><span style="cursor:pointer;border-bottom:1px dashed #ccc" onmouseover="this.style.textDecoration='underline'" onmouseout="this.style.textDecoration='none'" onclick="goToClient('${x.client.replace(/'/g,"\\'")}')" title="View client">${x.client}</span> <span style="font-weight:400;color:#888">— ${x.quote_no}</span></div>
-    <div class="row-sub">${x.address||''} · ${x.job_type||''} · ${fmt(Number(x.value))}</div></div>
-    <div class="row-actions">${badge(x.status)}</div></div>`).join('');
+  const hu=document.getElementById('home-unbooked');
+  const unbooked=proj.filter(p=>{
+    if(p.status==='Closed')return false;
+    const ck=p.checked||{};
+    return !ck['Subcontractor booked']||!ck['Calendar invite sent to client'];
+  });
+  if(!unbooked.length){hu.innerHTML='<div class="empty" style="color:#34453E;display:flex;align-items:center;gap:6px"><i class="ti ti-check" style="font-size:13px"></i> All active projects are booked in.</div>';}
+  else hu.innerHTML=unbooked.map(p=>{
+    const ck=p.checked||{};
+    const subBooked=!!ck['Subcontractor booked'];
+    const calSent=!!ck['Calendar invite sent to client'];
+    const chip=(done,label)=>`<span style="display:inline-flex;align-items:center;gap:4px;font-size:11px;padding:2px 8px;border-radius:20px;margin-right:4px;${done?'background:#EAF3DE;color:#3B6D11':'background:#FAEEDA;color:#854F0B'}"><i class="ti ${done?'ti-check':'ti-clock'}" style="font-size:10px"></i>${label}</span>`;
+    return `<div class="row"><div class="row-left">
+      <div class="row-name"><span style="cursor:pointer;border-bottom:1px dashed #ccc" onmouseover="this.style.textDecoration='underline'" onmouseout="this.style.textDecoration='none'" onclick="goToClient('${p.client.replace(/'/g,"\\'")}')" title="View client">${p.client}</span>
+      <span style="font-weight:400;color:#888;font-size:12px;margin-left:6px">${p.job_type||''}</span></div>
+      <div class="row-sub" style="margin-top:5px">${chip(subBooked,'Sub booked')}${chip(calSent,'Client invited')}</div>
+    </div></div>`;
+  }).join('');
   document.getElementById('home-revenue').innerHTML=`
     <div class="stat-row"><span class="stat-label">Total invoiced</span><span class="stat-val">${fmt(totInv)}</span></div>
     <div class="stat-row"><span class="stat-label">Collected</span><span class="stat-val" style="color:#34453E">${fmt(coll)}</span></div>
