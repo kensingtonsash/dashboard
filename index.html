@@ -473,7 +473,7 @@ function renderHome(){
     return `<div class="row" style="cursor:pointer" onclick="goToProject('${p.id}')" title="View project">
       <div class="row-left">
         <div class="row-name" style="display:flex;align-items:center;gap:6px">
-          <span>${p.client}</span>
+          <span class="proj-name-link">${p.client}</span>
           <span style="font-weight:400;color:#888;font-size:12px">${p.job_type||''}</span>
           <i class="ti ti-arrow-right" style="font-size:11px;color:#888"></i>
         </div>
