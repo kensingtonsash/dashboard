@@ -453,7 +453,7 @@ function renderHome(){
           <span class="proj-name-link">${p.client}</span>
           <i class="ti ti-arrow-right" style="font-size:11px;color:#888"></i>
         </div>
-        <div class="home-proj-next ${next?'':'ok'}"><i class="ti ${next?'ti-clock':'ti-check'}" style="font-size:11px"></i> ${next||'All steps complete'}</div>
+        <div class="home-proj-next" style="color:#888"><i class="ti ti-map-pin" style="font-size:11px"></i> ${p.address||''} ${p.job_type?'· '+p.job_type:''}</div>
       </div>
       <div class="home-proj-bar"><div class="progress-bar"><div class="progress-fill" style="width:${pct}%"></div></div>
       <div class="home-proj-pct">${pct}%</div></div></div>`;
@@ -835,7 +835,35 @@ async function toggleCheck(pid,item,val){
   const proj=DATA.proj.find(p=>p.id===pid);if(!proj)return;
   const ck={...proj.checked};val?ck[item]=true:delete ck[item];
   await sb('projects','PATCH',{checked:ck},`?id=eq.${pid}`);
-  proj.checked=ck;renderProj();renderHome();
+  proj.checked=ck;
+  // Update progress bar and label in place without collapsing
+  const sections=getProjectChecklist(proj);
+  const allSteps=sections.flatMap(s=>s.items);
+  const done=allSteps.filter(i=>ck[i]).length;
+  const pct=Math.round(done/allSteps.length*100);
+  const fill=document.querySelector(`#pc-${pid} .progress-fill`);
+  const label=document.querySelector(`#pc-${pid} .progress-label`);
+  if(fill)fill.style.width=pct+'%';
+  if(label)label.textContent=`${done} of ${allSteps.length} steps · ${pct}%`;
+  // Update checked styling on the label
+  const body=document.getElementById('pb-'+pid);
+  if(body){
+    body.querySelectorAll('.cl-item').forEach(el=>{
+      const cb=el.querySelector('input[type=checkbox]');
+      if(cb){el.classList.toggle('checked',cb.checked);}
+    });
+    // Show/hide close button if 100%
+    const existing=body.querySelector('.btn-sm[onclick^="closeProj"]');
+    if(pct===100&&!existing&&proj.status!=='Closed'){
+      const btn=document.createElement('button');
+      btn.className='btn-sm';btn.style.marginTop='12px';
+      btn.textContent='Mark closed';
+      btn.onclick=()=>closeProj(pid);
+      body.appendChild(btn);
+    }else if(pct<100&&existing){existing.remove();}
+  }
+  // Update home overview quietly
+  renderHome();
 }
 
 async function closeProj(id){
