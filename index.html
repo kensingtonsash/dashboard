@@ -461,7 +461,7 @@ function renderHome(){
     return `<div class="row"><div class="row-left">
       <div class="row-name"><span style="cursor:pointer;border-bottom:1px dashed #ccc" onmouseover="this.style.textDecoration='underline'" onmouseout="this.style.textDecoration='none'" onclick="goToClient('${p.client.replace(/'/g,"\\'")}')" title="View client">${p.client}</span>
       <span style="font-weight:400;color:#888;font-size:12px;margin-left:6px">${p.job_type||''}</span></div>
-      <div class="row-sub" style="margin-top:5px">${chip(subBooked,'Sub booked')}${chip(calSent,'Client invited')}</div>
+      <div class="row-sub" style="margin-top:5px">${chip(subBooked,'Installation team booked')}${chip(calSent,'Booked with client')}</div>
     </div></div>`;
   }).join('');
   document.getElementById('home-revenue').innerHTML=`
