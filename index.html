@@ -339,7 +339,7 @@ const CHECKLIST_TEMPLATE=[
   {section:'Finance',items:['Deposit invoice raised','Deposit payment received']},
   {section:'Specification',items:['Ironmongery style confirmed','Ironmongery finish confirmed','Paint colour / finish confirmed','Glazing type confirmed']},
   {section:'Ordering',items:['Supplier order placed','Supplier order confirmed & ETA received','Ironmongery ordered']},
-  {section:'Scheduling',items:['Subcontractor booked','Calendar invite sent to client','Interim invoice raised (if Sch. A)','Interim payment received (if Sch. A)']},
+  {section:'Scheduling',items:['Subcontractor booked','Calendar invite sent to client','Interim invoice raised','Interim payment received']},
   {section:'Installation',items:['Materials delivered to depot','Installation complete','Snagging checked / PC sign-off']},
   {section:'Close-out',items:['Final invoice raised','Final payment received','Warranty / close-out letter sent']}
 ];
@@ -358,7 +358,7 @@ function getProjectChecklist(proj){
   if(isReplacement){sections.push({section:'Ordering',items:['Supplier order placed','Supplier order confirmed & ETA received','Ironmongery ordered']});}
   if(isRepairs&&hasIronmongery){sections.push({section:'Ordering',items:['Ironmongery ordered']});}
   const schedItems=['Subcontractor booked','Calendar invite sent to client'];
-  if(isSchedA){schedItems.push('Interim invoice raised (if Sch. A)');schedItems.push('Interim payment received (if Sch. A)');}
+  if(isSchedA){schedItems.push('Interim invoice raised');schedItems.push('Interim payment received');}
   sections.push({section:'Scheduling',items:schedItems});
   const installItems=[];
   if(isReplacement)installItems.push('Materials delivered to depot');
