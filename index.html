@@ -464,11 +464,16 @@ function renderHome(){
     const subBooked=!!ck['Subcontractor booked'];
     const calSent=!!ck['Calendar invite sent to client'];
     const chip=(done,label)=>`<span style="display:inline-flex;align-items:center;gap:4px;font-size:11px;padding:2px 8px;border-radius:20px;margin-right:4px;${done?'background:#EAF3DE;color:#3B6D11':'background:#FAEEDA;color:#854F0B'}"><i class="ti ${done?'ti-check':'ti-clock'}" style="font-size:10px"></i>${label}</span>`;
-    return `<div class="row"><div class="row-left">
-      <div class="row-name"><span style="cursor:pointer;border-bottom:1px dashed #ccc" onmouseover="this.style.textDecoration='underline'" onmouseout="this.style.textDecoration='none'" onclick="goToClient('${p.client.replace(/'/g,"\\'")}')" title="View client">${p.client}</span>
-      <span style="font-weight:400;color:#888;font-size:12px;margin-left:6px">${p.job_type||''}</span></div>
-      <div class="row-sub" style="margin-top:5px">${chip(subBooked,'Installation team booked')}${chip(calSent,'Booked with client')}</div>
-    </div></div>`;
+    return `<div class="row" style="cursor:pointer" onclick="goToProject('${p.id}')" title="View project">
+      <div class="row-left">
+        <div class="row-name" style="display:flex;align-items:center;gap:6px">
+          <span>${p.client}</span>
+          <span style="font-weight:400;color:#888;font-size:12px">${p.job_type||''}</span>
+          <i class="ti ti-arrow-right" style="font-size:11px;color:#888"></i>
+        </div>
+        <div class="row-sub" style="margin-top:5px">${chip(subBooked,'Installation team booked')}${chip(calSent,'Booked with client')}</div>
+      </div>
+    </div>`;
   }).join('');
   document.getElementById('home-revenue').innerHTML=`
     <div class="stat-row"><span class="stat-label">Total invoiced</span><span class="stat-val">${fmt(totInv)}</span></div>
