@@ -161,6 +161,11 @@ body{font-family:system-ui,sans-serif;background:#f0f0ee;color:#1a1a1a;font-size
 .chat-send{background:#34453E;color:#fff;border:none;border-radius:8px;padding:0 14px;font-size:13px;cursor:pointer;font-family:inherit;height:38px}
 .chat-send:disabled{opacity:0.5;cursor:not-allowed}
 @media(max-width:600px){.home-grid{grid-template-columns:1fr}.inv-table{font-size:12px}.topbar{flex-direction:column;align-items:flex-start}.chat-panel{width:calc(100vw - 32px);right:16px}}
+
+.cl-jump-link{color:#185FA5;font-weight:500;cursor:pointer;text-decoration:none}
+.cl-jump-link:hover{text-decoration:underline}
+/* Hover underline for cross-tab client name links */
+[data-client-link]:hover{text-decoration:underline!important}
 </style>
 </head>
 <body>
@@ -436,14 +441,14 @@ function renderHome(){
   else hp.innerHTML=ap.map(p=>{
     const ck=p.checked||{};const done=allItems().filter(i=>ck[i]).length;
     const pct=Math.round(done/ti*100);const next=allItems().find(i=>!ck[i]);
-    return `<div class="home-proj-row"><div class="home-proj-info"><div class="home-proj-name"><span style="cursor:pointer;border-bottom:1px dashed #ccc" onclick="goToClient('${p.client.replace(/'/g,"\\'")}')" title="View client">${p.client}</span></div>
+    return `<div class="home-proj-row"><div class="home-proj-info"><div class="home-proj-name"><span style="cursor:pointer;border-bottom:1px dashed #ccc" onmouseover="this.style.textDecoration='underline'" onmouseout="this.style.textDecoration='none'" onclick="goToClient('${p.client.replace(/'/g,"\\'")}')" title="View client">${p.client}</span></div>
       <div class="home-proj-next ${next?'':'ok'}"><i class="ti ${next?'ti-clock':'ti-check'}" style="font-size:11px"></i> ${next||'All steps complete'}</div></div>
       <div class="home-proj-bar"><div class="progress-bar"><div class="progress-fill" style="width:${pct}%"></div></div>
       <div class="home-proj-pct">${pct}%</div></div></div>`;
   }).join('');
   const hq=document.getElementById('home-quotes');
   if(!open.length){hq.innerHTML='<div class="empty">No open quotes.</div>';}
-  else hq.innerHTML=open.map(x=>`<div class="row"><div class="row-left"><div class="row-name"><span style="cursor:pointer;border-bottom:1px dashed #ccc" onclick="goToClient('${x.client.replace(/'/g,"\\'")}')" title="View client">${x.client}</span> <span style="font-weight:400;color:#888">— ${x.quote_no}</span></div>
+  else hq.innerHTML=open.map(x=>`<div class="row"><div class="row-left"><div class="row-name"><span style="cursor:pointer;border-bottom:1px dashed #ccc" onmouseover="this.style.textDecoration='underline'" onmouseout="this.style.textDecoration='none'" onclick="goToClient('${x.client.replace(/'/g,"\\'")}')" title="View client">${x.client}</span> <span style="font-weight:400;color:#888">— ${x.quote_no}</span></div>
     <div class="row-sub">${x.address||''} · ${x.job_type||''} · ${fmt(Number(x.value))}</div></div>
     <div class="row-actions">${badge(x.status)}</div></div>`).join('');
   document.getElementById('home-revenue').innerHTML=`
@@ -510,9 +515,9 @@ function renderClients(){
     const detail=hasDetail?`
       <tr class="cl-detail" id="cd-${CSS.escape(c.name)}" style="display:none"><td colspan="5" style="padding:8px 0 12px 0;background:#fafaf9">
         ${cQuotes.length?`<div style="font-size:11px;font-weight:500;color:#888;text-transform:uppercase;letter-spacing:.04em;margin-bottom:6px">Quotes</div>
-        ${cQuotes.map(q=>`<div style="display:flex;justify-content:space-between;font-size:12px;padding:3px 0;border-bottom:0.5px solid #eee"><span style="color:#185FA5;font-weight:500">${q.quote_no}</span><span style="color:#555">${q.address||''}</span><span>${badge(q.status)}</span><span style="font-weight:500">${fmt(Number(q.value||0))}</span></div>`).join('')}`:''}
+        ${cQuotes.map(q=>`<div style="display:flex;justify-content:space-between;font-size:12px;padding:3px 0;border-bottom:0.5px solid #eee"><span class="cl-jump-link" onclick="event.stopPropagation();goToQuote('${q.quote_no}')">${q.quote_no}</span><span style="color:#555">${q.address||''}</span><span>${badge(q.status)}</span><span style="font-weight:500">${fmt(Number(q.value||0))}</span></div>`).join('')}`:''}
         ${cInv.length?`<div style="font-size:11px;font-weight:500;color:#888;text-transform:uppercase;letter-spacing:.04em;margin:${cQuotes.length?'10px':0} 0 6px">Invoices</div>
-        ${cInv.map(i=>`<div style="display:flex;justify-content:space-between;font-size:12px;padding:3px 0;border-bottom:0.5px solid #eee"><span style="color:#185FA5;font-weight:500">${i.invoice_no}</span><span style="color:#555">${i.subject||''}</span><span>${badge(i.status==='Overdue'?'Overdue':i.status)}</span><span style="font-weight:500">${fmt(Number(i.amount||0))}</span></div>`).join('')}`:''}
+        ${cInv.map(i=>`<div style="display:flex;justify-content:space-between;font-size:12px;padding:3px 0;border-bottom:0.5px solid #eee"><span class="cl-jump-link" onclick="event.stopPropagation();goToInvoice('${i.invoice_no}')">${i.invoice_no}</span><span style="color:#555">${i.subject||''}</span><span>${badge(i.status==='Overdue'?'Overdue':i.status)}</span><span style="font-weight:500">${fmt(Number(i.amount||0))}</span></div>`).join('')}`:''}
       </td></tr>`:'';
     return `<tr style="cursor:${hasDetail?'pointer':'default'}" onclick="${hasDetail?`toggleClientDetail('${c.name.replace(/'/g,"\\'")}')`:''}" >
       <td><div class="cl-name">${c.name||''}</div>${c.company?`<div class="cl-company">${c.company}</div>`:''}</td>
@@ -588,7 +593,7 @@ function renderRequests(){
     return `<div class="card" style="margin-bottom:10px">
       <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:12px;flex-wrap:wrap">
         <div>
-          <div style="font-size:15px;font-weight:600"><span style="cursor:pointer;border-bottom:1px dashed #ccc" onclick="goToClient('${x.client.replace(/'/g,"\\'")}')" title="View client">${x.client}</span>${x.company?` <span style="font-weight:400;font-size:13px;color:#888">· ${x.company}</span>`:''}</div>
+          <div style="font-size:15px;font-weight:600"><span style="cursor:pointer;border-bottom:1px dashed #ccc" onmouseover="this.style.textDecoration='underline'" onmouseout="this.style.textDecoration='none'" onclick="goToClient('${x.client.replace(/'/g,"\\'")}')" title="View client">${x.client}</span>${x.company?` <span style="font-weight:400;font-size:13px;color:#888">· ${x.company}</span>`:''}</div>
           <div style="font-size:12px;color:#888;margin-top:3px;display:flex;gap:14px;flex-wrap:wrap">
             ${x.address?`<span><i class="ti ti-map-pin" style="font-size:11px;margin-right:3px"></i>${x.address}</span>`:''}
             ${x.phone?`<span><i class="ti ti-phone" style="font-size:11px;margin-right:3px"></i>${x.phone}</span>`:''}
@@ -663,7 +668,7 @@ function renderQuotes(){
   b.innerHTML=e.map(x=>{
     const dateStr=x.date?new Date(x.date).toLocaleDateString('en-GB',{day:'numeric',month:'short',year:'numeric'}):'—';
     return `<tr>
-      <td><span style="font-weight:600;font-size:13px;cursor:pointer;border-bottom:1px dashed #ccc" onclick="goToClient('${x.client.replace(/'/g,"\\'")}')" title="View client">${x.client}</span></td>
+      <td><span style="font-weight:600;font-size:13px;cursor:pointer;border-bottom:1px dashed #ccc" onmouseover="this.style.textDecoration='underline'" onmouseout="this.style.textDecoration='none'" onclick="goToClient('${x.client.replace(/'/g,"\\'")}')" title="View client">${x.client}</span></td>
       <td>${x.drive_url?`<a href="${x.drive_url}" target="_blank" style="color:#185FA5;font-weight:500;text-decoration:none" onmouseover="this.style.textDecoration='underline'" onmouseout="this.style.textDecoration='none'">#${(x.quote_no||'').replace('KS-','')}</a>`:`<span style="color:#185FA5;font-weight:500">#${(x.quote_no||'').replace('KS-','')}</span>`}</td>
       <td style="color:#555;font-size:12px">${x.address||''}</td>
       <td style="color:#888;font-size:12px;white-space:nowrap">${dateStr}</td>
@@ -718,7 +723,7 @@ function renderInv(){
     const isOverdue=i.status==='Overdue'||i.status==='Past due';
     const paidDateStr=i.paid_date?new Date(i.paid_date).toLocaleDateString('en-GB',{day:'numeric',month:'short',year:'numeric'}):'—';
     return `<tr>
-      <td><span style="font-weight:600;cursor:pointer;color:#1a1a1a;border-bottom:1px dashed #ccc" onclick="goToClient('${i.client.replace(/'/g,"\\'")}')" title="View client">${i.client}</span></td>
+      <td><span style="font-weight:600;cursor:pointer;color:#1a1a1a;border-bottom:1px dashed #ccc" onmouseover="this.style.textDecoration='underline'" onmouseout="this.style.textDecoration='none'" onclick="goToClient('${i.client.replace(/'/g,"\\'")}')" title="View client">${i.client}</span></td>
       <td>${i.drive_url?`<a href="${i.drive_url}" target="_blank" style="color:#185FA5;font-weight:500;font-size:12px;text-decoration:none" onmouseover="this.style.textDecoration='underline'" onmouseout="this.style.textDecoration='none'">${i.invoice_no}</a>`:`<span style="color:#185FA5;font-weight:500;font-size:12px">${i.invoice_no}</span>`}</td>
       <td style="color:${isOverdue?'#A32D2D':'#888'};font-size:12px;white-space:nowrap">${dueDateStr}</td>
       <td style="color:#888;font-size:12px;white-space:nowrap">${paidDateStr}</td>
@@ -814,6 +819,37 @@ function switchTab(name,btn){
   document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));
   document.getElementById('tab-'+name).classList.add('active');
   btn.classList.add('active');
+}
+
+
+function goToQuote(quoteNo){
+  const quotesBtn=document.querySelectorAll('.tab')[3];
+  document.querySelectorAll('.section').forEach(s=>s.classList.remove('active'));
+  document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));
+  document.getElementById('tab-quotes').classList.add('active');
+  quotesBtn.classList.add('active');
+  // Set search to highlight this quote
+  const searchEl=document.getElementById('quote-search');
+  if(searchEl){searchEl.value=quoteNo;renderQuotes();}
+  setTimeout(()=>{
+    // Scroll to matching row
+    const rows=document.querySelectorAll('#quotes-list tr');
+    rows.forEach(r=>{if(r.textContent.includes(quoteNo.replace('KS-',''))){r.scrollIntoView({behavior:'smooth',block:'center'});}});
+  },50);
+}
+
+function goToInvoice(invoiceNo){
+  const invBtn=document.querySelectorAll('.tab')[4];
+  document.querySelectorAll('.section').forEach(s=>s.classList.remove('active'));
+  document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));
+  document.getElementById('tab-invoices').classList.add('active');
+  invBtn.classList.add('active');
+  const searchEl=document.getElementById('inv-search');
+  if(searchEl){searchEl.value=invoiceNo;renderInv();}
+  setTimeout(()=>{
+    const rows=document.querySelectorAll('#inv-body tr');
+    rows.forEach(r=>{if(r.textContent.includes(invoiceNo)){r.scrollIntoView({behavior:'smooth',block:'center'});}});
+  },50);
 }
 
 function goToClient(name){
