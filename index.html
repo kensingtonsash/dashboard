@@ -170,6 +170,8 @@ body{font-family:system-ui,sans-serif;background:#f0f0ee;color:#1a1a1a;font-size
 .home-proj-row:hover .home-proj-name span,
 .home-proj-row:hover .row-name span {text-decoration:underline}
 .proj-row-clickable:hover .home-proj-name span {text-decoration:underline}
+
+.row:hover .proj-name-link{text-decoration:underline}
 </style>
 </head>
 <body>
@@ -448,7 +450,7 @@ function renderHome(){
     return `<div class="home-proj-row" style="cursor:pointer" onclick="goToProject('${p.id}')" title="View project">
       <div class="home-proj-info">
         <div class="home-proj-name" style="display:flex;align-items:center;gap:6px">
-          <span>${p.client}</span>
+          <span class="proj-name-link">${p.client}</span>
           <i class="ti ti-arrow-right" style="font-size:11px;color:#888"></i>
         </div>
         <div class="home-proj-next ${next?'':'ok'}"><i class="ti ${next?'ti-clock':'ti-check'}" style="font-size:11px"></i> ${next||'All steps complete'}</div>
