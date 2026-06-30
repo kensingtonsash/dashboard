@@ -809,10 +809,12 @@ function renderProj(){
       ${sec.items.map(item=>`<label class="cl-item ${ck[item]?'checked':''}">
         <input type="checkbox" ${ck[item]?'checked':''} ${closed?'disabled':''} onchange="toggleCheck('${proj.id}','${item.replace(/'/g,"\\'")}',this.checked)">
         ${item}</label>`).join('')}`).join('');
+    const enq=DATA.enq.find(e=>e.quote_no===proj.quote_no);
+    const quoteUrl=enq?.drive_url||proj.drive_url||null;
     return `<div class="proj-card" id="pc-${proj.id}">
       <div class="proj-card-header" onclick="toggleProj('${proj.id}')">
         <div class="proj-header-left">
-          <div class="proj-client"><span style="cursor:pointer;border-bottom:1px dashed #ccc" onclick="event.stopPropagation();goToClient('${proj.client.replace(/'/g,"\\'")}')" title="View client">${proj.client}</span> <span style="font-weight:400;color:#888;font-size:12px">— ${proj.drive_url?`<a href="${proj.drive_url}" target="_blank" onclick="event.stopPropagation()" style="color:#185FA5;font-weight:500;text-decoration:none" onmouseover="this.style.textDecoration='underline'" onmouseout="this.style.textDecoration='none'">${proj.quote_no}</a>`:proj.quote_no}</span></div>
+          <div class="proj-client"><span style="cursor:pointer;border-bottom:1px dashed #ccc" onclick="event.stopPropagation();goToClient('${proj.client.replace(/'/g,"\\'")}')" title="View client">${proj.client}</span> <span style="font-weight:400;color:#888;font-size:12px">— ${quoteUrl?`<a href="${quoteUrl}" target="_blank" onclick="event.stopPropagation()" style="color:#185FA5;font-weight:500;text-decoration:none" onmouseover="this.style.textDecoration='underline'" onmouseout="this.style.textDecoration='none'">${proj.quote_no}</a>`:proj.quote_no}</span></div>
           <div class="proj-addr">${proj.address} · ${proj.job_type}</div>
           <div class="progress-wrap"><div class="progress-bar"><div class="progress-fill" style="width:${pct}%"></div></div>
           <div class="progress-label">${done} of ${allSteps.length} steps · ${pct}%</div></div>
