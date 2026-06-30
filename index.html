@@ -478,16 +478,19 @@ function renderHome(){
   const ap=proj.filter(p=>p.status!=='Closed');
   const ti=allItems().length;
   document.getElementById('kpi-home').innerHTML=`
-    <div class="kpi"><div class="kpi-label">Active projects</div><div class="kpi-val">${ap.length}</div><div class="kpi-sub">in progress</div></div>
-    <div class="kpi"><div class="kpi-label">Open quotes</div><div class="kpi-val">${open.length}</div><div class="kpi-sub">${fmt(open.reduce((s,x)=>s+(Number(x.value)||0),0))} pipeline</div></div>
-    <div class="kpi"><div class="kpi-label">Collected YTD</div><div class="kpi-val">${fmt(coll)}</div><div class="kpi-sub green">net excl. VAT</div></div>
-    <div class="kpi"><div class="kpi-label">Outstanding</div><div class="kpi-val">${fmt(out)}</div><div class="kpi-sub ${out>0?'red':''}">${ovd.length>0?ovd.length+' overdue':'all current'}</div></div>`;
+    <div class="kpi" style="cursor:pointer" onclick="switchTab('projects',document.querySelectorAll('.tab')[6])" title="Go to Projects"><div class="kpi-label">Active projects</div><div class="kpi-val">${ap.length}</div><div class="kpi-sub">in progress</div></div>
+    <div class="kpi" style="cursor:pointer" onclick="switchTab('quotes',document.querySelectorAll('.tab')[3])" title="Go to Quotes"><div class="kpi-label">Open quotes</div><div class="kpi-val">${open.length}</div><div class="kpi-sub">${fmt(open.reduce((s,x)=>s+(Number(x.value)||0),0))} pipeline</div></div>
+    <div class="kpi" style="cursor:pointer" onclick="switchTab('invoices',document.querySelectorAll('.tab')[4])" title="Go to Invoices"><div class="kpi-label">Collected YTD</div><div class="kpi-val">${fmt(coll)}</div><div class="kpi-sub green">net excl. VAT</div></div>
+    <div class="kpi" style="cursor:pointer" onclick="goToOverdueInvoices()" title="View overdue invoices"><div class="kpi-label">Outstanding</div><div class="kpi-val">${fmt(out)}</div><div class="kpi-sub ${out>0?'red':''}">${ovd.length>0?ovd.length+' overdue':'all current'}</div></div>`;
   const alerts=[];
-  ovd.forEach(i=>alerts.push({t:`${i.invoice_no} — ${i.client}`,s:fmt(Number(i.amount))+' overdue'}));
-  inv.filter(i=>i.status==='Awaiting').forEach(i=>alerts.push({t:`${i.invoice_no} — ${i.client}`,s:fmt(Number(i.amount))+' awaiting payment'}));
+  ovd.forEach(i=>alerts.push({t:`${i.invoice_no} — ${i.client}`,s:fmt(Number(i.amount))+' overdue',inv_no:i.invoice_no}));
+  inv.filter(i=>i.status==='Awaiting').forEach(i=>alerts.push({t:`${i.invoice_no} — ${i.client}`,s:fmt(Number(i.amount))+' awaiting payment',inv_no:i.invoice_no}));
   document.getElementById('alerts-block').innerHTML=alerts.length?`
     <div class="alert-card"><div class="alert-title"><i class="ti ti-alert-triangle"></i> Needs attention (${alerts.length})</div>
-    ${alerts.map(a=>`<div class="alert-row"><div><span style="font-weight:500">${a.t}</span><br><span style="font-size:11px;color:#888">${a.s}</span></div></div>`).join('')}</div>`:'';
+    ${alerts.map(a=>`<div class="alert-row" style="cursor:pointer" onclick="goToInvoice('${a.inv_no}')" onmouseover="this.style.background='#fdf5f5'" onmouseout="this.style.background=''">
+      <div><span style="font-weight:600;color:#C0392B">${a.t}</span><br><span style="font-size:11px;color:#aaa">${a.s}</span></div>
+      <i class="ti ti-arrow-right" style="font-size:13px;color:#C0392B;flex-shrink:0"></i>
+    </div>`).join('')}</div>`:'';
   const hp=document.getElementById('home-projects');
   if(!ap.length){hp.innerHTML='<div class="empty">No active projects.</div>';}
   else hp.innerHTML=ap.map(p=>{
@@ -984,6 +987,28 @@ function goToQuote(quoteNo){
     // Scroll to matching row
     const rows=document.querySelectorAll('#quotes-list tr');
     rows.forEach(r=>{if(r.textContent.includes(quoteNo.replace('KS-',''))){r.scrollIntoView({behavior:'smooth',block:'center'});}});
+  },50);
+}
+
+function goToOverdueInvoices(){
+  const invBtn=document.querySelectorAll('.tab')[4];
+  document.querySelectorAll('.section').forEach(s=>s.classList.remove('active'));
+  document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));
+  document.getElementById('tab-invoices').classList.add('active');
+  invBtn.classList.add('active');
+  // Filter to overdue/awaiting
+  const searchEl=document.getElementById('inv-search');
+  if(searchEl){searchEl.value='';renderInv();}
+  // Highlight overdue rows after render
+  setTimeout(()=>{
+    const rows=document.querySelectorAll('#inv-body tr');
+    rows.forEach(r=>{
+      const text=r.textContent;
+      if(text.includes('Overdue')||text.includes('Awaiting')){
+        r.style.background='#FFF8F8';
+        r.scrollIntoView({behavior:'smooth',block:'center'});
+      }
+    });
   },50);
 }
 
