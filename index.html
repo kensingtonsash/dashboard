@@ -436,14 +436,14 @@ function renderHome(){
   else hp.innerHTML=ap.map(p=>{
     const ck=p.checked||{};const done=allItems().filter(i=>ck[i]).length;
     const pct=Math.round(done/ti*100);const next=allItems().find(i=>!ck[i]);
-    return `<div class="home-proj-row"><div class="home-proj-info"><div class="home-proj-name">${p.client}</div>
+    return `<div class="home-proj-row"><div class="home-proj-info"><div class="home-proj-name"><span style="cursor:pointer;border-bottom:1px dashed #ccc" onclick="goToClient('${p.client.replace(/'/g,"\\'")}')" title="View client">${p.client}</span></div>
       <div class="home-proj-next ${next?'':'ok'}"><i class="ti ${next?'ti-clock':'ti-check'}" style="font-size:11px"></i> ${next||'All steps complete'}</div></div>
       <div class="home-proj-bar"><div class="progress-bar"><div class="progress-fill" style="width:${pct}%"></div></div>
       <div class="home-proj-pct">${pct}%</div></div></div>`;
   }).join('');
   const hq=document.getElementById('home-quotes');
   if(!open.length){hq.innerHTML='<div class="empty">No open quotes.</div>';}
-  else hq.innerHTML=open.map(x=>`<div class="row"><div class="row-left"><div class="row-name">${x.client} <span style="font-weight:400;color:#888">— ${x.quote_no}</span></div>
+  else hq.innerHTML=open.map(x=>`<div class="row"><div class="row-left"><div class="row-name"><span style="cursor:pointer;border-bottom:1px dashed #ccc" onclick="goToClient('${x.client.replace(/'/g,"\\'")}')" title="View client">${x.client}</span> <span style="font-weight:400;color:#888">— ${x.quote_no}</span></div>
     <div class="row-sub">${x.address||''} · ${x.job_type||''} · ${fmt(Number(x.value))}</div></div>
     <div class="row-actions">${badge(x.status)}</div></div>`).join('');
   document.getElementById('home-revenue').innerHTML=`
@@ -543,7 +543,7 @@ function renderRequests(){
       return `<div style="border-bottom:0.5px solid #eee">
         <div style="display:flex;align-items:center;justify-content:space-between;padding:8px 0;gap:8px;cursor:pointer" onclick="toggleReq('${x.id}')">
           <div style="flex:1;min-width:0">
-            <span style="font-size:13px;font-weight:500">${x.client}</span>
+            <span style="font-size:13px;font-weight:500;cursor:pointer;border-bottom:1px dashed #ccc" onclick="event.stopPropagation();goToClient('${x.client.replace(/'/g,"\\'")}')" title="View client">${x.client}</span>
             ${x.address?`<span style="font-size:12px;color:#888;margin-left:8px">${x.address}</span>`:''}
           </div>
           <div style="display:flex;align-items:center;gap:8px;flex-shrink:0">
@@ -588,7 +588,7 @@ function renderRequests(){
     return `<div class="card" style="margin-bottom:10px">
       <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:12px;flex-wrap:wrap">
         <div>
-          <div style="font-size:15px;font-weight:600">${x.client}${x.company?` <span style="font-weight:400;font-size:13px;color:#888">· ${x.company}</span>`:''}</div>
+          <div style="font-size:15px;font-weight:600"><span style="cursor:pointer;border-bottom:1px dashed #ccc" onclick="goToClient('${x.client.replace(/'/g,"\\'")}')" title="View client">${x.client}</span>${x.company?` <span style="font-weight:400;font-size:13px;color:#888">· ${x.company}</span>`:''}</div>
           <div style="font-size:12px;color:#888;margin-top:3px;display:flex;gap:14px;flex-wrap:wrap">
             ${x.address?`<span><i class="ti ti-map-pin" style="font-size:11px;margin-right:3px"></i>${x.address}</span>`:''}
             ${x.phone?`<span><i class="ti ti-phone" style="font-size:11px;margin-right:3px"></i>${x.phone}</span>`:''}
@@ -663,7 +663,7 @@ function renderQuotes(){
   b.innerHTML=e.map(x=>{
     const dateStr=x.date?new Date(x.date).toLocaleDateString('en-GB',{day:'numeric',month:'short',year:'numeric'}):'—';
     return `<tr>
-      <td style="font-weight:600;font-size:13px">${x.client}</td>
+      <td><span style="font-weight:600;font-size:13px;cursor:pointer;border-bottom:1px dashed #ccc" onclick="goToClient('${x.client.replace(/'/g,"\\'")}')" title="View client">${x.client}</span></td>
       <td>${x.drive_url?`<a href="${x.drive_url}" target="_blank" style="color:#185FA5;font-weight:500;text-decoration:none" onmouseover="this.style.textDecoration='underline'" onmouseout="this.style.textDecoration='none'">#${(x.quote_no||'').replace('KS-','')}</a>`:`<span style="color:#185FA5;font-weight:500">#${(x.quote_no||'').replace('KS-','')}</span>`}</td>
       <td style="color:#555;font-size:12px">${x.address||''}</td>
       <td style="color:#888;font-size:12px;white-space:nowrap">${dateStr}</td>
@@ -718,7 +718,7 @@ function renderInv(){
     const isOverdue=i.status==='Overdue'||i.status==='Past due';
     const paidDateStr=i.paid_date?new Date(i.paid_date).toLocaleDateString('en-GB',{day:'numeric',month:'short',year:'numeric'}):'—';
     return `<tr>
-      <td style="font-weight:600">${i.client}</td>
+      <td><span style="font-weight:600;cursor:pointer;color:#1a1a1a;border-bottom:1px dashed #ccc" onclick="goToClient('${i.client.replace(/'/g,"\\'")}')" title="View client">${i.client}</span></td>
       <td>${i.drive_url?`<a href="${i.drive_url}" target="_blank" style="color:#185FA5;font-weight:500;font-size:12px;text-decoration:none" onmouseover="this.style.textDecoration='underline'" onmouseout="this.style.textDecoration='none'">${i.invoice_no}</a>`:`<span style="color:#185FA5;font-weight:500;font-size:12px">${i.invoice_no}</span>`}</td>
       <td style="color:${isOverdue?'#A32D2D':'#888'};font-size:12px;white-space:nowrap">${dueDateStr}</td>
       <td style="color:#888;font-size:12px;white-space:nowrap">${paidDateStr}</td>
@@ -776,7 +776,7 @@ function renderProj(){
     return `<div class="proj-card" id="pc-${proj.id}">
       <div class="proj-card-header" onclick="toggleProj('${proj.id}')">
         <div class="proj-header-left">
-          <div class="proj-client">${proj.client} <span style="font-weight:400;color:#888;font-size:12px">— ${proj.quote_no}</span></div>
+          <div class="proj-client"><span style="cursor:pointer;border-bottom:1px dashed #ccc" onclick="event.stopPropagation();goToClient('${proj.client.replace(/'/g,"\\'")}')" title="View client">${proj.client}</span> <span style="font-weight:400;color:#888;font-size:12px">— ${proj.quote_no}</span></div>
           <div class="proj-addr">${proj.address} · ${proj.job_type}</div>
           <div class="progress-wrap"><div class="progress-bar"><div class="progress-fill" style="width:${pct}%"></div></div>
           <div class="progress-label">${done} of ${allSteps.length} steps · ${pct}%</div></div>
@@ -814,6 +814,29 @@ function switchTab(name,btn){
   document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));
   document.getElementById('tab-'+name).classList.add('active');
   btn.classList.add('active');
+}
+
+function goToClient(name){
+  // Switch to clients tab
+  const clientsBtn=document.querySelector('.tab:nth-child(2)');
+  document.querySelectorAll('.section').forEach(s=>s.classList.remove('active'));
+  document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));
+  document.getElementById('tab-clients').classList.add('active');
+  clientsBtn.classList.add('active');
+  // Clear search and re-render so all clients are visible
+  const searchEl=document.getElementById('client-search');
+  if(searchEl)searchEl.value='';
+  renderClients();
+  // Open the detail row and scroll to it
+  setTimeout(()=>{
+    const row=document.getElementById('cd-'+CSS.escape(name));
+    if(row){
+      row.style.display='table-row';
+      // Scroll the client row into view
+      const clientRow=row.previousElementSibling;
+      if(clientRow)clientRow.scrollIntoView({behavior:'smooth',block:'center'});
+    }
+  },50);
 }
 
 function toggleClientDetail(name){
