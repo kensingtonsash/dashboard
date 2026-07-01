@@ -6,163 +6,227 @@
 <title>Request a Quote — Kensington Sash</title>
 <style>
 *{box-sizing:border-box;margin:0;padding:0}
-body{font-family:system-ui,-apple-system,sans-serif;background:#fff;color:#1a1a1a;font-size:14px}
-.wrap{max-width:560px;margin:0 auto;padding:2.5rem 1.25rem 3rem}
-.logo{margin-bottom:2rem}
-.logo img{height:36px;width:auto}
-h1{font-size:18px;font-weight:600;margin-bottom:4px}
-.sub{font-size:13px;color:#888;margin-bottom:1.75rem}
-.sub a{color:#34453E}
 
-/* Field rows */
-.row{display:grid;gap:10px;margin-bottom:10px}
-.row.c2{grid-template-columns:1fr 1fr}
-.row.c3{grid-template-columns:2fr 1fr 1fr}
-.row.c1{grid-template-columns:1fr}
-label{display:block;font-size:11.5px;font-weight:500;color:#666;margin-bottom:3px}
-input,textarea{width:100%;border:1px solid #ddd;border-radius:6px;padding:8px 10px;font-size:13.5px;font-family:inherit;outline:none;color:#1a1a1a;transition:border-color .15s}
-input:focus,textarea:focus{border-color:#34453E}
+body{
+  font-family:system-ui,-apple-system,sans-serif;
+  color:#1a1a1a;
+  font-size:14px;
+  min-height:100vh;
+  background-color:#2e3e38;
+  background-image:
+    linear-gradient(rgba(255,255,255,0.03) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255,255,255,0.03) 1px, transparent 1px);
+  background-size:40px 40px;
+  display:flex;
+  align-items:flex-start;
+  justify-content:center;
+  padding:2.5rem 1rem 3rem;
+}
+
+.card{
+  background:#fff;
+  border-radius:16px;
+  width:100%;
+  max-width:520px;
+  box-shadow:0 8px 40px rgba(0,0,0,0.25),0 1px 0 rgba(255,255,255,0.05);
+  overflow:hidden;
+}
+
+/* Header strip */
+.card-head{
+  background:#34453E;
+  padding:1.5rem 1.75rem 1.25rem;
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:12px;
+}
+.card-head img{height:32px;width:auto;filter:brightness(0) invert(1)}
+.card-head-text{font-size:12px;color:rgba(255,255,255,0.5);text-align:right;line-height:1.5}
+.card-head-text a{color:rgba(255,255,255,0.7);text-decoration:none}
+.card-head-text a:hover{color:#fff}
+
+/* Body */
+.card-body{padding:1.5rem 1.75rem 1.75rem}
+
+.eyebrow{font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:.08em;color:#34453E;margin-bottom:4px}
+h1{font-size:20px;font-weight:600;letter-spacing:-.02em;margin-bottom:1.25rem;color:#111}
+
+/* Dividers */
+.divider{
+  font-size:10.5px;font-weight:600;text-transform:uppercase;letter-spacing:.08em;
+  color:#bbb;margin:1.25rem 0 .9rem;display:flex;align-items:center;gap:7px
+}
+.divider::before,.divider::after{content:'';flex:1;height:1px;background:#f0f0ee}
+
+/* Grid layouts */
+.g2{display:grid;grid-template-columns:1fr 1fr;gap:9px;margin-bottom:9px}
+.g3{display:grid;grid-template-columns:2fr 1fr 1fr;gap:9px;margin-bottom:9px}
+.g1{margin-bottom:9px}
+
+label{display:block;font-size:11.5px;font-weight:500;color:#777;margin-bottom:3px}
+input,textarea{
+  width:100%;border:1px solid #e8e8e8;border-radius:7px;
+  padding:8px 10px;font-size:13.5px;font-family:inherit;
+  outline:none;color:#1a1a1a;background:#fafafa;
+  transition:border-color .15s,background .15s;
+}
+input:focus,textarea:focus{border-color:#34453E;background:#fff;box-shadow:0 0 0 3px rgba(52,69,62,.07)}
 input::placeholder,textarea::placeholder{color:#ccc}
-textarea{resize:vertical;min-height:72px;line-height:1.5}
+textarea{resize:vertical;min-height:68px;line-height:1.5}
 .req{color:#A32D2D}
 
-/* Divider */
-.divider{font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:.07em;color:#bbb;margin:1.5rem 0 1rem;display:flex;align-items:center;gap:8px}
-.divider::before,.divider::after{content:'';flex:1;height:1px;background:#eee}
-
 /* Services */
-.services{display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-bottom:10px}
+.services{display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-bottom:9px}
 .svc{position:relative}
 .svc input{position:absolute;opacity:0;width:0;height:0}
 .svc label{
-  display:block;padding:8px 10px;border:1px solid #e8e8e8;border-radius:6px;
-  cursor:pointer;font-size:12.5px;font-weight:400;color:#555;background:#fafafa;
-  transition:border-color .12s,background .12s,color .12s;line-height:1.3;margin:0
+  display:block;padding:8px 10px;border:1px solid #ebebeb;border-radius:7px;
+  cursor:pointer;font-size:12.5px;color:#666;background:#fafafa;
+  transition:all .12s;line-height:1.3;margin:0;
 }
 .svc label:hover{border-color:#34453E;background:#f0f4f2;color:#34453E}
 .svc input:checked+label{border-color:#34453E;background:#f0f4f2;color:#34453E;font-weight:500}
 .svc-full{grid-column:1/-1}
 
-/* Photo */
-.photo-btn{display:inline-flex;align-items:center;gap:6px;padding:7px 14px;border:1px dashed #ccc;border-radius:6px;font-size:12.5px;color:#888;cursor:pointer;transition:border-color .15s,color .15s;background:#fafafa}
+/* Count + photo row */
+.detail-row{display:grid;grid-template-columns:110px 1fr;gap:9px;margin-bottom:9px;align-items:end}
+.photo-btn{
+  display:flex;align-items:center;justify-content:center;gap:6px;
+  width:100%;padding:8px 10px;border:1px dashed #ddd;border-radius:7px;
+  font-size:12.5px;color:#999;cursor:pointer;background:#fafafa;
+  transition:border-color .15s,color .15s;font-family:inherit;
+}
 .photo-btn:hover{border-color:#34453E;color:#34453E}
 .photo-btn input{display:none}
-.photo-preview{display:flex;flex-wrap:wrap;gap:5px;margin-top:8px}
-.photo-preview img{width:52px;height:52px;object-fit:cover;border-radius:5px;border:1px solid #eee}
+.photo-preview{display:flex;flex-wrap:wrap;gap:5px;margin-bottom:9px}
+.photo-preview img{width:48px;height:48px;object-fit:cover;border-radius:5px;border:1px solid #eee}
 
 /* Toggles */
-.toggle-pair{display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-bottom:10px}
-.tog-card{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:10px 12px;border:1px solid #e8e8e8;border-radius:6px;background:#fafafa}
-.tog-card-text{font-size:12.5px;color:#555;line-height:1.35}
-.tog{position:relative;display:inline-block;width:36px;height:20px;flex-shrink:0}
+.tog-pair{display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-bottom:9px}
+.tog-card{
+  display:flex;align-items:center;justify-content:space-between;gap:8px;
+  padding:9px 11px;border:1px solid #ebebeb;border-radius:7px;background:#fafafa;
+}
+.tog-card-text{font-size:12px;color:#666;line-height:1.3}
+.tog{position:relative;display:inline-block;width:34px;height:19px;flex-shrink:0}
 .tog input{opacity:0;width:0;height:0}
-.tog-s{position:absolute;cursor:pointer;inset:0;background:#ddd;border-radius:20px;transition:.18s}
-.tog-s:before{content:'';position:absolute;height:14px;width:14px;left:3px;bottom:3px;background:#fff;border-radius:50%;transition:.18s;box-shadow:0 1px 2px rgba(0,0,0,.15)}
+.tog-s{position:absolute;cursor:pointer;inset:0;background:#ddd;border-radius:19px;transition:.18s}
+.tog-s:before{content:'';position:absolute;height:13px;width:13px;left:3px;bottom:3px;background:#fff;border-radius:50%;transition:.18s;box-shadow:0 1px 2px rgba(0,0,0,.15)}
 .tog input:checked+.tog-s{background:#34453E}
-.tog input:checked+.tog-s:before{transform:translateX(16px)}
+.tog input:checked+.tog-s:before{transform:translateX(15px)}
 
 /* Submit */
-.submit-btn{width:100%;background:#34453E;color:#fff;border:none;border-radius:7px;padding:11px;font-size:14px;font-weight:500;font-family:inherit;cursor:pointer;margin-top:1.25rem;transition:background .15s}
+.submit-btn{
+  width:100%;background:#34453E;color:#fff;border:none;border-radius:8px;
+  padding:11px;font-size:14px;font-weight:500;font-family:inherit;
+  cursor:pointer;transition:background .15s;margin-top:1rem;letter-spacing:.01em;
+}
 .submit-btn:hover{background:#2a3830}
-.submit-btn:disabled{opacity:.55;cursor:not-allowed}
-.note{font-size:11.5px;color:#aaa;text-align:center;margin-top:8px}
+.submit-btn:disabled{opacity:.5;cursor:not-allowed}
+.foot-note{font-size:11.5px;color:#bbb;text-align:center;margin-top:8px}
 
 /* Success */
-#success-msg{display:none;text-align:center;padding:3rem 1rem}
-#success-msg h2{font-size:18px;font-weight:600;color:#34453E;margin-bottom:6px;margin-top:10px}
-#success-msg p{font-size:13px;color:#666;line-height:1.6}
+#success-msg{display:none;text-align:center;padding:2.5rem 1.5rem}
+#success-msg .s-icon{font-size:38px;margin-bottom:.75rem}
+#success-msg h2{font-size:18px;font-weight:600;color:#34453E;margin-bottom:6px}
+#success-msg p{font-size:13px;color:#777;line-height:1.6}
 
 @media(max-width:440px){
-  .row.c2,.row.c3,.services,.toggle-pair{grid-template-columns:1fr}
+  body{padding:0;align-items:flex-start}
+  .card{border-radius:0;box-shadow:none;min-height:100vh}
+  .g2,.g3,.services,.tog-pair,.detail-row{grid-template-columns:1fr}
   .svc-full{grid-column:1}
 }
 </style>
 </head>
 <body>
-<div class="wrap">
-  <div class="logo"><img src="/Logo%20slogan%202.png" alt="Kensington Sash"></div>
+<div class="card">
 
-  <h1>Request a Quote</h1>
-  <p class="sub">Fill this in and we'll get back to you shortly. Existing clients — email <a href="mailto:info@kensingtonsash.co.uk">info@kensingtonsash.co.uk</a></p>
-
-  <form id="req-form">
-
-    <div class="row c2">
-      <div><label>First name <span class="req">*</span></label><input type="text" name="first_name" required placeholder="First name"></div>
-      <div><label>Last name <span class="req">*</span></label><input type="text" name="last_name" required placeholder="Last name"></div>
+  <div class="card-head">
+    <img src="/Logo%20slogan%202.png" alt="Kensington Sash">
+    <div class="card-head-text">
+      020 3840 7255<br>
+      <a href="mailto:info@kensingtonsash.co.uk">info@kensingtonsash.co.uk</a>
     </div>
-    <div class="row c2">
-      <div><label>Email <span class="req">*</span></label><input type="email" name="email" required placeholder="you@email.com"></div>
-      <div><label>Phone <span class="req">*</span></label><input type="tel" name="phone" required placeholder="+44"></div>
-    </div>
-    <div class="row c1">
-      <div><label>Company <span style="color:#bbb;font-weight:400">(optional)</span></label><input type="text" name="company" placeholder="Company name"></div>
-    </div>
+  </div>
 
-    <div class="divider">Property</div>
+  <div class="card-body">
+    <div class="eyebrow">Kensington Sash</div>
+    <h1>Request a Quote</h1>
 
-    <div class="row c1">
-      <div><label>Street address <span class="req">*</span></label><input type="text" name="street" required placeholder="Street address"></div>
-    </div>
-    <div class="row c3">
-      <div><label>City <span class="req">*</span></label><input type="text" name="city" required placeholder="London"></div>
-      <div><label>County</label><input type="text" name="county" placeholder="County"></div>
-      <div><label>Postcode <span class="req">*</span></label><input type="text" name="postcode" required placeholder="SW1A 1AA"></div>
-    </div>
-    <div class="row c1">
-      <div><label>Flat / unit <span style="color:#bbb;font-weight:400">(optional)</span></label><input type="text" name="unit" placeholder="Flat, apt, suite…"></div>
-    </div>
+    <form id="req-form">
 
-    <div class="divider">Services</div>
-
-    <div class="services">
-      <div class="svc"><input type="checkbox" name="service" value="New Windows and Doors" id="s1"><label for="s1">New Windows & Doors</label></div>
-      <div class="svc"><input type="checkbox" name="service" value="Sash-Only Replacement" id="s2"><label for="s2">Sash-Only Replacement</label></div>
-      <div class="svc"><input type="checkbox" name="service" value="Sash Window Repairs" id="s3"><label for="s3">Sash Window Repairs</label></div>
-      <div class="svc"><input type="checkbox" name="service" value="Sash Window Painting" id="s4"><label for="s4">Sash Window Painting</label></div>
-      <div class="svc"><input type="checkbox" name="service" value="Vacuum Glazing" id="s5"><label for="s5">Vacuum Glazing</label></div>
-      <div class="svc"><input type="checkbox" name="service" value="New Ironmongery and Locks" id="s6"><label for="s6">Ironmongery & Locks</label></div>
-      <div class="svc svc-full"><input type="checkbox" name="service" value="General Enquiry" id="s7"><label for="s7">General Enquiry — not sure yet</label></div>
-    </div>
-
-    <div class="divider">Details</div>
-
-    <div class="row c2" style="margin-bottom:10px">
-      <div><label>No. of windows / doors</label><input type="number" name="window_count" min="1" placeholder="e.g. 4"></div>
-      <div style="display:flex;align-items:flex-end">
-        <label class="photo-btn" style="width:100%;justify-content:center">
-          📷 Add photos
-          <input type="file" id="photo-input" name="photos" accept="image/*" multiple>
-        </label>
+      <div class="g2">
+        <div><label>First name <span class="req">*</span></label><input type="text" name="first_name" required placeholder="First name"></div>
+        <div><label>Last name <span class="req">*</span></label><input type="text" name="last_name" required placeholder="Last name"></div>
       </div>
-    </div>
-    <div class="row c1">
-      <div><label>Description <span style="color:#bbb;font-weight:400">(optional but helpful)</span></label><textarea name="notes" placeholder="Window condition, sizes, access, listed building…"></textarea></div>
-    </div>
-    <div class="photo-preview" id="photo-preview"></div>
-
-    <div class="divider">Preferences</div>
-
-    <div class="toggle-pair">
-      <div class="tog-card">
-        <div class="tog-card-text">Free onsite survey</div>
-        <label class="tog"><input type="checkbox" name="survey" checked><span class="tog-s"></span></label>
+      <div class="g2">
+        <div><label>Email <span class="req">*</span></label><input type="email" name="email" required placeholder="you@email.com"></div>
+        <div><label>Phone <span class="req">*</span></label><input type="tel" name="phone" required placeholder="+44"></div>
       </div>
-      <div class="tog-card">
-        <div class="tog-card-text">Photo estimate instead</div>
-        <label class="tog"><input type="checkbox" name="photo_estimate"><span class="tog-s"></span></label>
+      <div class="g1"><label>Company <span style="color:#bbb;font-weight:400">(optional)</span></label><input type="text" name="company" placeholder="Company name"></div>
+
+      <div class="divider">Property</div>
+
+      <div class="g1"><label>Street address <span class="req">*</span></label><input type="text" name="street" required placeholder="Street address"></div>
+      <div class="g3">
+        <div><label>City <span class="req">*</span></label><input type="text" name="city" required placeholder="London"></div>
+        <div><label>County</label><input type="text" name="county" placeholder="County"></div>
+        <div><label>Postcode <span class="req">*</span></label><input type="text" name="postcode" required placeholder="SW1A 1AA"></div>
       </div>
+      <div class="g1"><label>Flat / unit <span style="color:#bbb;font-weight:400">(optional)</span></label><input type="text" name="unit" placeholder="Flat, apt, suite…"></div>
+
+      <div class="divider">Services needed</div>
+
+      <div class="services">
+        <div class="svc"><input type="checkbox" name="service" value="New Windows and Doors" id="s1"><label for="s1">New Windows & Doors</label></div>
+        <div class="svc"><input type="checkbox" name="service" value="Sash-Only Replacement" id="s2"><label for="s2">Sash-Only Replacement</label></div>
+        <div class="svc"><input type="checkbox" name="service" value="Sash Window Repairs" id="s3"><label for="s3">Sash Window Repairs</label></div>
+        <div class="svc"><input type="checkbox" name="service" value="Sash Window Painting" id="s4"><label for="s4">Sash Window Painting</label></div>
+        <div class="svc"><input type="checkbox" name="service" value="Vacuum Glazing" id="s5"><label for="s5">Vacuum Glazing</label></div>
+        <div class="svc"><input type="checkbox" name="service" value="New Ironmongery and Locks" id="s6"><label for="s6">Ironmongery & Locks</label></div>
+        <div class="svc svc-full"><input type="checkbox" name="service" value="General Enquiry" id="s7"><label for="s7">General Enquiry — not sure yet</label></div>
+      </div>
+
+      <div class="divider">Details</div>
+
+      <div class="detail-row">
+        <div><label>No. of windows</label><input type="number" name="window_count" min="1" placeholder="e.g. 4"></div>
+        <div>
+          <label>Photos <span style="color:#bbb;font-weight:400">(up to 10)</span></label>
+          <label class="photo-btn">
+            📷 &nbsp;Add photos
+            <input type="file" id="photo-input" name="photos" accept="image/*" multiple>
+          </label>
+        </div>
+      </div>
+      <div class="photo-preview" id="photo-preview"></div>
+      <div class="g1"><label>Description <span style="color:#bbb;font-weight:400">(optional but helpful)</span></label><textarea name="notes" placeholder="Condition, sizes, access requirements, listed building…"></textarea></div>
+
+      <div class="divider">Preferences</div>
+
+      <div class="tog-pair">
+        <div class="tog-card">
+          <div class="tog-card-text">Free onsite survey</div>
+          <label class="tog"><input type="checkbox" name="survey" checked><span class="tog-s"></span></label>
+        </div>
+        <div class="tog-card">
+          <div class="tog-card-text">Photo estimate instead</div>
+          <label class="tog"><input type="checkbox" name="photo_estimate"><span class="tog-s"></span></label>
+        </div>
+      </div>
+
+      <button type="submit" class="submit-btn" id="submit-btn">Send Request</button>
+      <div class="foot-note">No obligation &nbsp;·&nbsp; We respond within 24 hours</div>
+
+    </form>
+
+    <div id="success-msg">
+      <div class="s-icon">✅</div>
+      <h2>Request received</h2>
+      <p>We'll be in touch shortly.<br>Urgent? Call <strong>020 3840 7255</strong></p>
     </div>
-
-    <button type="submit" class="submit-btn" id="submit-btn">Send Request</button>
-    <div class="note">No obligation · We'll respond within 24 hours · 020 3840 7255</div>
-
-  </form>
-
-  <div id="success-msg">
-    <div style="font-size:36px">✅</div>
-    <h2>Request received</h2>
-    <p>We'll be in touch shortly.<br>For urgent enquiries call <strong>020 3840 7255</strong>.</p>
   </div>
 </div>
 
