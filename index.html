@@ -352,8 +352,15 @@ body.dark #inv-body span[title="View client"]{color:#d8d8e8 !important;border-bo
 .mat-select{font-size:11.5px;padding:3px 7px;border-radius:7px;border:1px solid #E8E6E1;background:#fff;color:#666;font-family:inherit;cursor:pointer;outline:none;max-width:150px}
 .mat-qty{width:64px;padding:5px 8px;border:1px solid #E8E6E1;border-radius:7px;font-size:12.5px;font-family:inherit;outline:none;text-align:center;background:#fff}
 .mat-qty:focus,.mat-select:focus{border-color:#34453E}
-.mat-actions{white-space:nowrap;text-align:right}
-.mat-actions .btn-sm{margin-left:5px}
+.mat-actions{white-space:nowrap;text-align:right;width:1%}
+.mat-ico{background:none;border:none;cursor:pointer;padding:4px;margin-left:2px;border-radius:6px;color:#c4c4c0;font-size:15px;line-height:1;opacity:0;transition:opacity .12s,color .12s,background .12s}
+.mat-table tr:hover .mat-ico{opacity:1}
+.mat-ico:focus-visible{opacity:1}
+.mat-ico:hover{background:#EFEFEC;color:#34453E}
+.mat-ico-del:hover{background:#FDEBEB;color:#A32D2D}
+body.dark .mat-ico{color:#4a4a54}
+body.dark .mat-ico:hover{background:#2e2e34;color:#7ab890}
+body.dark .mat-ico-del:hover{background:#3a1a1a;color:#e06060}
 body.dark .mat-table th{color:#505060;border-bottom-color:#28282e}
 body.dark .mat-table td{border-bottom-color:#28282e}
 body.dark .mat-table tr:hover td{background:#28282e}
@@ -1500,8 +1507,8 @@ function renderMaterials(){
         <td><input type="number" min="0" class="mat-qty" value="${st.qty||''}" oninput="setMatQty('${m.id}',this.value)"></td>
         <td class="mat-note">${m.note||''}</td>
         <td class="mat-actions">
-          <button class="btn-sm" onclick="editMat('${m.id}')">Edit</button>
-          <button class="btn-sm" style="border-color:#A32D2D;color:#A32D2D" onclick="deleteMat('${m.id}')">Delete</button>
+          <button class="mat-ico" title="Edit" onclick="editMat('${m.id}')"><i class="ti ti-pencil"></i></button>
+          <button class="mat-ico mat-ico-del" title="Delete" onclick="deleteMat('${m.id}')"><i class="ti ti-trash"></i></button>
         </td>
       </tr>`;
     }).join('');
