@@ -455,26 +455,52 @@ body.dark .th-foot{color:#505060;border-top-color:#28282e}
 #kpi-mkt .kpi:nth-child(4)::before{background:#2D7A55}
 #tab-marketing .chart-wrap{height:200px}
 
-/* ── Marketing: recurring tasks ── */
-.tk-row{display:flex;align-items:flex-start;gap:12px;padding:12px 0;border-bottom:1px solid #F2F1EE}
-.tk-row:last-child{border-bottom:none}
+/* ── Marketing: task board ── */
+.tg-head{display:flex;align-items:center;gap:8px;margin:18px 0 4px;padding-bottom:6px;border-bottom:1px solid #F2F1EE}
+.tg-head:first-child{margin-top:0}
+.tg-lbl{font-size:10.5px;font-weight:700;text-transform:uppercase;letter-spacing:.08em}
+.tg-count{font-size:10.5px;font-weight:700;border-radius:20px;padding:1px 8px;background:#EFEFEC;color:#999}
+.g-over .tg-lbl{color:#A32D2D}.g-over .tg-count{background:#FDEBEB;color:#A32D2D}
+.g-now  .tg-lbl{color:#7D4B0A}.g-now  .tg-count{background:#FEF1DC;color:#7D4B0A}
+.g-soon .tg-lbl{color:#34453E}
+.g-later .tg-lbl{color:#bbb}
+
+.tk-row{display:flex;align-items:center;gap:14px;padding:13px 10px;margin:0 -10px;border-radius:10px;transition:background .12s}
 .tk-row:hover{background:#FAFAF8}
-.tk-tick{flex-shrink:0;width:24px;height:24px;margin-top:1px;border-radius:50%;border:1.5px solid #D8D6D0;background:#fff;color:transparent;cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:13px;transition:all .15s}
-.tk-tick:hover{border-color:#34453E;background:#34453E;color:#fff}
+.tk-tick{flex-shrink:0;width:26px;height:26px;border-radius:50%;border:1.5px solid #D8D6D0;background:#fff;color:transparent;cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:14px;transition:all .15s}
+.tk-tick:hover{border-color:#34453E;background:#34453E;color:#fff;transform:scale(1.06)}
 .tk-main{flex:1;min-width:0}
-.tk-title{font-size:13px;font-weight:600;color:#1a1a1a;display:flex;align-items:center;gap:6px}
-.tk-link{color:#c4c4c0;text-decoration:none;font-size:12px;display:inline-flex}
-.tk-link:hover{color:#185FA5}
-.tk-detail{font-size:11.5px;color:#aaa;line-height:1.5;margin-top:3px}
-.tk-side{display:flex;flex-direction:column;align-items:flex-end;gap:2px;flex-shrink:0;text-align:right}
-.tk-due{font-size:11.5px;font-weight:600;white-space:nowrap}
-.td-over{color:#A32D2D}.td-now{color:#7D4B0A}.td-soon{color:#7D4B0A}.td-ok{color:#bbb}
-.tk-cad{font-size:10.5px;color:#bbb;text-transform:uppercase;letter-spacing:.05em}
-.tk-last{font-size:10.5px;color:#ccc}
-.tk-acts{display:flex;gap:2px;flex-shrink:0}
-.tk-acts .mat-ico{opacity:0}
-.tk-row:hover .tk-acts .mat-ico{opacity:1}
-body.dark .tk-row{border-bottom-color:#28282e}
+.tk-title{font-size:13.5px;font-weight:600;color:#1a1a1a}
+.tk-detail{font-size:11.5px;color:#aaa;line-height:1.5;margin-top:2px}
+.tk-meta{display:flex;align-items:center;gap:6px;margin-top:5px;flex-wrap:wrap}
+.tk-due{font-size:11px;font-weight:600;white-space:nowrap}
+.td-over{color:#A32D2D}.td-now{color:#7D4B0A}.td-soon{color:#7D4B0A}.td-ok{color:#bbb}.td-new{color:#a8a6a0}
+.tk-dot{color:#ddd;font-size:11px}
+.tk-cad{font-size:11px;color:#bbb}
+.tk-last{font-size:11px;color:#c4c4c0}
+.tk-do{display:flex;align-items:center;gap:6px;flex-shrink:0}
+.tk-btn{display:inline-flex;align-items:center;gap:5px;font-size:11.5px;font-weight:600;padding:5px 11px;border-radius:20px;
+  border:1px solid #E0DED8;background:#fff;color:#888;cursor:pointer;font-family:inherit;text-decoration:none;white-space:nowrap;transition:all .15s}
+.tk-btn:hover{border-color:#34453E;color:#34453E;background:#F7F9F8}
+.tk-btn i{font-size:12px}
+.tk-btn-ai{border-color:#CBD8CF;color:#34453E;background:#F4F8F5}
+.tk-btn-ai:hover{background:#34453E;color:#fff;border-color:#34453E}
+.tk-do .mat-ico{opacity:0}
+.tk-row:hover .tk-do .mat-ico{opacity:1}
+
+.tk-clear{display:flex;flex-direction:column;align-items:center;justify-content:center;padding:34px 12px;text-align:center;gap:2px}
+.tk-clear i{font-size:28px;color:#2D7A55;margin-bottom:6px}
+.tk-clear-t{font-size:14px;font-weight:600;color:#34453E}
+.tk-clear-s{font-size:12px;color:#bbb}
+
+body.dark .tg-head{border-bottom-color:#28282e}
+body.dark .tg-count{background:#28282e;color:#58586a}
+body.dark .g-over .tg-lbl{color:#e06060}
+body.dark .g-over .tg-count{background:#3a1a1a;color:#e06060}
+body.dark .g-now .tg-lbl{color:#c09040}
+body.dark .g-now .tg-count{background:#3a2a10;color:#c09040}
+body.dark .g-soon .tg-lbl{color:#7ab890}
+body.dark .g-later .tg-lbl{color:#4e4e58}
 body.dark .tk-row:hover{background:#28282e}
 body.dark .tk-tick{background:#1e1e22;border-color:#3a3a42}
 body.dark .tk-tick:hover{background:#34453E;border-color:#4a6a5a;color:#fff}
@@ -482,10 +508,16 @@ body.dark .tk-title{color:#d8d8e8}
 body.dark .tk-detail{color:#58586a}
 body.dark .td-over{color:#e06060}
 body.dark .td-now,body.dark .td-soon{color:#c09040}
-body.dark .td-ok{color:#505060}
-body.dark .tk-cad,body.dark .tk-last{color:#3f3f48}
-body.dark .tk-link{color:#3a3a42}
-body.dark .tk-link:hover{color:#5a90d0}
+body.dark .td-ok,body.dark .td-new{color:#505060}
+body.dark .tk-dot,body.dark .tk-cad,body.dark .tk-last{color:#44444e}
+body.dark .tk-btn{background:#1e1e22;border-color:#2e2e34;color:#58586a}
+body.dark .tk-btn:hover{border-color:#4a6a5a;color:#a8d8b8;background:#28282e}
+body.dark .tk-btn-ai{background:#232c26;border-color:#3a4a40;color:#7ab890}
+body.dark .tk-btn-ai:hover{background:#34453E;color:#fff}
+body.dark .tk-clear i{color:#5ab880}
+body.dark .tk-clear-t{color:#7ab890}
+body.dark .tk-clear-s{color:#505060}
+@media(max-width:820px){.tk-row{flex-wrap:wrap}.tk-do{width:100%;justify-content:flex-end}.tk-do .mat-ico{opacity:1}}
 
 /* ── Left sidebar navigation ── */
 body{padding-left:224px}
@@ -716,6 +748,39 @@ body.dark .tabs{background:#222226;border-right:1px solid #2e2e34}
   <div id="tab-marketing" class="section">
     <div class="kpi-grid" id="kpi-mkt"></div>
 
+    <div class="card">
+      <div style="display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:14px;flex-wrap:wrap">
+        <div class="card-title" style="margin-bottom:0"><i class="ti ti-checkup-list"></i> This week</div>
+        <div style="display:flex;gap:4px;flex-wrap:wrap;align-items:center">
+          <button class="inv-pill active" onclick="setTaskFilter('due')" data-tfilter="due">Due now</button>
+          <button class="inv-pill" onclick="setTaskFilter('all')" data-tfilter="all">Everything</button>
+          <button class="btn-sm" style="margin-left:6px" onclick="showAddTask()">+ Add task</button>
+        </div>
+      </div>
+      <div id="mkt-tasks"></div>
+    </div>
+
+    <div id="task-form" style="display:none" class="card">
+      <div class="card-title"><i class="ti ti-list-check"></i> <span id="task-form-title">Add task</span></div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px">
+        <div><div class="ff-lbl">Title</div><input id="tf-title" class="ff"></div>
+        <div><div class="ff-lbl">Repeat every</div>
+          <select id="tf-cadence" class="ff">
+            <option value="1">Day</option><option value="7" selected>Week</option>
+            <option value="14">Fortnight</option><option value="30">Month</option>
+            <option value="90">Quarter</option><option value="365">Year</option>
+          </select>
+        </div>
+      </div>
+      <div style="margin-top:10px"><div class="ff-lbl">Detail</div><textarea id="tf-detail" rows="2" class="ff" style="resize:vertical"></textarea></div>
+      <div style="margin-top:10px"><div class="ff-lbl">Link <span style="color:#bbb">(optional)</span></div><input id="tf-link" class="ff" placeholder="https://..."></div>
+      <div style="margin-top:10px"><div class="ff-lbl">AI brief <span style="color:#bbb">(optional — adds a "Draft with AI" button to this task)</span></div><textarea id="tf-prompt" rows="4" class="ff" style="resize:vertical;font-size:12px;line-height:1.6" placeholder="Instructions for Claude. Be specific about tone, length, and what to avoid."></textarea></div>
+      <div style="display:flex;gap:8px;margin-top:12px">
+        <button class="btn-main" onclick="saveTask()">Save</button>
+        <button class="btn-main" style="border-color:#ddd;color:#888" onclick="cancelTask()">Cancel</button>
+      </div>
+    </div>
+
     <div class="home-grid">
       <div class="card">
         <div class="card-title"><i class="ti ti-chart-bar"></i> Ad spend by month</div>
@@ -756,39 +821,6 @@ body.dark .tabs{background:#222226;border-right:1px solid #2e2e34}
           <div class="th-ring"><canvas id="mkt-health-chart"></canvas><div class="th-centre" id="th-centre"></div></div>
           <div class="th-key" id="th-key"></div>
         </div>
-      </div>
-    </div>
-
-    <div class="card">
-      <div style="display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:14px;flex-wrap:wrap">
-        <div class="card-title" style="margin-bottom:0"><i class="ti ti-checkup-list"></i> Recurring tasks</div>
-        <div style="display:flex;gap:4px;flex-wrap:wrap;align-items:center">
-          <button class="inv-pill active" onclick="setTaskFilter('due')" data-tfilter="due">Due now</button>
-          <button class="inv-pill" onclick="setTaskFilter('all')" data-tfilter="all">All</button>
-          <button class="btn-sm" style="margin-left:6px" onclick="showAddTask()">+ Add task</button>
-        </div>
-      </div>
-      <div id="mkt-tasks"></div>
-    </div>
-
-    <div id="task-form" style="display:none" class="card">
-      <div class="card-title"><i class="ti ti-list-check"></i> <span id="task-form-title">Add task</span></div>
-      <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px">
-        <div><div class="ff-lbl">Title</div><input id="tf-title" class="ff"></div>
-        <div><div class="ff-lbl">Repeat every</div>
-          <select id="tf-cadence" class="ff">
-            <option value="1">Day</option><option value="7" selected>Week</option>
-            <option value="14">Fortnight</option><option value="30">Month</option>
-            <option value="90">Quarter</option><option value="365">Year</option>
-          </select>
-        </div>
-      </div>
-      <div style="margin-top:10px"><div class="ff-lbl">Detail</div><textarea id="tf-detail" rows="2" class="ff" style="resize:vertical"></textarea></div>
-      <div style="margin-top:10px"><div class="ff-lbl">Link <span style="color:#bbb">(optional)</span></div><input id="tf-link" class="ff" placeholder="https://..."></div>
-      <div style="margin-top:10px"><div class="ff-lbl">AI brief <span style="color:#bbb">(optional — adds a "Draft with AI" button to this task)</span></div><textarea id="tf-prompt" rows="4" class="ff" style="resize:vertical;font-size:12px;line-height:1.6" placeholder="Instructions for Claude. Be specific about tone, length, and what to avoid."></textarea></div>
-      <div style="display:flex;gap:8px;margin-top:12px">
-        <button class="btn-main" onclick="saveTask()">Save</button>
-        <button class="btn-main" style="border-color:#ddd;color:#888" onclick="cancelTask()">Cancel</button>
       </div>
     </div>
 
@@ -1911,36 +1943,36 @@ function renderMarketing(){
   // ── Tasks ──
   const tl=document.getElementById('mkt-tasks');
   if(tl){
-    let rows=tasks.filter(t=>t.active!==false);
-    if(taskFilter==='due')rows=rows.filter(t=>taskDueIn(t)<=0);
-    rows.sort((a,b)=>taskDueIn(a)-taskDueIn(b));
-    if(!tasks.length){
+    const live=tasks.filter(t=>t.active!==false);
+    const bucket=t=>{
+      if(!t.last_done)return 1;            // never started → do it
+      const n=taskDueIn(t);
+      if(n<0) return 0;                    // overdue
+      if(n===0)return 1;                   // due today
+      if(n<=7) return 2;                   // this week
+      return 3;                            // later
+    };
+    const GROUPS=[
+      {k:0,lbl:'Overdue',   cls:'g-over'},
+      {k:1,lbl:'Do now',    cls:'g-now'},
+      {k:2,lbl:'This week', cls:'g-soon'},
+      {k:3,lbl:'Later',     cls:'g-later'}
+    ];
+    const show=taskFilter==='due'?[0,1]:[0,1,2,3];
+
+    if(!live.length){
       tl.innerHTML='<div class="empty">No tasks yet.</div>';
-    }else if(!rows.length){
-      tl.innerHTML='<div class="empty" style="color:#34453E;display:flex;align-items:center;gap:6px"><i class="ti ti-check" style="font-size:13px"></i> Nothing due. All caught up.</div>';
     }else{
-      tl.innerHTML=rows.map(t=>{
-        const n=taskDueIn(t),d=dueLabel(n);
-        return `<div class="tk-row">
-          <button class="tk-tick" title="Mark done today" onclick="doneTask('${t.id}')"><i class="ti ti-check"></i></button>
-          <div class="tk-main">
-            <div class="tk-title">${t.title}
-              ${t.link?`<a href="${t.link}" target="_blank" rel="noopener" class="tk-link" title="Open"><i class="ti ti-external-link"></i></a>`:''}
-            </div>
-            ${t.detail?`<div class="tk-detail">${t.detail}</div>`:''}
-          </div>
-          <div class="tk-side">
-            <span class="tk-due ${d.cls}">${d.txt}</span>
-            <span class="tk-cad">${CADENCE_LBL[t.cadence_days]||('every '+t.cadence_days+'d')}</span>
-            <span class="tk-last">${t.last_done?'last '+dateLbl(t.last_done):'never done'}</span>
-          </div>
-          <div class="tk-acts">
-            ${t.prompt?`<button class="mat-ico tk-ai" title="Draft with AI" onclick="draftTask('${t.id}')"><i class="ti ti-sparkles"></i></button>`:''}
-            <button class="mat-ico" title="Edit" onclick="editTask('${t.id}')"><i class="ti ti-pencil"></i></button>
-            <button class="mat-ico mat-ico-del" title="Delete" onclick="deleteTask('${t.id}')"><i class="ti ti-trash"></i></button>
-          </div>
-        </div>`;
+      const html=GROUPS.filter(g=>show.includes(g.k)).map(g=>{
+        const rows=live.filter(t=>bucket(t)===g.k).sort((a,b)=>taskDueIn(a)-taskDueIn(b));
+        if(!rows.length)return '';
+        return `<div class="tg-head ${g.cls}"><span class="tg-lbl">${g.lbl}</span><span class="tg-count">${rows.length}</span></div>`
+          + rows.map(t=>taskCard(t)).join('');
       }).join('');
+      tl.innerHTML=html||`<div class="tk-clear">
+        <i class="ti ti-circle-check"></i>
+        <div class="tk-clear-t">Nothing due</div>
+        <div class="tk-clear-s">All caught up. Switch to Everything to see what's coming.</div></div>`;
     }
   }
 
@@ -1980,6 +2012,32 @@ function renderMarketing(){
   drawSplitChart(spend);
   drawGanttChart(camps);
   drawTaskHealth(tasks);
+}
+
+/** One task row. Action buttons are visible, not hover-hidden — these are things you do. */
+function taskCard(t){
+  const never=!t.last_done;
+  const n=taskDueIn(t);
+  const d=never?{txt:'not started yet',cls:'td-new'}:dueLabel(n);
+  return `<div class="tk-row">
+    <button class="tk-tick" title="Mark done today" onclick="doneTask('${t.id}')"><i class="ti ti-check"></i></button>
+    <div class="tk-main">
+      <div class="tk-title">${t.title}</div>
+      ${t.detail?`<div class="tk-detail">${t.detail}</div>`:''}
+      <div class="tk-meta">
+        <span class="tk-due ${d.cls}">${d.txt}</span>
+        <span class="tk-dot">·</span>
+        <span class="tk-cad">${CADENCE_LBL[t.cadence_days]||('every '+t.cadence_days+'d')}</span>
+        ${t.last_done?`<span class="tk-dot">·</span><span class="tk-last">last done ${dateLbl(t.last_done)}</span>`:''}
+      </div>
+    </div>
+    <div class="tk-do">
+      ${t.prompt?`<button class="tk-btn tk-btn-ai" onclick="draftTask('${t.id}')"><i class="ti ti-sparkles"></i>Draft</button>`:''}
+      ${t.link?`<a class="tk-btn" href="${t.link}" target="_blank" rel="noopener"><i class="ti ti-external-link"></i>Open</a>`:''}
+      <button class="mat-ico" title="Edit" onclick="editTask('${t.id}')"><i class="ti ti-pencil"></i></button>
+      <button class="mat-ico mat-ico-del" title="Delete" onclick="deleteTask('${t.id}')"><i class="ti ti-trash"></i></button>
+    </div>
+  </div>`;
 }
 
 /* ── Charts ── */
