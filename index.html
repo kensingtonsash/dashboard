@@ -1675,27 +1675,37 @@ const D_MS=86400000;
 const midnight=d=>{const x=new Date(d);x.setHours(0,0,0,0);return x;};
 const daysUntil=iso=>Math.round((midnight(iso)-midnight(new Date()))/D_MS);
 
-/** Working days including the start day, so "day 2 of 4" reads correctly on site. */
+/** Booked length comes from install_days, set when the job is booked in.
+    But whether it's FINISHED comes from the checklist — a job can overrun,
+    and an open-ended job (rolling HMO) has no sensible day count at all. */
+const installDone=p=>!!(p.checked&&p.checked['Installation complete']);
+
 function installState(p){
   if(!p.install_start)return {k:'none',l:'Not scheduled',s:''};
   const d=daysUntil(p.install_start);
-  const len=Math.max(parseInt(p.install_days)||1,1);
-  const endsIn=d+len-1;
+  const len=parseInt(p.install_days)||null;
 
-  if(d>0){
+  if(d>0){                                        // still to come
     const wks=Math.round(d/7);
     const l = d===1 ? 'Tomorrow'
             : d<=6  ? `In ${d} days`
             : d<=10 ? 'Next week'
             : `In ${wks} weeks`;
-    return {k: d<=7?'soon':'future', l, s:dateLbl(p.install_start)};
+    return {k:d<=7?'soon':'future', l, s:len?`${len} day${len>1?'s':''}`:dateLbl(p.install_start)};
   }
-  if(endsIn>=0){
-    const day=Math.min(1-d,len);
-    return {k:'now', l:'On site', s:`day ${day} of ${len}`};
+
+  if(!installDone(p)){                            // started, not signed off
+    const day=1-d;
+    let s;
+    if(!len)               s = day<=60 ? `week ${Math.ceil(day/7)}` : `since ${dateLbl(p.install_start)}`;
+    else if(day<=len)      s = `day ${day} of ${len}`;
+    else                   s = `day ${day} of ${len} · over`;
+    return {k:'now', l:'On site', s};
   }
-  const ago=-endsIn;
-  const l = ago===0?'Finished today' : ago<7?`Finished ${ago}d ago` : `Finished ${Math.round(ago/7)}w ago`;
+
+  const ago=-d;                                   // signed off
+  const l = ago===0?'Finished today' : ago<7?`Finished ${ago}d ago`
+          : ago<56?`Finished ${Math.round(ago/7)}w ago` : `Finished ${Math.round(ago/30)}m ago`;
   return {k:'past', l, s:dateLbl(p.install_start)};
 }
 
@@ -1711,7 +1721,7 @@ function installTile(p){
   const mon=d.toLocaleDateString('en-GB',{month:'short'}).toUpperCase();
   const day=d.getDate();
   const dow=d.toLocaleDateString('en-GB',{weekday:'short'});
-  return `<div class="cal cal-${st.k}" title="${dateLbl(p.install_start)}${p.install_days?' · '+p.install_days+' days on site':''}">
+  return `<div class="cal cal-${st.k}" title="${dateLbl(p.install_start)}${p.install_days?' · '+p.install_days+' day booking':''}${st.k==='now'?' · '+st.s:''}">
     <div class="cal-m">${mon}</div>
     <div class="cal-d">${day}</div>
     <div class="cal-note">${st.k==='now'?st.s:st.l}</div>
@@ -1768,7 +1778,7 @@ function renderProj(){
           <div class="proj-client"><span style="cursor:pointer;border-bottom:1px dashed #ccc" onclick="event.stopPropagation();goToClient('${proj.client.replace(/'/g,"\\'")}')" title="View client">${proj.client}</span> <span style="font-weight:400;color:#888;font-size:12px">— ${quoteUrl?`<a href="${quoteUrl}" target="_blank" onclick="event.stopPropagation()" style="color:#185FA5;font-weight:500;text-decoration:none" onmouseover="this.style.textDecoration='underline'" onmouseout="this.style.textDecoration='none'">${proj.quote_no}</a>`:proj.quote_no}</span></div>
           <div class="proj-addr">${proj.address} · ${proj.job_type}</div>
           <div class="progress-wrap"><div class="progress-bar"><div class="progress-fill" style="width:${pct}%"></div></div>
-          <div class="progress-label">${done} of ${allSteps.length} steps · ${pct}%${isClosed?'':(()=>{const s=installState(proj);return s.k==='none'?'':` <span class="pl-sep">·</span> <span class="pl-ins pl-${s.k}">${s.l}${s.s&&s.k!=='now'?' · '+s.s:s.k==='now'?' · '+s.s:''}</span>`;})()}</div></div>
+          <div class="progress-label">${done} of ${allSteps.length} steps · ${pct}%${isClosed?'':(()=>{const s=installState(proj);return s.k==='none'?'':` <span class="pl-sep">·</span> <span class="pl-ins pl-${s.k}">${s.l}${s.s?' · '+s.s:''}</span>`;})()}</div></div>
         </div>
         <div class="proj-header-right">${isClosed?'':installTile(proj)}${badge(isClosed?'Closed':proj.status)}<i class="ti ti-chevron-down proj-chevron" id="chev-${proj.id}"></i></div>
       </div>
