@@ -331,6 +331,28 @@ body.dark .inv-pill.active{background:#34453E;color:#d4ede0;border-color:#34453E
 .dark-toggle:hover{border-color:#34453E;color:#34453E}
 body.dark .dark-toggle{border-color:#2e2e34;color:#7ab890;background:#1e1e22}
 body.dark .dark-toggle:hover{border-color:#4a6a5a}
+
+/* ── Left sidebar navigation ── */
+body{padding-left:196px}
+.tabs{
+  position:fixed;left:0;top:0;bottom:0;width:196px;
+  display:flex;flex-direction:column;align-items:stretch;flex-wrap:nowrap;gap:3px;
+  background:#fff;border-right:1px solid #E8E6E1;border-radius:0;
+  padding:22px 12px;overflow-y:auto;z-index:60
+}
+.tab{width:100%;text-align:left;padding:9px 13px;font-size:13px}
+.tab i{width:16px;text-align:center}
+body.dark .tabs{background:#222226;border-right:1px solid #2e2e34}
+
+@media(max-width:900px){
+  body{padding-left:0}
+  .tabs{
+    position:static;width:auto;flex-direction:row;flex-wrap:wrap;
+    background:#F2F1EE;border-right:none;border-radius:10px;padding:3px;gap:2px;z-index:auto
+  }
+  .tab{width:auto;padding:6px 14px}
+  body.dark .tabs{background:#18181A;border-right:none}
+}
 </style>
 </head>
 <body>
