@@ -1280,8 +1280,20 @@ function renderSub(){
         ${s.pricing?`<div style="font-size:12px;color:#34453E;margin-top:4px"><i class="ti ti-currency-pound" style="font-size:11px;margin-right:3px"></i>${s.pricing}</div>`:''}
         ${s.notes?`<div style="font-size:12px;color:#888;margin-top:4px">${s.notes}</div>`:''}
       </div>
-      <div class="row-actions"><button class="btn-sm" onclick="editSub('${s.id}')">Edit</button></div>
+      <div class="row-actions">
+        <button class="btn-sm" onclick="editSub('${s.id}')">Edit</button>
+        <button class="btn-sm" style="border-color:#A32D2D;color:#A32D2D" onclick="deleteSub('${s.id}')">Delete</button>
+      </div>
     </div>`).join('');
+}
+
+async function deleteSub(id){
+  const s=(DATA.sub||[]).find(x=>x.id===id);if(!s)return;
+  if(!confirm(`Delete ${s.name}? This cannot be undone.`))return;
+  await sb('subcontractors','DELETE',null,`?id=eq.${id}`);
+  DATA.sub=(DATA.sub||[]).filter(x=>x.id!==id);
+  if(editingSubId===id)cancelSub();
+  renderSub();
 }
 
 function showAddSub(){
