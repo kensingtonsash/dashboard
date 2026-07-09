@@ -352,6 +352,8 @@ body.dark #inv-body span[title="View client"]{color:#d8d8e8 !important;border-bo
 .mat-select{font-size:11.5px;padding:3px 7px;border-radius:7px;border:1px solid #E8E6E1;background:#fff;color:#666;font-family:inherit;cursor:pointer;outline:none;max-width:150px}
 .mat-qty{width:64px;padding:5px 8px;border:1px solid #E8E6E1;border-radius:7px;font-size:12.5px;font-family:inherit;outline:none;text-align:center;background:#fff}
 .mat-qty:focus,.mat-select:focus{border-color:#34453E}
+.mat-actions{white-space:nowrap;text-align:right}
+.mat-actions .btn-sm{margin-left:5px}
 body.dark .mat-table th{color:#505060;border-bottom-color:#28282e}
 body.dark .mat-table td{border-bottom-color:#28282e}
 body.dark .mat-table tr:hover td{background:#28282e}
@@ -559,13 +561,35 @@ body.dark .tabs{background:#222226;border-right:1px solid #2e2e34}
           <span id="mat-count" style="font-size:11px;color:#aaa"></span>
           <button class="btn-sm" onclick="clearMatQty()">Clear qty</button>
           <button class="btn-sm" onclick="copyMatOrder()"><i class="ti ti-copy" style="font-size:11px;margin-right:3px"></i>Copy order list</button>
+          <button class="btn-sm" onclick="showAddMat()">+ Add material</button>
           <input type="text" id="mat-search" placeholder="Search materials..." oninput="renderMaterials()" style="padding:6px 12px;border:1px solid #E8E6E1;border-radius:8px;font-size:13px;font-family:inherit;width:200px;outline:none">
         </div>
       </div>
       <div style="overflow-x:auto"><table class="mat-table">
-        <thead><tr><th>Item</th><th>Order via</th><th>Supplier</th><th>Options</th><th style="width:80px">Qty</th><th>Notes</th></tr></thead>
+        <thead><tr><th>Item</th><th>Order via</th><th>Supplier</th><th>Options</th><th style="width:80px">Qty</th><th>Notes</th><th></th></tr></thead>
         <tbody id="mat-list"></tbody>
       </table></div>
+    </div>
+
+    <div id="mat-form" style="display:none" class="card">
+      <div class="card-title"><i class="ti ti-package"></i> <span id="mat-form-title">Add material</span></div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px">
+        <div><div style="font-size:11px;color:#888;margin-bottom:4px">Item name</div><input id="mf-name" style="width:100%;padding:7px 10px;border:1px solid #E8E6E1;border-radius:8px;font-size:13px;font-family:inherit;outline:none"></div>
+        <div><div style="font-size:11px;color:#888;margin-bottom:4px">Category</div><input id="mf-category" list="mf-cat-list" style="width:100%;padding:7px 10px;border:1px solid #E8E6E1;border-radius:8px;font-size:13px;font-family:inherit;outline:none" placeholder="Sash Repairs"><datalist id="mf-cat-list"></datalist></div>
+        <div><div style="font-size:11px;color:#888;margin-bottom:4px">Order via</div>
+          <select id="mf-via" style="width:100%;padding:7px 10px;border:1px solid #E8E6E1;border-radius:8px;font-size:13px;font-family:inherit;outline:none;background:#fff">
+            <option value="link">Link</option><option value="email">Email order</option><option value="whatsapp">WhatsApp order</option>
+          </select>
+        </div>
+        <div><div style="font-size:11px;color:#888;margin-bottom:4px">Supplier</div><input id="mf-supplier" style="width:100%;padding:7px 10px;border:1px solid #E8E6E1;border-radius:8px;font-size:13px;font-family:inherit;outline:none"></div>
+      </div>
+      <div style="margin-top:10px"><div style="font-size:11px;color:#888;margin-bottom:4px">URL <span style="color:#bbb">(only used when Order via = Link)</span></div><input id="mf-url" style="width:100%;padding:7px 10px;border:1px solid #E8E6E1;border-radius:8px;font-size:13px;font-family:inherit;outline:none" placeholder="https://..."></div>
+      <div style="margin-top:10px"><div style="font-size:11px;color:#888;margin-bottom:4px">Options <span style="color:#bbb">(comma separated — leave blank for no dropdown)</span></div><input id="mf-options" style="width:100%;padding:7px 10px;border:1px solid #E8E6E1;border-radius:8px;font-size:13px;font-family:inherit;outline:none" placeholder="Select size…, Ovolo, Lambs Tongue"></div>
+      <div style="margin-top:10px"><div style="font-size:11px;color:#888;margin-bottom:4px">Notes</div><textarea id="mf-note" rows="2" style="width:100%;padding:7px 10px;border:1px solid #E8E6E1;border-radius:8px;font-size:13px;font-family:inherit;outline:none;resize:vertical"></textarea></div>
+      <div style="display:flex;gap:8px;margin-top:12px">
+        <button class="btn-main" onclick="saveMat()">Save</button>
+        <button class="btn-main" style="border-color:#ddd;color:#888" onclick="cancelMat()">Cancel</button>
+      </div>
     </div>
   </div>
 </div>
@@ -633,7 +657,7 @@ function getProjectChecklist(proj){
   return sections;
 }
 
-let DATA={enq:[],inv:[],jobs:[],proj:[],clients:[],sub:[]};
+let DATA={enq:[],inv:[],jobs:[],proj:[],clients:[],sub:[],mat:[]};
 let svcChart=null,clientFilter='all';
 const allItems=()=>getProjectChecklist({job_type:'Full Replacement',payment_schedule:'A',ironmongery:true}).flatMap(s=>s.items);
 const fmt=n=>'£'+Number(n).toLocaleString('en-GB',{minimumFractionDigits:0,maximumFractionDigits:0});
@@ -668,15 +692,16 @@ function toggleDark(){
 async function loadAll(){
   setStatus('Loading...');
   try{
-    const [enq,inv,jobs,proj,clients,sub]=await Promise.all([
+    const [enq,inv,jobs,proj,clients,sub,mat]=await Promise.all([
       sb('enquiries','GET',null,'?order=quote_no.desc'),
       sb('invoices','GET',null,'?order=invoice_no.desc'),
       sb('jobs','GET',null,'?order=created_at.desc'),
       sb('projects','GET',null,'?order=created_at.desc'),
       sb('clients','GET',null,'?order=created_at.desc'),
-      sb('subcontractors','GET',null,'?order=name.asc')
+      sb('subcontractors','GET',null,'?order=name.asc'),
+      sb('materials','GET',null,'?order=sort_order.asc').catch(()=>[])
     ]);
-    DATA.enq=enq||[];DATA.inv=inv||[];DATA.jobs=jobs||[];DATA.proj=proj||[];DATA.clients=clients||[];DATA.sub=sub||[];
+    DATA.enq=enq||[];DATA.inv=inv||[];DATA.jobs=jobs||[];DATA.proj=proj||[];DATA.clients=clients||[];DATA.sub=sub||[];DATA.mat=mat||[];
     render();
     setStatus('Updated '+new Date().toLocaleTimeString('en-GB',{hour:'2-digit',minute:'2-digit'}));
   }catch(e){setStatus('Error: '+e.message);}
@@ -1398,62 +1423,11 @@ async function saveSub(){
 function cancelSub(){document.getElementById('sub-form').style.display='none';}
 
 /* ── MATERIALS ──
-   Edit this list directly.
-   name     : item name
-   via      : 'link' | 'email' | 'whatsapp'  (how it gets ordered)
-   url      : only used when via==='link'. Paste the real product URL.
-   supplier : supplier name
-   options  : array of choices -> renders a dropdown. Omit or [] for none.
-   note     : free text shown in Notes column
-*/
-const MATERIALS=[
-  {cat:'Sash Repairs',items:[
-    {name:'Staff Bead',via:'link',url:'',supplier:'Mighton',options:['Select size…','Ovolo','Lambs Tongue','Square']},
-    {name:'Parting Bead',via:'link',url:'',supplier:'Mighton',options:['Select size…','Standard','Deep']},
-    {name:'Sash Cord',via:'link',url:'',supplier:'Mighton',options:['Select size…','No.6','No.7','No.8']},
-    {name:'Masking Tape',via:'link',url:'',supplier:'Mighton'},
-    {name:'Sash Lifts',via:'link',url:'',supplier:'Mighton'},
-    {name:'Fitch Fasteners',via:'link',url:'',supplier:'Mighton'},
-    {name:'Brighton Fasteners',via:'link',url:'',supplier:'Mighton'},
-    {name:'Sash Pulleys',via:'link',url:'',supplier:'Mighton',options:['Select finish…','Brass','Chrome','Satin Nickel','Black']},
-    {name:'Spiral Balances',via:'link',url:'',supplier:'Mighton'},
-    {name:'Lead Makeweights & Add-ons',via:'link',url:'',supplier:'Mighton'},
-    {name:'Sash Weights',via:'whatsapp',url:'',supplier:'Sash Weights Shop London',note:'Email or WhatsApp order'},
-    {name:'Glazing Putty',via:'link',url:'',supplier:'Sealants Online, Leyland'},
-    {name:'Primer',via:'link',url:'',supplier:'Mighton'}
-  ]},
-  {cat:'Replacement Windows & Doors',items:[
-    {name:'Timber windows and doors',via:'email',url:'',supplier:'MB Windalux',note:'Standard day-to-day windows and doors for 90% of jobs'},
-    {name:'Accoya and fully custom windows and doors',via:'email',url:'',supplier:'Kemp Windows & Doors',note:'Higher end, fully bespoke — listed buildings and discerning clientele'},
-    {name:'Slimline Double Glazing',via:'whatsapp',url:'',supplier:'Beechhall Joinery'},
-    {name:'70mm Ogee Architrave 5 Pack',via:'link',url:'',supplier:'Wickes'},
-    {name:'Custom Architrave',via:'email',url:'',supplier:''},
-    {name:'Window Board 2.1m',via:'link',url:'',supplier:'Wickes'}
-  ]},
-  {cat:'Painting & Decorating',items:[
-    {name:'Teknos Aqua White Paint 3L',via:'link',url:'',supplier:'Paint Monster',options:['Select colour…','RAL','Farrow & Ball','Little Greene','NCS']},
-    {name:'Teknos Primer 3L',via:'link',url:'',supplier:'Paint Monster'},
-    {name:'Ronseal 2 Part Filler',via:'link',url:'',supplier:'Wickes'},
-    {name:'RepairCare Resin',via:'link',url:'',supplier:''},
-    {name:'Caulk',via:'link',url:'',supplier:'Mighton'},
-    {name:'Johnstones Joncryl Primer',via:'link',url:'',supplier:'Amazon'},
-    {name:'Silicone',via:'link',url:'',supplier:''},
-    {name:'Exterior Masonry Filler',via:'link',url:'',supplier:''},
-    {name:'Interior Wall Filler',via:'link',url:'',supplier:''},
-    {name:'Triangle Sanding Head',via:'link',url:'',supplier:'Amazon'},
-    {name:'Sash Brushes',via:'link',url:'',supplier:'Amazon'},
-    {name:'Triangle Sanding Pad',via:'link',url:'',supplier:'Amazon'},
-    {name:'Sys Extractor Bags',via:'link',url:'',supplier:'Amazon'},
-    {name:'40 Grit RO90 Discs',via:'link',url:'',supplier:'Amazon'},
-    {name:'120 Grit RO90 Discs',via:'link',url:'',supplier:'Amazon'},
-    {name:'80 Grit RO90 Triangles',via:'link',url:'',supplier:'Amazon'},
-    {name:'120 Grit RO90 Triangles',via:'link',url:'',supplier:'Amazon'},
-    {name:'Plastic Dust Sheets',via:'link',url:'',supplier:'Mighton'}
-  ]}
-];
+   Lives in the Supabase `materials` table. Add / edit / delete from the UI.
+   via: 'link' | 'email' | 'whatsapp'   options: text[] -> renders a dropdown */
 
 const MAT_STATE={};
-const matKey=(cat,name)=>cat+'|'+name;
+let editingMatId=null;
 
 function setMatQty(k,v){MAT_STATE[k]={...(MAT_STATE[k]||{}),qty:parseInt(v)||0};updateMatCount();}
 function setMatOpt(k,v){MAT_STATE[k]={...(MAT_STATE[k]||{}),opt:v};}
@@ -1471,60 +1445,137 @@ function clearMatQty(){
 
 function copyMatOrder(){
   const bySupplier={};
-  MATERIALS.forEach(g=>g.items.forEach(m=>{
-    const st=MAT_STATE[matKey(g.cat,m.name)];
+  (DATA.mat||[]).forEach(m=>{
+    const st=MAT_STATE[m.id];
     if(!st||!st.qty)return;
     const sup=m.supplier||'Unspecified supplier';
     (bySupplier[sup]=bySupplier[sup]||[]).push(
       `  ${st.qty} x ${m.name}${st.opt&&!st.opt.startsWith('Select')?' ('+st.opt+')':''}`
     );
-  }));
+  });
   const sups=Object.keys(bySupplier);
   if(!sups.length)return alert('Enter a quantity against at least one item first.');
   const txt=sups.map(s=>s+':\n'+bySupplier[s].join('\n')).join('\n\n');
-  navigator.clipboard.writeText(txt).then(
-    ()=>alert('Order list copied:\n\n'+txt),
-    ()=>alert(txt)
-  );
+  navigator.clipboard.writeText(txt).then(()=>alert('Order list copied:\n\n'+txt),()=>alert(txt));
 }
 
 function renderMaterials(){
   const q=(document.getElementById('mat-search')?.value||'').toLowerCase();
   const b=document.getElementById('mat-list');
   if(!b)return;
-  let html='',hits=0;
+  const mats=DATA.mat||[];
+
+  // keep the category datalist in step with what exists
+  const cats=[...new Set(mats.map(m=>m.category).filter(Boolean))];
+  const dl=document.getElementById('mf-cat-list');
+  if(dl)dl.innerHTML=cats.map(c=>`<option value="${c}">`).join('');
+
   const viaCell=m=>{
-    if(m.via==='link') return m.url
-      ? `<a href="${m.url}" target="_blank" rel="noopener" class="mat-link">Link <i class="ti ti-external-link" style="font-size:10px"></i></a>`
-      : `<span class="mat-none">Link needed</span>`;
     if(m.via==='email')    return `<span class="mat-via"><i class="ti ti-mail" style="font-size:11px;margin-right:4px"></i>Email order</span>`;
     if(m.via==='whatsapp') return `<span class="mat-via"><i class="ti ti-brand-whatsapp" style="font-size:11px;margin-right:4px"></i>WhatsApp order</span>`;
-    return '<span class="mat-none">—</span>';
+    return m.url
+      ? `<a href="${m.url}" target="_blank" rel="noopener" class="mat-link">Link <i class="ti ti-external-link" style="font-size:10px"></i></a>`
+      : `<span class="mat-none">Link needed</span>`;
   };
-  MATERIALS.forEach(g=>{
-    const items=g.items.filter(m=>!q||((m.name||'')+(m.supplier||'')+(m.note||'')).toLowerCase().includes(q));
+
+  let html='',hits=0;
+  cats.forEach(cat=>{
+    const items=mats
+      .filter(m=>m.category===cat)
+      .filter(m=>!q||((m.name||'')+(m.supplier||'')+(m.note||'')).toLowerCase().includes(q))
+      .sort((a,b)=>(a.sort_order||0)-(b.sort_order||0));
     if(!items.length)return;
     hits+=items.length;
-    html+=`<tr class="mat-group"><td colspan="6">${g.cat}</td></tr>`;
+    html+=`<tr class="mat-group"><td colspan="7">${cat}</td></tr>`;
     html+=items.map(m=>{
-      const k=matKey(g.cat,m.name);
-      const st=MAT_STATE[k]||{};
+      const st=MAT_STATE[m.id]||{};
       const opts=(m.options&&m.options.length)
-        ? `<select class="mat-select" onchange="setMatOpt('${k}',this.value)">${m.options.map(o=>`<option ${st.opt===o?'selected':''}>${o}</option>`).join('')}</select>`
+        ? `<select class="mat-select" onchange="setMatOpt('${m.id}',this.value)">${m.options.map(o=>`<option ${st.opt===o?'selected':''}>${o}</option>`).join('')}</select>`
         : `<span class="mat-none">—</span>`;
       return `<tr>
         <td class="mat-name">${m.name}</td>
         <td>${viaCell(m)}</td>
         <td class="mat-sup">${m.supplier||'<span class="mat-none">—</span>'}</td>
         <td>${opts}</td>
-        <td><input type="number" min="0" class="mat-qty" value="${st.qty||''}" oninput="setMatQty('${k}',this.value)"></td>
+        <td><input type="number" min="0" class="mat-qty" value="${st.qty||''}" oninput="setMatQty('${m.id}',this.value)"></td>
         <td class="mat-note">${m.note||''}</td>
+        <td class="mat-actions">
+          <button class="btn-sm" onclick="editMat('${m.id}')">Edit</button>
+          <button class="btn-sm" style="border-color:#A32D2D;color:#A32D2D" onclick="deleteMat('${m.id}')">Delete</button>
+        </td>
       </tr>`;
     }).join('');
   });
-  b.innerHTML=hits?html:'<tr><td colspan="6" class="empty">No materials match that search.</td></tr>';
+  b.innerHTML=hits?html:'<tr><td colspan="7" class="empty">No materials match that search.</td></tr>';
   updateMatCount();
 }
+
+function showAddMat(){
+  editingMatId=null;
+  document.getElementById('mat-form-title').textContent='Add material';
+  ['name','category','url','supplier','options','note'].forEach(f=>document.getElementById('mf-'+f).value='');
+  document.getElementById('mf-via').value='link';
+  document.getElementById('mat-form').style.display='block';
+  document.getElementById('mf-name').focus();
+}
+
+function editMat(id){
+  const m=(DATA.mat||[]).find(x=>x.id===id);if(!m)return;
+  editingMatId=id;
+  document.getElementById('mat-form-title').textContent='Edit material';
+  document.getElementById('mf-name').value=m.name||'';
+  document.getElementById('mf-category').value=m.category||'';
+  document.getElementById('mf-via').value=m.via||'link';
+  document.getElementById('mf-url').value=m.url||'';
+  document.getElementById('mf-supplier').value=m.supplier||'';
+  document.getElementById('mf-options').value=(m.options||[]).join(', ');
+  document.getElementById('mf-note').value=m.note||'';
+  document.getElementById('mat-form').style.display='block';
+  document.getElementById('mf-name').focus();
+}
+
+async function saveMat(){
+  const optsRaw=document.getElementById('mf-options').value.trim();
+  const payload={
+    name:document.getElementById('mf-name').value.trim(),
+    category:document.getElementById('mf-category').value.trim(),
+    via:document.getElementById('mf-via').value,
+    url:document.getElementById('mf-url').value.trim(),
+    supplier:document.getElementById('mf-supplier').value.trim(),
+    options:optsRaw?optsRaw.split(',').map(s=>s.trim()).filter(Boolean):null,
+    note:document.getElementById('mf-note').value.trim()
+  };
+  if(!payload.name)return alert('Item name is required.');
+  if(!payload.category)return alert('Category is required.');
+  try{
+    if(editingMatId){
+      await sb('materials','PATCH',payload,`?id=eq.${editingMatId}`);
+      const i=DATA.mat.findIndex(x=>x.id===editingMatId);
+      if(i>-1)DATA.mat[i]={...DATA.mat[i],...payload};
+    }else{
+      const sibs=(DATA.mat||[]).filter(x=>x.category===payload.category);
+      payload.sort_order=sibs.length?Math.max(...sibs.map(x=>x.sort_order||0))+10:10;
+      const res=await sb('materials','POST',payload);
+      if(res&&res[0])DATA.mat=[...(DATA.mat||[]),res[0]];
+    }
+    document.getElementById('mat-form').style.display='none';
+    renderMaterials();
+  }catch(e){alert('Save failed: '+e.message);}
+}
+
+async function deleteMat(id){
+  const m=(DATA.mat||[]).find(x=>x.id===id);if(!m)return;
+  if(!confirm(`Delete "${m.name}"? This cannot be undone.`))return;
+  try{
+    await sb('materials','DELETE',null,`?id=eq.${id}`);
+    DATA.mat=(DATA.mat||[]).filter(x=>x.id!==id);
+    delete MAT_STATE[id];
+    if(editingMatId===id)cancelMat();
+    renderMaterials();
+  }catch(e){alert('Delete failed: '+e.message);}
+}
+
+function cancelMat(){editingMatId=null;document.getElementById('mat-form').style.display='none';}
 
 let chatHistory=[],chatBusy=false;
 
