@@ -423,31 +423,6 @@ body.dark .ai-note{color:#505060}
 body.dark .ai-err{color:#e06060}
 body.dark .tk-ai:hover{background:#2e3a34;color:#7ab890}
 
-/* ── Marketing: task health ring ── */
-.th-wrap{display:flex;align-items:center;gap:22px}
-.th-ring{position:relative;width:150px;height:150px;flex-shrink:0}
-.th-centre{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;pointer-events:none}
-.th-num{font-size:34px;font-weight:700;line-height:1;letter-spacing:-.02em;color:#1a1a1a}
-.th-num.good{color:#2D7A55}.th-num.mid{color:#D8952E}.th-num.bad{color:#A32D2D}
-.th-cap{font-size:10px;color:#bbb;text-transform:uppercase;letter-spacing:.08em;font-weight:700;margin-top:4px}
-.th-key{flex:1;min-width:0}
-.th-krow{display:flex;align-items:center;gap:9px;padding:6px 0;border-bottom:1px solid #F2F1EE;font-size:12.5px}
-.th-krow:last-of-type{border-bottom:none}
-.th-kdot{width:9px;height:9px;border-radius:3px;flex-shrink:0}
-.th-klbl{flex:1;color:#888}
-.th-kval{font-weight:700;color:#1a1a1a}
-.th-foot{font-size:11px;color:#bbb;margin-top:10px;padding-top:9px;border-top:1px solid #F2F1EE}
-@media(max-width:1100px){.th-wrap{flex-direction:column;align-items:stretch}.th-ring{align-self:center}}
-body.dark .th-num{color:#e8e8f0}
-body.dark .th-num.good{color:#5ab880}
-body.dark .th-num.mid{color:#c09040}
-body.dark .th-num.bad{color:#e06060}
-body.dark .th-cap{color:#505060}
-body.dark .th-krow{border-bottom-color:#28282e}
-body.dark .th-klbl{color:#58586a}
-body.dark .th-kval{color:#d8d8e8}
-body.dark .th-foot{color:#505060;border-top-color:#28282e}
-
 /* ── Marketing KPI accents ── */
 #kpi-mkt .kpi:nth-child(1)::before{background:#D8952E}
 #kpi-mkt .kpi:nth-child(2)::before{background:#185FA5}
@@ -456,62 +431,59 @@ body.dark .th-foot{color:#505060;border-top-color:#28282e}
 #tab-marketing .chart-wrap{height:200px}
 
 /* ── Marketing: task cards ── */
-.tc-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(258px,1fr));gap:12px}
+.tc-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(232px,1fr));gap:9px}
 
-.tc{position:relative;display:flex;flex-direction:column;background:#fff;border:1px solid #E8E6E1;border-radius:14px;
-  padding:16px 16px 13px;overflow:hidden;transition:transform .14s,box-shadow .14s,border-color .14s}
-.tc::before{content:'';position:absolute;left:0;right:0;top:0;height:3px;background:#D6D4CE}
-.tc:hover{transform:translateY(-2px);box-shadow:0 6px 18px rgba(0,0,0,.09);border-color:#D6D4CE}
+.tc{position:relative;display:flex;flex-direction:column;gap:10px;background:#fff;border:1px solid #E8E6E1;
+  border-radius:11px;padding:11px 12px;overflow:hidden;transition:box-shadow .14s,border-color .14s}
+.tc::before{content:'';position:absolute;left:0;top:0;bottom:0;width:3px;background:#D6D4CE}
+.tc:hover{box-shadow:0 3px 10px rgba(0,0,0,.07);border-color:#D6D4CE}
 .tc-over::before{background:#A32D2D}
 .tc-now::before{background:#D8952E}
 .tc-new::before{background:#B9B7B0}
 .tc-soon::before{background:#34453E}
 .tc-later::before{background:#E0DED8}
 
-.tc-head{display:flex;align-items:flex-start;gap:8px;margin-bottom:11px}
-.tc-icon{width:36px;height:36px;border-radius:10px;background:#F4F6F4;color:#34453E;display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0}
+.tc-head{display:flex;align-items:center;gap:9px;min-width:0}
+.tc-icon{width:28px;height:28px;border-radius:8px;background:#F4F6F4;color:#34453E;display:flex;align-items:center;
+  justify-content:center;font-size:15px;flex-shrink:0}
 .tc-over .tc-icon{background:#FDEFEF;color:#A32D2D}
 .tc-now  .tc-icon{background:#FDF3E3;color:#8A5410}
-.tc-chip{margin-left:auto;font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.05em;
-  padding:3px 9px;border-radius:20px;background:#EFEFEC;color:#999;white-space:nowrap;align-self:center}
+.tc-txt{flex:1;min-width:0}
+.tc-title{font-size:12.5px;font-weight:600;color:#1a1a1a;line-height:1.3;
+  white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.tc-meta{font-size:10px;color:#c4c2bc;margin-top:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.tc-chip{flex-shrink:0;font-size:9.5px;font-weight:700;text-transform:uppercase;letter-spacing:.04em;
+  padding:2px 7px;border-radius:20px;background:#EFEFEC;color:#999;white-space:nowrap}
 .tc-over .tc-chip{background:#FDEBEB;color:#A32D2D}
 .tc-now  .tc-chip{background:#FEF1DC;color:#7D4B0A}
-.tc-new  .tc-chip{background:#EFEFEC;color:#999}
 .tc-soon .tc-chip{background:#EAF0EC;color:#34453E}
-.tc-edit{position:absolute;top:12px;right:10px;display:flex;gap:0;opacity:0;transition:opacity .12s;background:#fff;border-radius:8px}
+.tc-edit{position:absolute;top:9px;right:8px;display:flex;opacity:0;transition:opacity .12s;background:#fff;border-radius:7px}
 .tc:hover .tc-edit{opacity:1}
 .tc:hover .tc-chip{opacity:0}
+.tc-edit .mat-ico{opacity:1;padding:3px;font-size:13px}
 
-.tc-title{font-size:14px;font-weight:600;color:#1a1a1a;line-height:1.35;margin-bottom:5px}
-.tc-detail{font-size:11.5px;color:#a8a6a0;line-height:1.55;flex:1;min-height:34px;
-  display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden}
-.tc-meta{display:flex;align-items:center;gap:6px;font-size:10.5px;color:#c4c2bc;margin:11px 0 12px;
-  padding-top:10px;border-top:1px solid #F4F4F2;flex-wrap:wrap}
-.tc-sep{color:#e0ded8}
-
-.tc-foot{display:flex;align-items:center;gap:6px}
-.tc-btn{flex:1;display:inline-flex;align-items:center;justify-content:center;gap:5px;font-size:12px;font-weight:600;
-  padding:8px 10px;border-radius:9px;border:1px solid transparent;cursor:pointer;font-family:inherit;text-decoration:none;
+.tc-foot{display:flex;align-items:center;gap:5px}
+.tc-btn{flex:1;display:inline-flex;align-items:center;justify-content:center;gap:5px;font-size:11.5px;font-weight:600;
+  padding:6px 8px;border-radius:8px;border:1px solid transparent;cursor:pointer;font-family:inherit;text-decoration:none;
   white-space:nowrap;transition:all .15s}
 .tc-btn-ai{background:#34453E;color:#fff;border-color:#34453E}
-.tc-btn-ai:hover{background:#2a3830;border-color:#2a3830}
-.tc-btn-ai i{font-size:13px}
+.tc-btn-ai:hover{background:#2a3830}
+.tc-btn i{font-size:12px}
 .tc-btn-ghost{background:transparent;border:1px dashed #E8E6E1;color:#c4c2bc;cursor:default;font-weight:500}
-.tc-btn-icon{flex:0 0 auto;padding:8px 10px;background:#fff;border:1px solid #E0DED8;color:#888}
+.tc-btn-icon{flex:0 0 auto;padding:6px 8px;background:#fff;border:1px solid #E0DED8;color:#999}
 .tc-btn-icon:hover{border-color:#34453E;color:#34453E}
-.tc-done{flex:0 0 auto;display:inline-flex;align-items:center;gap:5px;font-size:12px;font-weight:600;padding:8px 12px;
-  border-radius:9px;border:1px solid #E0DED8;background:#fff;color:#999;cursor:pointer;font-family:inherit;transition:all .15s}
+.tc-done{flex:0 0 auto;display:inline-flex;align-items:center;justify-content:center;width:30px;height:29px;
+  border-radius:8px;border:1px solid #E0DED8;background:#fff;color:#bbb;cursor:pointer;font-size:14px;transition:all .15s}
 .tc-done:hover{background:#2D7A55;border-color:#2D7A55;color:#fff}
-.tc-done i{font-size:13px}
 
-.tk-clear{display:flex;flex-direction:column;align-items:center;justify-content:center;padding:40px 12px;text-align:center;gap:2px}
-.tk-clear i{font-size:30px;color:#2D7A55;margin-bottom:6px}
+.tk-clear{display:flex;flex-direction:column;align-items:center;justify-content:center;padding:34px 12px;text-align:center;gap:2px}
+.tk-clear i{font-size:28px;color:#2D7A55;margin-bottom:6px}
 .tk-clear-t{font-size:14px;font-weight:600;color:#34453E}
 .tk-clear-s{font-size:12px;color:#bbb}
 
 body.dark .tc{background:#222226;border-color:#2e2e34}
 body.dark .tc::before{background:#33333b}
-body.dark .tc:hover{box-shadow:0 6px 18px rgba(0,0,0,.4);border-color:#3a3a42}
+body.dark .tc:hover{box-shadow:0 3px 10px rgba(0,0,0,.4);border-color:#3a3a42}
 body.dark .tc-over::before{background:#c0392b}
 body.dark .tc-now::before{background:#c09040}
 body.dark .tc-new::before{background:#44444e}
@@ -520,22 +492,19 @@ body.dark .tc-later::before{background:#2e2e34}
 body.dark .tc-icon{background:#282e2a;color:#7ab890}
 body.dark .tc-over .tc-icon{background:#331d1d;color:#e06060}
 body.dark .tc-now .tc-icon{background:#332813;color:#c09040}
+body.dark .tc-title{color:#d8d8e8}
+body.dark .tc-meta{color:#44444e}
 body.dark .tc-chip{background:#28282e;color:#58586a}
 body.dark .tc-over .tc-chip{background:#3a1a1a;color:#e06060}
 body.dark .tc-now .tc-chip{background:#3a2a10;color:#c09040}
-body.dark .tc-new .tc-chip{background:#28282e;color:#58586a}
 body.dark .tc-soon .tc-chip{background:#1e2e24;color:#7ab890}
 body.dark .tc-edit{background:#222226}
-body.dark .tc-title{color:#d8d8e8}
-body.dark .tc-detail{color:#58586a}
-body.dark .tc-meta{color:#44444e;border-top-color:#28282e}
-body.dark .tc-sep{color:#33333b}
 body.dark .tc-btn-ai{background:#34453E;border-color:#4a6a5a;color:#d4ede0}
 body.dark .tc-btn-ai:hover{background:#3d5449}
 body.dark .tc-btn-ghost{border-color:#2e2e34;color:#3a3a42}
 body.dark .tc-btn-icon{background:#1e1e22;border-color:#2e2e34;color:#58586a}
 body.dark .tc-btn-icon:hover{border-color:#4a6a5a;color:#7ab890}
-body.dark .tc-done{background:#1e1e22;border-color:#2e2e34;color:#58586a}
+body.dark .tc-done{background:#1e1e22;border-color:#2e2e34;color:#4e4e58}
 body.dark .tc-done:hover{background:#2D7A55;border-color:#2D7A55;color:#fff}
 body.dark .tk-clear i{color:#5ab880}
 body.dark .tk-clear-t{color:#7ab890}
@@ -836,23 +805,14 @@ body.dark .tabs{background:#222226;border-right:1px solid #2e2e34}
       </div>
     </div>
 
-    <div class="home-grid">
-      <div class="card">
-        <div class="card-title"><i class="ti ti-timeline-event"></i> Campaign timeline</div>
-        <div class="chart-wrap" id="mkt-gantt-wrap"><canvas id="mkt-gantt-chart"></canvas></div>
-        <div id="mkt-gantt-empty" class="chart-empty" style="display:none">
-          <i class="ti ti-timeline-event"></i>
-          <div class="ce-t">No campaigns yet</div>
-          <div class="ce-s">Add one with a start date to see it here</div>
-          <button class="btn-sm" onclick="showAddCamp()">Add campaign</button>
-        </div>
-      </div>
-      <div class="card">
-        <div class="card-title"><i class="ti ti-progress-check"></i> Task health</div>
-        <div class="th-wrap">
-          <div class="th-ring"><canvas id="mkt-health-chart"></canvas><div class="th-centre" id="th-centre"></div></div>
-          <div class="th-key" id="th-key"></div>
-        </div>
+    <div class="card">
+      <div class="card-title"><i class="ti ti-timeline-event"></i> Campaign timeline</div>
+      <div class="chart-wrap" id="mkt-gantt-wrap"><canvas id="mkt-gantt-chart"></canvas></div>
+      <div id="mkt-gantt-empty" class="chart-empty" style="display:none">
+        <i class="ti ti-timeline-event"></i>
+        <div class="ce-t">No campaigns yet</div>
+        <div class="ce-s">Add one with a start date to see it here</div>
+        <button class="btn-sm" onclick="showAddCamp()">Add campaign</button>
       </div>
     </div>
 
@@ -2025,46 +1985,45 @@ function renderMarketing(){
   drawSpendChart(spend);
   drawSplitChart(spend);
   drawGanttChart(camps);
-  drawTaskHealth(tasks);
 }
 
-/** A play you pick up and run — not a checkbox. */
+/** Compact tile. Detail lives in the tooltip, not on the card. */
 function taskCard(t){
   const never=!t.last_done;
   const n=taskDueIn(t);
   const state = never ? 'new' : n<0 ? 'over' : n===0 ? 'now' : n<=7 ? 'soon' : 'later';
   const chip  = never ? 'Not started'
-              : n<0   ? Math.abs(n)+'d overdue'
-              : n===0 ? 'Due today'
-              : n===1 ? 'Due tomorrow'
-              : 'In '+n+' days';
+              : n<0   ? Math.abs(n)+'d late'
+              : n===0 ? 'Today'
+              : n===1 ? 'Tomorrow'
+              : n+'d';
   const icon=t.icon||'ti-target-arrow';
-  return `<div class="tc tc-${state}">
+  const cad=CADENCE_LBL[t.cadence_days]||('Every '+t.cadence_days+'d');
+  const tip=(t.detail||'').replace(/"/g,'&quot;');
+  return `<div class="tc tc-${state}"${tip?` title="${tip}"`:''}>
     <div class="tc-head">
       <div class="tc-icon"><i class="ti ${icon}"></i></div>
+      <div class="tc-txt">
+        <div class="tc-title">${t.title}</div>
+        <div class="tc-meta">${cad}${t.last_done?' · last '+dateLbl(t.last_done):''}</div>
+      </div>
       <span class="tc-chip">${chip}</span>
       <div class="tc-edit">
         <button class="mat-ico" title="Edit" onclick="editTask('${t.id}')"><i class="ti ti-pencil"></i></button>
         <button class="mat-ico mat-ico-del" title="Delete" onclick="deleteTask('${t.id}')"><i class="ti ti-trash"></i></button>
       </div>
     </div>
-    <div class="tc-title">${t.title}</div>
-    ${t.detail?`<div class="tc-detail">${t.detail}</div>`:'<div class="tc-detail"></div>'}
-    <div class="tc-meta">
-      <span>${CADENCE_LBL[t.cadence_days]||('Every '+t.cadence_days+'d')}</span>
-      ${t.last_done?`<span class="tc-sep">·</span><span>Last ${dateLbl(t.last_done)}</span>`:''}
-    </div>
     <div class="tc-foot">
-      ${t.prompt?`<button class="tc-btn tc-btn-ai" onclick="draftTask('${t.id}')"><i class="ti ti-sparkles"></i>Draft it</button>`
+      ${t.prompt?`<button class="tc-btn tc-btn-ai" onclick="draftTask('${t.id}')"><i class="ti ti-sparkles"></i>Draft</button>`
                 :t.link?`<a class="tc-btn tc-btn-ai" href="${t.link}" target="_blank" rel="noopener"><i class="ti ti-external-link"></i>Open</a>`
                 :`<span class="tc-btn tc-btn-ghost">No brief</span>`}
       ${t.prompt&&t.link?`<a class="tc-btn tc-btn-icon" href="${t.link}" target="_blank" rel="noopener" title="Open"><i class="ti ti-external-link"></i></a>`:''}
-      <button class="tc-done" onclick="doneTask('${t.id}')" title="Mark done today"><i class="ti ti-check"></i>Done</button>
+      <button class="tc-done" onclick="doneTask('${t.id}')" title="Mark done today"><i class="ti ti-check"></i></button>
     </div>
   </div>`;
 }
 
-/* ── Charts ── *//* ── Charts ── */
+/* ── Charts ── *//* ── Charts ── *//* ── Charts ── */
 const MKT_COLORS=['#34453E','#185FA5','#854F0B','#2D7A55','#4E44B5','#A32D2D','#5a8a70','#7D4B0A','#9a9a94'];
 const chanColor=(c,i)=>MKT_COLORS[i%MKT_COLORS.length];
 const isDark=()=>document.body.classList.contains('dark');
@@ -2175,52 +2134,6 @@ function drawGanttChart(camps){
            grid:{color:gridCol()}},
         y:{ticks:{font:{size:11},color:tickCol()},grid:{display:false}}
       }}});
-}
-
-/** Ring + key. Never-done is its own bucket — it is "not started", not "failed". */
-let mktHealthChart=null;
-function drawTaskHealth(tasks){
-  mktHealthChart=killChart(mktHealthChart);
-  const centre=document.getElementById('th-centre');
-  const key=document.getElementById('th-key');
-  const ctx=document.getElementById('mkt-health-chart');
-  if(!centre||!key||!ctx)return;
-
-  const live=tasks.filter(t=>t.active!==false);
-  if(!live.length){
-    centre.innerHTML='<div class="th-num">—</div>';
-    key.innerHTML='<div class="empty">No tasks yet.</div>';
-    return;
-  }
-
-  const never   = live.filter(t=>!t.last_done).length;
-  const overdue = live.filter(t=>t.last_done&&taskDueIn(t)<0).length;
-  const today   = live.filter(t=>t.last_done&&taskDueIn(t)===0).length;
-  const ok      = live.filter(t=>t.last_done&&taskDueIn(t)>0).length;
-  const dueNow  = never+overdue+today;
-
-  const segs=[
-    {lbl:'Overdue',     n:overdue, c:'#A32D2D'},
-    {lbl:'Due today',   n:today,   c:'#D8952E'},
-    {lbl:'Not started', n:never,   c:'#B9B7B0'},
-    {lbl:'On schedule', n:ok,      c:'#34453E'}
-  ].filter(s=>s.n>0);
-
-  centre.innerHTML=`<div class="th-num ${overdue?'bad':dueNow?'mid':'good'}">${dueNow}</div>
-                    <div class="th-cap">due now</div>`;
-
-  key.innerHTML=segs.map(s=>`
-    <div class="th-krow">
-      <span class="th-kdot" style="background:${s.c}"></span>
-      <span class="th-klbl">${s.lbl}</span>
-      <span class="th-kval">${s.n}</span>
-    </div>`).join('') +
-    `<div class="th-foot">${ok+today+overdue?`${Math.round(ok/(live.length)*100)}% of tasks are on schedule`:'Nothing has been ticked off yet'}</div>`;
-
-  mktHealthChart=new Chart(ctx,{type:'doughnut',
-    data:{labels:segs.map(s=>s.lbl),datasets:[{data:segs.map(s=>s.n),backgroundColor:segs.map(s=>s.c),borderWidth:0}]},
-    options:{responsive:true,maintainAspectRatio:false,cutout:'74%',
-      plugins:{legend:{display:false},tooltip:{callbacks:{label:c=>' '+c.label+': '+c.raw}}}}});
 }
 
 /* ── Task CRUD ── */
