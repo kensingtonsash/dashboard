@@ -558,10 +558,10 @@ body.dark .sg-now{color:#44444e}
 body.dark .sg-new{color:#7ab890}
 
 /* ── Marketing: task cards ── */
-.tc-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(232px,1fr));gap:9px}
+.tc-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(228px,1fr));gap:10px}
 
-.tc{position:relative;display:flex;flex-direction:column;gap:10px;background:#fff;border:1px solid #E8E6E1;
-  border-radius:11px;padding:11px 12px;overflow:hidden;transition:box-shadow .14s,border-color .14s}
+.tc{position:relative;display:flex;flex-direction:column;background:#fff;border:1px solid #E8E6E1;
+  border-radius:12px;padding:12px 13px 11px;overflow:hidden;transition:box-shadow .14s,border-color .14s}
 .tc::before{content:'';position:absolute;left:0;top:0;bottom:0;width:3px;background:#D6D4CE}
 .tc:hover{box-shadow:0 3px 10px rgba(0,0,0,.07);border-color:#D6D4CE}
 .tc-over::before{background:#A32D2D}
@@ -570,26 +570,29 @@ body.dark .sg-new{color:#7ab890}
 .tc-soon::before{background:#34453E}
 .tc-later::before{background:#E0DED8}
 
-.tc-head{display:flex;align-items:center;gap:9px;min-width:0}
+/* Row 1 — icon and status only. Title is not allowed to compete for this space. */
+.tc-head{display:flex;align-items:center;gap:8px;margin-bottom:9px}
 .tc-icon{width:28px;height:28px;border-radius:8px;background:#F4F6F4;color:#34453E;display:flex;align-items:center;
   justify-content:center;font-size:15px;flex-shrink:0}
 .tc-over .tc-icon{background:#FDEFEF;color:#A32D2D}
 .tc-now  .tc-icon{background:#FDF3E3;color:#8A5410}
-.tc-txt{flex:1;min-width:0}
-.tc-title{font-size:12.5px;font-weight:600;color:#1a1a1a;line-height:1.3;
-  white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.tc-meta{font-size:10px;color:#c4c2bc;margin-top:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.tc-chip{flex-shrink:0;font-size:9.5px;font-weight:700;text-transform:uppercase;letter-spacing:.04em;
-  padding:2px 7px;border-radius:20px;background:#EFEFEC;color:#999;white-space:nowrap}
+.tc-chip{margin-left:auto;flex-shrink:0;font-size:9.5px;font-weight:700;text-transform:uppercase;letter-spacing:.04em;
+  padding:3px 8px;border-radius:20px;background:#EFEFEC;color:#999;white-space:nowrap}
 .tc-over .tc-chip{background:#FDEBEB;color:#A32D2D}
 .tc-now  .tc-chip{background:#FEF1DC;color:#7D4B0A}
 .tc-soon .tc-chip{background:#EAF0EC;color:#34453E}
-.tc-edit{position:absolute;top:9px;right:8px;display:flex;opacity:0;transition:opacity .12s;background:#fff;border-radius:7px}
+.tc-edit{position:absolute;top:10px;right:9px;display:flex;opacity:0;transition:opacity .12s;background:#fff;border-radius:7px}
 .tc:hover .tc-edit{opacity:1}
 .tc:hover .tc-chip{opacity:0}
 .tc-edit .mat-ico{opacity:1;padding:3px;font-size:13px}
 
-.tc-foot{display:flex;align-items:center;gap:5px}
+/* Row 2 — the title. Wraps to two lines, never truncates to an ellipsis. */
+.tc-title{font-size:13px;font-weight:600;color:#1a1a1a;line-height:1.32;
+  display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;
+  min-height:34px;word-break:break-word}
+.tc-meta{font-size:10px;color:#c4c2bc;margin-top:4px;margin-bottom:11px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+
+.tc-foot{display:flex;align-items:center;gap:5px;margin-top:auto}
 .tc-btn{flex:1;display:inline-flex;align-items:center;justify-content:center;gap:5px;font-size:11.5px;font-weight:600;
   padding:6px 8px;border-radius:8px;border:1px solid transparent;cursor:pointer;font-family:inherit;text-decoration:none;
   white-space:nowrap;transition:all .15s}
@@ -2147,7 +2150,7 @@ function renderMarketing(){
   drawGanttChart(camps);
 }
 
-/** Compact tile. Detail lives in the tooltip, not on the card. */
+/** Compact tile. Title gets its own row so it never truncates. */
 function taskCard(t){
   const never=!t.last_done;
   const n=taskDueIn(t);
@@ -2163,16 +2166,14 @@ function taskCard(t){
   return `<div class="tc tc-${state}"${tip?` title="${tip}"`:''}>
     <div class="tc-head">
       <div class="tc-icon"><i class="ti ${icon}"></i></div>
-      <div class="tc-txt">
-        <div class="tc-title">${t.title}</div>
-        <div class="tc-meta">${cad}${t.last_done?' · last '+dateLbl(t.last_done):''}</div>
-      </div>
       <span class="tc-chip">${chip}</span>
       <div class="tc-edit">
         <button class="mat-ico" title="Edit" onclick="editTask('${t.id}')"><i class="ti ti-pencil"></i></button>
         <button class="mat-ico mat-ico-del" title="Delete" onclick="deleteTask('${t.id}')"><i class="ti ti-trash"></i></button>
       </div>
     </div>
+    <div class="tc-title">${t.title}</div>
+    <div class="tc-meta">${cad}${t.last_done?' · last '+dateLbl(t.last_done):''}</div>
     <div class="tc-foot">
       ${t.prompt?`<button class="tc-btn tc-btn-ai" onclick="draftTask('${t.id}')"><i class="ti ti-sparkles"></i>Draft</button>`
                 :t.link?`<a class="tc-btn tc-btn-ai" href="${t.link}" target="_blank" rel="noopener"><i class="ti ti-external-link"></i>Open</a>`
@@ -2183,7 +2184,6 @@ function taskCard(t){
   </div>`;
 }
 
-/* ── Charts ── *//* ── Charts ── *//* ── Charts ── */
 /* ── Budget engine ── */
 const targetPct   = ()=>Number(DATA.cfg?.target_pct   ?? 3);
 const basisMonths = ()=>Number(DATA.cfg?.basis_months ?? 6);
