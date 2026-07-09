@@ -336,15 +336,15 @@ body.dark .dark-toggle:hover{border-color:#4a6a5a}
 body.dark #inv-body span[title="View client"]{color:#d8d8e8 !important;border-bottom-color:#3a3a42 !important}
 
 /* ── Left sidebar navigation ── */
-body{padding-left:196px}
+body{padding-left:224px}
 .tabs{
-  position:fixed;left:0;top:0;bottom:0;width:196px;
-  display:flex;flex-direction:column;align-items:stretch;flex-wrap:nowrap;gap:3px;
+  position:fixed;left:0;top:0;bottom:0;width:224px;
+  display:flex;flex-direction:column;align-items:stretch;flex-wrap:nowrap;gap:5px;
   background:#fff;border-right:1px solid #E8E6E1;border-radius:0;
-  padding:22px 12px;overflow-y:auto;z-index:60
+  padding:26px 14px;overflow-y:auto;z-index:60
 }
-.tab{width:100%;text-align:left;padding:9px 13px;font-size:13px}
-.tab i{width:16px;text-align:center}
+.tab{width:100%;text-align:left;padding:12px 15px;font-size:14.5px;border-radius:10px;letter-spacing:.005em}
+.tab i{width:18px;font-size:16px !important;text-align:center;margin-right:8px !important;vertical-align:-2px !important}
 body.dark .tabs{background:#222226;border-right:1px solid #2e2e34}
 
 @media(max-width:900px){
@@ -353,7 +353,7 @@ body.dark .tabs{background:#222226;border-right:1px solid #2e2e34}
     position:static;width:auto;flex-direction:row;flex-wrap:wrap;
     background:#F2F1EE;border-right:none;border-radius:10px;padding:3px;gap:2px;z-index:auto
   }
-  .tab{width:auto;padding:6px 14px}
+  .tab{width:auto;padding:6px 14px;font-size:12.5px;border-radius:8px}
   body.dark .tabs{background:#18181A;border-right:none}
 }
 </style>
