@@ -136,6 +136,8 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Inter',system-ui,sans-serif;b
 .stat-row{display:flex;justify-content:space-between;align-items:center;padding:8px 0;border-bottom:1px solid #F2F1EE;font-size:13px}
 .stat-row:last-child{border-bottom:none}
 .stat-label{color:#999}.stat-val{font-weight:600}
+.stat-note{font-size:9.5px;color:#c9c7c1;text-transform:uppercase;letter-spacing:.05em;margin-left:5px;font-weight:600}
+body.dark .stat-note{color:#44444e}
 .growth-section{padding-bottom:14px;border-bottom:1px solid #F2F1EE;margin-bottom:14px}
 .growth-section:last-child{border-bottom:none;margin-bottom:0;padding-bottom:0}
 .growth-label{font-size:10.5px;color:#bbb;text-transform:uppercase;letter-spacing:.07em;margin-bottom:9px;font-weight:700}
@@ -431,6 +433,26 @@ body.dark .tk-ai:hover{background:#2e3a34;color:#7ab890}
 #tab-marketing .chart-wrap{height:200px}
 
 /* ── Marketing: budget panel ── */
+.bg-basis-input{padding:5px 8px;border:1px solid #E8E6E1;border-radius:8px;font-size:12px;font-weight:600;
+  font-family:inherit;outline:none;color:#34453E;background:#fff;cursor:pointer}
+.bg-basis-input:focus{border-color:#34453E}
+.bg-warn{display:flex;align-items:flex-start;gap:8px;margin-top:16px;padding:10px 12px;border-radius:10px;
+  background:#FEFBF4;border:1px solid #F3E3C6;font-size:11.5px;color:#8A6520;line-height:1.55}
+.bg-warn i{font-size:14px;color:#D8952E;flex-shrink:0;margin-top:1px}
+.bg-spark{display:flex;align-items:flex-end;gap:5px;height:64px;margin-top:16px;padding-top:4px}
+.bg-bar{flex:1;display:flex;flex-direction:column;justify-content:flex-end;align-items:center;height:100%;gap:4px;cursor:default}
+.bg-bar-fill{width:100%;max-width:34px;background:#CBD8CF;border-radius:3px 3px 0 0;transition:background .15s}
+.bg-bar:hover .bg-bar-fill{background:#34453E}
+.bg-bar-fill.zero{background:#F0EFEC;border:1px dashed #E0DED8;min-height:3px}
+.bg-bar span{font-size:9px;color:#c4c2bc;font-weight:600}
+body.dark .bg-basis-input{background:#1e1e22;border-color:#2e2e34;color:#7ab890}
+body.dark .bg-warn{background:#241f14;border-color:#3a2f18;color:#c09040}
+body.dark .bg-warn i{color:#c09040}
+body.dark .bg-bar-fill{background:#3a4a40}
+body.dark .bg-bar:hover .bg-bar-fill{background:#5a8a70}
+body.dark .bg-bar-fill.zero{background:#232329;border-color:#2e2e34}
+body.dark .bg-bar span{color:#44444e}
+
 .bg-target{display:flex;align-items:center;gap:7px;font-size:11.5px;color:#999}
 .bg-pct-input{width:62px;padding:5px 8px;border:1px solid #E8E6E1;border-radius:8px;font-size:13px;font-weight:700;
   font-family:inherit;text-align:center;outline:none;color:#34453E;background:#fff}
@@ -725,6 +747,7 @@ body.dark .tabs{background:#222226;border-right:1px solid #2e2e34}
     <div class="kpi-grid" id="kpi-inv"></div>
     <div class="kpi-grid" id="kpi-inv2"></div>
     <div class="card"><div class="card-title"><i class="ti ti-file-invoice"></i> Invoice register</div>
+      <div id="inv-warn"></div>
       <div style="display:flex;align-items:center;gap:8px;margin-bottom:14px;flex-wrap:wrap">
         <input type="text" id="inv-search" placeholder="Search invoices..." oninput="setInvFilter('all');renderInv()" style="padding:6px 12px;border:1px solid #E8E6E1;border-radius:8px;font-size:13px;font-family:inherit;width:200px;outline:none">
         <div style="display:flex;gap:4px;flex-wrap:wrap" id="inv-filter-pills">
@@ -846,7 +869,12 @@ body.dark .tabs{background:#222226;border-right:1px solid #2e2e34}
         <div class="bg-target">
           <span>Target</span>
           <input type="number" id="bg-pct" min="0" max="20" step="0.5" class="bg-pct-input" onchange="saveTargetPct(this.value)">
-          <span>% of revenue</span>
+          <span>% of revenue, based on last</span>
+          <select id="bg-basis" class="bg-basis-input" onchange="saveBasis(this.value)">
+            <option value="3">3 months</option>
+            <option value="6">6 months</option>
+            <option value="12">12 months</option>
+          </select>
         </div>
       </div>
       <div id="bg-body"></div>
@@ -1122,7 +1150,7 @@ async function loadAll(){
       sb('marketing_spend','GET',null,'?order=month.desc').catch(()=>[]),
       sb('marketing_config','GET',null,'?id=eq.default').catch(()=>[])
     ]);
-    DATA.enq=enq||[];DATA.inv=inv||[];DATA.jobs=jobs||[];DATA.proj=proj||[];DATA.clients=clients||[];DATA.sub=sub||[];DATA.mat=mat||[];DATA.mtask=mtask||[];DATA.camp=camp||[];DATA.spend=spend||[];DATA.cfg=(cfg&&cfg[0])||{target_pct:3};
+    DATA.enq=enq||[];DATA.inv=inv||[];DATA.jobs=jobs||[];DATA.proj=proj||[];DATA.clients=clients||[];DATA.sub=sub||[];DATA.mat=mat||[];DATA.mtask=mtask||[];DATA.camp=camp||[];DATA.spend=spend||[];DATA.cfg=(cfg&&cfg[0])||{target_pct:3,basis_months:6};
     render();
     setStatus('Updated '+new Date().toLocaleTimeString('en-GB',{hour:'2-digit',minute:'2-digit'}));
   }catch(e){setStatus('Error: '+e.message);}
@@ -1141,7 +1169,9 @@ function renderHome(){
   const open=e.filter(x=>['Quoted','New','Pending survey','Sent'].includes(x.status));
   const totInv=inv.reduce((s,i)=>s+(Number(i.amount)||0),0);
   const thisYr=new Date().getFullYear();
-  const coll=inv.filter(i=>i.status==='Paid'&&i.paid_date&&new Date(i.paid_date).getFullYear()===thisYr).reduce((s,i)=>s+(Number(i.amount)||0),0);
+  // Net of VAT, to match the caption and the Invoices tab. Mixed VAT rates mean
+  // amount/1.2 is NOT a safe fallback (draughtproofing is zero-rated), so use ex_vat.
+  const coll=inv.filter(i=>i.status==='Paid'&&i.paid_date&&new Date(i.paid_date).getFullYear()===thisYr).reduce((s,i)=>s+(Number(i.ex_vat)||0),0);
   const out=inv.filter(i=>i.status!=='Paid').reduce((s,i)=>s+(Number(i.balance||i.amount)||0),0);
   const ovd=inv.filter(i=>i.status==='Overdue');
   const ap=proj.filter(p=>p.status!=='Closed');
@@ -1200,16 +1230,16 @@ function renderHome(){
     </div>`;
   }).join('');
   document.getElementById('home-revenue').innerHTML=`
-    <div class="stat-row"><span class="stat-label">Total invoiced</span><span class="stat-val">${fmt(totInv)}</span></div>
-    <div class="stat-row"><span class="stat-label">Collected</span><span class="stat-val" style="color:#34453E">${fmt(coll)}</span></div>
-    <div class="stat-row"><span class="stat-label">Outstanding</span><span class="stat-val" style="color:${out>0?'#A32D2D':'#888'}">${fmt(out)}</span></div>
+    <div class="stat-row"><span class="stat-label">Total invoiced <span class="stat-note">inc. VAT</span></span><span class="stat-val">${fmt(totInv)}</span></div>
+    <div class="stat-row"><span class="stat-label">Collected YTD <span class="stat-note">net</span></span><span class="stat-val" style="color:#34453E">${fmt(coll)}</span></div>
+    <div class="stat-row"><span class="stat-label">Outstanding <span class="stat-note">inc. VAT</span></span><span class="stat-val" style="color:${out>0?'#A32D2D':'#888'}">${fmt(out)}</span></div>
     <div class="stat-row"><span class="stat-label">Jobs won</span><span class="stat-val">${won.length}</span></div>
     <div class="stat-row"><span class="stat-label">Win rate</span><span class="stat-val">${e.length?Math.round(won.length/e.length*100):0}%</span></div>`;
   const now=new Date();
   const invByMonth={};
   DATA.inv.filter(i=>i.status==='Paid'&&i.paid_date).forEach(i=>{
     const k=mKey(new Date(i.paid_date));
-    invByMonth[k]=(invByMonth[k]||0)+Number(i.ex_vat||i.amount||0);
+    invByMonth[k]=(invByMonth[k]||0)+Number(i.ex_vat||0);
   });
   const invSum=ks=>ks.reduce((s,k)=>s+(invByMonth[k]||0),0);
   const k12c=[],k12p=[],k3c=[],k3p=[];
@@ -1451,7 +1481,7 @@ function renderInv(){
   else if(invFilter==='Paid') inv=inv.filter(i=>i.status==='Paid');
   const tot=inv.reduce((s,i)=>s+(Number(i.amount)||0),0);
   const col=inv.filter(i=>i.status==='Paid').reduce((s,i)=>s+(Number(i.amount)||0),0);
-  const colNet=inv.filter(i=>i.status==='Paid').reduce((s,i)=>s+(Number(i.ex_vat)||Number(i.amount)/1.2||0),0);
+  const colNet=inv.filter(i=>i.status==='Paid').reduce((s,i)=>s+(Number(i.ex_vat)||0),0);
   const out=inv.filter(i=>i.status!=='Paid').reduce((s,i)=>s+(Number(i.balance||i.amount)||0),0);
   const ovd=inv.filter(i=>i.status==='Overdue'||i.status==='Past due').length;
   document.getElementById('kpi-inv').innerHTML=`
@@ -1463,10 +1493,10 @@ function renderInv(){
   const now=new Date();
   const thisYear=now.getFullYear(),thisMonth=now.getMonth();
   const paidInv=inv.filter(i=>i.status==='Paid'&&i.paid_date);
-  const thisYearCol=paidInv.filter(i=>new Date(i.paid_date).getFullYear()===thisYear).reduce((s,i)=>s+Number(i.ex_vat||i.amount||0),0);
-  const thisMonthCol=paidInv.filter(i=>{const d=new Date(i.paid_date);return d.getFullYear()===thisYear&&d.getMonth()===thisMonth;}).reduce((s,i)=>s+Number(i.ex_vat||i.amount||0),0);
-  const lastMonthCol=paidInv.filter(i=>{const d=new Date(i.paid_date);const lm=thisMonth===0?11:thisMonth-1;const ly=thisMonth===0?thisYear-1:thisYear;return d.getFullYear()===ly&&d.getMonth()===lm;}).reduce((s,i)=>s+Number(i.ex_vat||i.amount||0),0);
-  const lastYearYTD=paidInv.filter(i=>{const d=new Date(i.paid_date);return d.getFullYear()===thisYear-1&&(d.getMonth()<thisMonth||(d.getMonth()===thisMonth&&d.getDate()<=now.getDate()));}).reduce((s,i)=>s+Number(i.ex_vat||i.amount||0),0);
+  const thisYearCol=paidInv.filter(i=>new Date(i.paid_date).getFullYear()===thisYear).reduce((s,i)=>s+Number(i.ex_vat||0),0);
+  const thisMonthCol=paidInv.filter(i=>{const d=new Date(i.paid_date);return d.getFullYear()===thisYear&&d.getMonth()===thisMonth;}).reduce((s,i)=>s+Number(i.ex_vat||0),0);
+  const lastMonthCol=paidInv.filter(i=>{const d=new Date(i.paid_date);const lm=thisMonth===0?11:thisMonth-1;const ly=thisMonth===0?thisYear-1:thisYear;return d.getFullYear()===ly&&d.getMonth()===lm;}).reduce((s,i)=>s+Number(i.ex_vat||0),0);
+  const lastYearYTD=paidInv.filter(i=>{const d=new Date(i.paid_date);return d.getFullYear()===thisYear-1&&(d.getMonth()<thisMonth||(d.getMonth()===thisMonth&&d.getDate()<=now.getDate()));}).reduce((s,i)=>s+Number(i.ex_vat||0),0);
   const yoyPct=lastYearYTD?Math.round(((thisYearCol-lastYearYTD)/lastYearYTD)*100):null;
   const yoyStr=yoyPct===null?'—':(yoyPct>=0?'+':'')+yoyPct+'%';
   const yoyCls=yoyPct===null?'#888':yoyPct>=0?'#34453E':'#A32D2D';
@@ -1475,6 +1505,17 @@ function renderInv(){
     <div class="kpi"><div class="kpi-label">Last month</div><div class="kpi-val">${fmt(Math.round(lastMonthCol))}</div><div class="kpi-sub">net excl. VAT</div></div>
     <div class="kpi"><div class="kpi-label">This year</div><div class="kpi-val">${fmt(Math.round(thisYearCol))}</div><div class="kpi-sub">net excl. VAT · ${thisYear}</div></div>
     <div class="kpi"><div class="kpi-label">YoY growth</div><div class="kpi-val" style="color:${yoyCls}">${yoyStr}</div><div class="kpi-sub">vs same period ${thisYear-1}</div></div>`;
+  // Every net figure relies on ex_vat. Surface gaps rather than silently under-reporting.
+  const noNet=DATA.inv.filter(i=>i.status==='Paid'&&!Number(i.ex_vat));
+  const warnEl=document.getElementById('inv-warn');
+  if(warnEl){
+    warnEl.innerHTML=noNet.length
+      ? `<div class="bg-warn" style="margin:0 0 14px"><i class="ti ti-alert-triangle"></i>
+         ${noNet.length} paid invoice${noNet.length>1?'s are':' is'} missing a net (ex. VAT) figure
+         &mdash; ${noNet.map(i=>i.invoice_no).join(', ')}. Net totals below understate by that amount.</div>`
+      : '';
+  }
+
   const b=document.getElementById('inv-body');
   if(!inv.length){b.innerHTML='<tr><td colspan="9" class="empty" style="padding:8px 0">No invoices yet.</td></tr>';return;}
   b.innerHTML=inv.map(i=>{
@@ -2140,35 +2181,75 @@ function taskCard(t){
 
 /* ── Charts ── *//* ── Charts ── *//* ── Charts ── */
 /* ── Budget engine ── */
-const targetPct=()=>Number(DATA.cfg?.target_pct ?? 3);
-const netOf=i=>Number(i.ex_vat||0)||Number(i.amount||0)/1.2;
+const targetPct   = ()=>Number(DATA.cfg?.target_pct   ?? 3);
+const basisMonths = ()=>Number(DATA.cfg?.basis_months ?? 6);
+// VAT rates are mixed per invoice (draughtproofing 0%, everything else 20%), so a
+// gross-to-net constant would be wrong. Use the stored net; skip rows that lack it.
+const netOf = i=>Number(i.ex_vat)||0;
+const mk = d=>d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0');
 
-/** Rolling 12-month collected revenue, net of VAT. Only paid invoices count. */
-function revenue12(){
-  const cut=new Date();cut.setMonth(cut.getMonth()-12);
-  return (DATA.inv||[])
-    .filter(i=>i.status==='Paid'&&i.paid_date&&new Date(i.paid_date)>=cut)
-    .reduce((a,i)=>a+netOf(i),0);
-}
-function spend12(){
-  const cut=new Date();cut.setMonth(cut.getMonth()-12);
-  return (DATA.spend||[]).filter(s=>s.month&&new Date(s.month)>=cut)
-    .reduce((a,s)=>a+Number(s.amount||0),0);
-}
-function spendByChannel12(){
-  const cut=new Date();cut.setMonth(cut.getMonth()-12);
+/** Net collected revenue keyed by YYYY-MM. Paid invoices only. */
+function revenueByMonth(){
   const by={};
-  (DATA.spend||[]).filter(s=>s.month&&new Date(s.month)>=cut)
+  (DATA.inv||[]).filter(i=>i.status==='Paid'&&i.paid_date).forEach(i=>{
+    const k=(i.paid_date||'').slice(0,7);
+    by[k]=(by[k]||0)+netOf(i);
+  });
+  return by;
+}
+
+/** The last N COMPLETE months. The current month is excluded — it is always partial. */
+function completeMonthKeys(n){
+  const now=new Date(), keys=[];
+  for(let i=1;i<=n;i++){
+    const d=new Date(now.getFullYear(),now.getMonth()-i,1);
+    keys.push(mk(d));
+  }
+  return keys.reverse();
+}
+
+/** Average monthly revenue over the basis window. Months with no invoices count as zero. */
+function avgMonthlyRevenue(){
+  const by=revenueByMonth();
+  const keys=completeMonthKeys(basisMonths());
+  if(!keys.length)return 0;
+  return keys.reduce((a,k)=>a+(by[k]||0),0)/keys.length;
+}
+
+/** What the basis window actually contains — so the number can be audited. */
+function basisDetail(){
+  const by=revenueByMonth();
+  const keys=completeMonthKeys(basisMonths());
+  const vals=keys.map(k=>by[k]||0);
+  return {
+    keys, vals,
+    total: vals.reduce((a,b)=>a+b,0),
+    zeros: vals.filter(v=>v===0).length,
+    from: keys[0], to: keys[keys.length-1]
+  };
+}
+
+/** Annualised from the run rate, not a naive trailing total. */
+const annualisedRevenue = ()=>avgMonthlyRevenue()*12;
+const monthlyBudget     = ()=>avgMonthlyRevenue()*targetPct()/100;
+const annualBudget      = ()=>annualisedRevenue()*targetPct()/100;
+
+function spendByChannelWindow(){
+  const keys=new Set(completeMonthKeys(basisMonths()));
+  const by={};
+  (DATA.spend||[]).filter(s=>keys.has((s.month||'').slice(0,7)))
     .forEach(s=>{by[s.channel]=(by[s.channel]||0)+Number(s.amount||0);});
   return by;
+}
+function spendWindow(){
+  const by=spendByChannelWindow();
+  return Object.values(by).reduce((a,b)=>a+b,0);
 }
 function spendThisMonth(){
   const m=new Date().toISOString().slice(0,7);
   return (DATA.spend||[]).filter(s=>(s.month||'').slice(0,7)===m)
     .reduce((a,s)=>a+Number(s.amount||0),0);
 }
-/** Monthly budget = target% of trailing-12m revenue, over 12. Smoothed, not spiky. */
-const monthlyBudget=()=>revenue12()*targetPct()/100/12;
 
 async function saveTargetPct(v){
   const pct=Math.max(0,Number(v)||0);
@@ -2178,32 +2259,54 @@ async function saveTargetPct(v){
     renderMarketing();
   }catch(e){alert('Could not save target: '+e.message);}
 }
+async function saveBasis(v){
+  const n=parseInt(v)||6;
+  try{
+    await sb('marketing_config','PATCH',{basis_months:n},'?id=eq.default');
+    DATA.cfg={...(DATA.cfg||{}),basis_months:n};
+    renderMarketing();
+  }catch(e){alert('Could not save basis: '+e.message);}
+}
+
+const monthName=k=>{const [y,m]=k.split('-');return new Date(y,m-1,1).toLocaleDateString('en-GB',{month:'short',year:'2-digit'});};
 
 function renderBudget(){
   const el=document.getElementById('bg-body');
   const inp=document.getElementById('bg-pct');
+  const bas=document.getElementById('bg-basis');
   if(!el)return;
   if(inp&&document.activeElement!==inp)inp.value=targetPct();
+  if(bas&&document.activeElement!==bas)bas.value=basisMonths();
 
-  const rev=revenue12(), sp=spend12(), tgt=targetPct();
-  if(rev<=0||!tgt){
+  const tgt=targetPct();
+  const avgRev=avgMonthlyRevenue();
+  const det=basisDetail();
+
+  if(avgRev<=0||!tgt){
     el.innerHTML=`<div class="chart-empty" style="display:flex">
       <i class="ti ti-receipt-off"></i>
-      <div class="ce-t">${rev<=0?'No collected revenue yet':'Set a target above 0%'}</div>
-      <div class="ce-s">${rev<=0?'Budget is a percentage of revenue — mark an invoice paid and this comes alive':'The budget is a share of revenue'}</div></div>`;
+      <div class="ce-t">${avgRev<=0?'No collected revenue in this window':'Set a target above 0%'}</div>
+      <div class="ce-s">${avgRev<=0?'Budget is a share of revenue — mark an invoice paid, or widen the window':'The budget is a share of revenue'}</div></div>`;
     return;
   }
 
-  const targetSpend=rev*tgt/100;
-  const actualPct=sp/rev*100;
-  const gap=targetSpend-sp;
   const mBudget=monthlyBudget();
+  const aBudget=annualBudget();
   const mSpent=spendThisMonth();
   const mLeft=mBudget-mSpent;
-  const fill=Math.min(actualPct/tgt*100,100);
 
-  const st = (actualPct>=tgt*0.9&&actualPct<=tgt*1.1) ? 'on' : actualPct<tgt ? 'under' : 'over';
-  const verdict = st==='on' ? 'On target' : st==='under' ? 'Underspending' : 'Overspending';
+  // How the window's actual spend compares, as a like-for-like percentage
+  const winSpend=spendWindow();
+  const winRev=det.total;
+  const actualPct=winRev?winSpend/winRev*100:0;
+  const gapMonthly=mBudget-(winSpend/basisMonths());
+  const fill=Math.min(tgt?actualPct/tgt*100:0,100);
+  const st=(actualPct>=tgt*0.9&&actualPct<=tgt*1.1)?'on':actualPct<tgt?'under':'over';
+  const verdict=st==='on'?'On target':st==='under'?'Underspending':'Overspending';
+
+  const warn = det.zeros
+    ? `<div class="bg-warn"><i class="ti ti-alert-triangle"></i> ${det.zeros} of the last ${basisMonths()} months had no collected revenue. That pulls the average down — consider a shorter window.</div>`
+    : '';
 
   el.innerHTML=`
     <div class="bg-top">
@@ -2214,12 +2317,17 @@ function renderBudget(){
         <div class="bg-scale"><span>0%</span><span>${tgt}% target</span></div>
       </div>
       <div class="bg-stats">
-        <div class="bg-stat"><div class="bg-l">Revenue · 12m</div><div class="bg-v">${fmt(rev)}</div><div class="bg-s">net, collected</div></div>
-        <div class="bg-stat"><div class="bg-l">Budget at ${tgt}%</div><div class="bg-v">${fmt(targetSpend)}</div><div class="bg-s">${fmt(mBudget)} per month</div></div>
-        <div class="bg-stat"><div class="bg-l">Spent · 12m</div><div class="bg-v">${fmt(sp)}</div><div class="bg-s">${sp?actualPct.toFixed(1)+'% of revenue':'nothing logged'}</div></div>
-        <div class="bg-stat"><div class="bg-l">${gap>=0?'Shortfall':'Over budget'}</div><div class="bg-v ${gap>=0?'v-under':'v-over'}">${fmt(Math.abs(gap))}</div><div class="bg-s">${gap>=0?'room to invest':'above target'}</div></div>
+        <div class="bg-stat"><div class="bg-l">Avg monthly revenue</div><div class="bg-v">${fmt(avgRev)}</div>
+          <div class="bg-s">${monthName(det.from)} – ${monthName(det.to)}, net</div></div>
+        <div class="bg-stat"><div class="bg-l">Monthly budget</div><div class="bg-v">${fmt(mBudget)}</div>
+          <div class="bg-s">${tgt}% of run rate</div></div>
+        <div class="bg-stat"><div class="bg-l">Annualised budget</div><div class="bg-v">${fmt(aBudget)}</div>
+          <div class="bg-s">on ${fmt(annualisedRevenue())} run rate</div></div>
+        <div class="bg-stat"><div class="bg-l">Spent · window</div><div class="bg-v ${winSpend?'':'v-under'}">${fmt(winSpend)}</div>
+          <div class="bg-s">${fmt(winSpend/basisMonths())} per month</div></div>
       </div>
     </div>
+    ${warn}
 
     <div class="bg-month">
       <div class="bg-month-l">
@@ -2230,24 +2338,34 @@ function renderBudget(){
       <div class="bg-month-r ${mLeft<0?'v-over':''}">${mLeft>=0?fmt(mLeft)+' left':fmt(-mLeft)+' over'}</div>
     </div>
 
-    ${suggestions(gap,mBudget,mSpent,rev,tgt)}`;
+    <div class="bg-spark">
+      ${det.keys.map((k,i)=>{
+        const v=det.vals[i], mx=Math.max(...det.vals,1);
+        return `<div class="bg-bar" title="${monthName(k)}: ${fmt(v)}">
+          <div class="bg-bar-fill ${v?'':'zero'}" style="height:${Math.max(v/mx*100,2)}%"></div>
+          <span>${monthName(k).split(' ')[0]}</span></div>`;
+      }).join('')}
+    </div>
+
+    ${suggestions(gapMonthly,mBudget,mSpent,avgRev,tgt)}`;
 }
 
 /** Honest suggestions. We can size the gap; we cannot rank channels without attribution. */
-function suggestions(gap,mBudget,mSpent,rev,tgt){
-  const by=spendByChannel12();
+function suggestions(gapMonthly,mBudget,mSpent,avgRev,tgt){
+  const by=spendByChannelWindow();
   const chans=Object.keys(by);
   const total=chans.reduce((a,c)=>a+by[c],0);
+  const n=basisMonths();
   const rows=[];
 
-  if(gap<=0){
+  if(gapMonthly<=0){
     rows.push({i:'ti-alert-triangle',c:'warn',
-      t:`You are ${fmt(-gap)} above the ${tgt}% target over twelve months.`,
+      t:`You are about ${fmt(-gapMonthly)} a month above the ${tgt}% target.`,
       s:'Not necessarily wrong — but it should be a deliberate choice rather than a drift.'});
   }else{
     rows.push({i:'ti-trending-up',c:'go',
-      t:`Increase spend by about ${fmt(gap/12)} a month to reach ${tgt}%.`,
-      s:`That is ${fmt(gap)} over the next twelve months, against ${fmt(rev)} of collected revenue.`});
+      t:`Increase spend by about ${fmt(gapMonthly)} a month to reach ${tgt}%.`,
+      s:`That takes you to ${fmt(mBudget)} a month, or ${fmt(mBudget*12)} a year, against a ${fmt(avgRev)} monthly run rate.`});
 
     if(!total){
       rows.push({i:'ti-player-play',c:'go',
@@ -2257,7 +2375,7 @@ function suggestions(gap,mBudget,mSpent,rev,tgt){
       const lines=chans.sort((a,b)=>by[b]-by[a]).map(c=>{
         const share=by[c]/total;
         return `<div class="sg-alloc"><span class="sg-ch">${c}</span>
-          <span class="sg-now">${fmt(by[c]/12)}/m</span>
+          <span class="sg-now">${fmt(by[c]/n)}/m</span>
           <i class="ti ti-arrow-narrow-right"></i>
           <span class="sg-new">${fmt(mBudget*share)}/m</span></div>`;
       }).join('');
