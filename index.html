@@ -379,6 +379,7 @@ body.dark .tabs{background:#222226;border-right:1px solid #2e2e34}
       <button class="tab" onclick="switchTab('projects',this)">Projects</button>
       <button class="tab" onclick="switchTab('schedule',this)">Schedule</button>
       <button class="tab" onclick="switchTab('subcontractors',this)">Subcontractors</button>
+      <button class="tab" onclick="switchTab('materials',this)">Materials</button>
     </div>
   </div>
 
@@ -512,10 +513,13 @@ body.dark .tabs{background:#222226;border-right:1px solid #2e2e34}
       </div>
       <div style="margin-top:10px"><div style="font-size:11px;color:#888;margin-bottom:4px">Pricing</div><input id="sf-pricing" style="width:100%;padding:7px 10px;border:0.5px solid #ddd;border-radius:8px;font-size:13px;font-family:inherit;outline:none" placeholder="e.g. £430/day for 2 men, +£120 per extra labourer"></div>
       <div style="margin-top:10px"><div style="font-size:11px;color:#888;margin-bottom:4px">Notes</div><textarea id="sf-notes" rows="2" style="width:100%;padding:7px 10px;border:0.5px solid #ddd;border-radius:8px;font-size:13px;font-family:inherit;outline:none;resize:vertical"></textarea></div>
-      <div style="display:flex;gap:8px;margin-top:12px">
-        <button class="btn-main" onclick="saveSub()">Save</button>
-        <button class="btn-main" style="border-color:#ddd;color:#888" onclick="cancelSub()">Cancel</button>
+  <div id="tab-materials" class="section">
+    <div class="card">
+      <div style="display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:14px;flex-wrap:wrap">
+        <div class="card-title" style="margin-bottom:0"><i class="ti ti-package"></i> Materials &amp; ordering links</div>
+        <input type="text" id="mat-search" placeholder="Search materials..." oninput="renderMaterials()" style="padding:6px 12px;border:1px solid #E8E6E1;border-radius:8px;font-size:13px;font-family:inherit;width:220px;outline:none">
       </div>
+      <div id="mat-list"></div>
     </div>
   </div>
 </div>
