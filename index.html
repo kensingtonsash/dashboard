@@ -408,17 +408,52 @@ body.dark .ai-note{color:#505060}
 body.dark .ai-err{color:#e06060}
 body.dark .tk-ai:hover{background:#2e3a34;color:#7ab890}
 
-/* ── Marketing: task health ── */
-.th-score{font-size:40px;font-weight:700;line-height:1;letter-spacing:-.02em}
-.th-score.good{color:#2D7A55}.th-score.mid{color:#D8952E}.th-score.bad{color:#A32D2D}
-.th-sub{font-size:11px;color:#bbb;text-transform:uppercase;letter-spacing:.07em;margin-top:5px;font-weight:600}
-.th-bar{display:flex;gap:2px;height:8px;margin-top:14px;border-radius:5px;overflow:hidden;background:#F2F1EE}
-.th-seg{height:100%;border-radius:2px}
-body.dark .th-sub{color:#505060}
-body.dark .th-bar{background:#2a2a32}
-body.dark .th-score.good{color:#5ab880}
-body.dark .th-score.mid{color:#c09040}
-body.dark .th-score.bad{color:#e06060}
+/* ── Chart empty states ── */
+.chart-empty{height:200px;display:none;flex-direction:column;align-items:center;justify-content:center;gap:2px;
+  border:1px dashed #E0DED8;border-radius:12px;background:#FCFCFB;text-align:center}
+.chart-empty i{font-size:24px;color:#D6D4CE;margin-bottom:6px}
+.ce-t{font-size:13px;font-weight:600;color:#a8a6a0}
+.ce-s{font-size:11.5px;color:#c4c2bc;margin-bottom:12px}
+.chart-empty .btn-sm{border-color:#D6D4CE;color:#999}
+.chart-empty .btn-sm:hover{border-color:#34453E;background:#34453E;color:#fff}
+body.dark .chart-empty{border-color:#2e2e34;background:#1e1e22}
+body.dark .chart-empty i{color:#33333b}
+body.dark .ce-t{color:#4e4e58}
+body.dark .ce-s{color:#3a3a42}
+body.dark .chart-empty .btn-sm{border-color:#2e2e34;color:#4e4e58}
+body.dark .chart-empty .btn-sm:hover{border-color:#4a6a5a;background:#34453E;color:#fff}
+
+/* ── Marketing: task health ring ── */
+.th-wrap{display:flex;align-items:center;gap:22px}
+.th-ring{position:relative;width:150px;height:150px;flex-shrink:0}
+.th-centre{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;pointer-events:none}
+.th-num{font-size:34px;font-weight:700;line-height:1;letter-spacing:-.02em;color:#1a1a1a}
+.th-num.good{color:#2D7A55}.th-num.mid{color:#D8952E}.th-num.bad{color:#A32D2D}
+.th-cap{font-size:10px;color:#bbb;text-transform:uppercase;letter-spacing:.08em;font-weight:700;margin-top:4px}
+.th-key{flex:1;min-width:0}
+.th-krow{display:flex;align-items:center;gap:9px;padding:6px 0;border-bottom:1px solid #F2F1EE;font-size:12.5px}
+.th-krow:last-of-type{border-bottom:none}
+.th-kdot{width:9px;height:9px;border-radius:3px;flex-shrink:0}
+.th-klbl{flex:1;color:#888}
+.th-kval{font-weight:700;color:#1a1a1a}
+.th-foot{font-size:11px;color:#bbb;margin-top:10px;padding-top:9px;border-top:1px solid #F2F1EE}
+@media(max-width:1100px){.th-wrap{flex-direction:column;align-items:stretch}.th-ring{align-self:center}}
+body.dark .th-num{color:#e8e8f0}
+body.dark .th-num.good{color:#5ab880}
+body.dark .th-num.mid{color:#c09040}
+body.dark .th-num.bad{color:#e06060}
+body.dark .th-cap{color:#505060}
+body.dark .th-krow{border-bottom-color:#28282e}
+body.dark .th-klbl{color:#58586a}
+body.dark .th-kval{color:#d8d8e8}
+body.dark .th-foot{color:#505060;border-top-color:#28282e}
+
+/* ── Marketing KPI accents ── */
+#kpi-mkt .kpi:nth-child(1)::before{background:#D8952E}
+#kpi-mkt .kpi:nth-child(2)::before{background:#185FA5}
+#kpi-mkt .kpi:nth-child(3)::before{background:#34453E}
+#kpi-mkt .kpi:nth-child(4)::before{background:#2D7A55}
+#tab-marketing .chart-wrap{height:200px}
 
 /* ── Marketing: recurring tasks ── */
 .tk-row{display:flex;align-items:flex-start;gap:12px;padding:12px 0;border-bottom:1px solid #F2F1EE}
@@ -686,12 +721,21 @@ body.dark .tabs{background:#222226;border-right:1px solid #2e2e34}
         <div class="card-title"><i class="ti ti-chart-bar"></i> Ad spend by month</div>
         <div id="mkt-legend" class="svc-legend"></div>
         <div class="chart-wrap"><canvas id="mkt-spend-chart"></canvas></div>
-        <div id="mkt-spend-empty" class="empty" style="display:none">No spend logged yet. Add a row below and it'll chart here.</div>
+        <div id="mkt-spend-empty" class="chart-empty" style="display:none">
+          <i class="ti ti-chart-bar"></i>
+          <div class="ce-t">No spend logged</div>
+          <div class="ce-s">Log a month and it charts here</div>
+          <button class="btn-sm" onclick="showAddSpend()">Log spend</button>
+        </div>
       </div>
       <div class="card">
         <div class="card-title"><i class="ti ti-chart-donut"></i> Spend split — this year</div>
         <div class="chart-wrap"><canvas id="mkt-split-chart"></canvas></div>
-        <div id="mkt-split-empty" class="empty" style="display:none">Nothing to split yet.</div>
+        <div id="mkt-split-empty" class="chart-empty" style="display:none">
+          <i class="ti ti-chart-donut"></i>
+          <div class="ce-t">Nothing to split</div>
+          <div class="ce-s">Add spend across two or more channels</div>
+        </div>
       </div>
     </div>
 
@@ -699,11 +743,19 @@ body.dark .tabs{background:#222226;border-right:1px solid #2e2e34}
       <div class="card">
         <div class="card-title"><i class="ti ti-timeline-event"></i> Campaign timeline</div>
         <div class="chart-wrap" id="mkt-gantt-wrap"><canvas id="mkt-gantt-chart"></canvas></div>
-        <div id="mkt-gantt-empty" class="empty" style="display:none">No campaigns with start dates yet.</div>
+        <div id="mkt-gantt-empty" class="chart-empty" style="display:none">
+          <i class="ti ti-timeline-event"></i>
+          <div class="ce-t">No campaigns yet</div>
+          <div class="ce-s">Add one with a start date to see it here</div>
+          <button class="btn-sm" onclick="showAddCamp()">Add campaign</button>
+        </div>
       </div>
       <div class="card">
         <div class="card-title"><i class="ti ti-progress-check"></i> Task health</div>
-        <div id="mkt-health"></div>
+        <div class="th-wrap">
+          <div class="th-ring"><canvas id="mkt-health-chart"></canvas><div class="th-centre" id="th-centre"></div></div>
+          <div class="th-key" id="th-key"></div>
+        </div>
       </div>
     </div>
 
@@ -1943,7 +1995,7 @@ function killChart(c){if(c){c.destroy();}return null;}
 function toggleEmpty(canvasId,emptyId,hasData){
   const cv=document.getElementById(canvasId),em=document.getElementById(emptyId);
   if(cv)cv.parentElement.style.display=hasData?'':'none';
-  if(em)em.style.display=hasData?'none':'block';
+  if(em)em.style.display=hasData?'none':'flex';
   return hasData;
 }
 
@@ -2043,29 +2095,50 @@ function drawGanttChart(camps){
       }}});
 }
 
-/** Not a chart — a progress readout of how on-top-of-it you are. */
+/** Ring + key. Never-done is its own bucket — it is "not started", not "failed". */
+let mktHealthChart=null;
 function drawTaskHealth(tasks){
-  const el=document.getElementById('mkt-health');
-  if(!el)return;
+  mktHealthChart=killChart(mktHealthChart);
+  const centre=document.getElementById('th-centre');
+  const key=document.getElementById('th-key');
+  const ctx=document.getElementById('mkt-health-chart');
+  if(!centre||!key||!ctx)return;
+
   const live=tasks.filter(t=>t.active!==false);
-  if(!live.length){el.innerHTML='<div class="empty">No tasks yet.</div>';return;}
+  if(!live.length){
+    centre.innerHTML='<div class="th-num">—</div>';
+    key.innerHTML='<div class="empty">No tasks yet.</div>';
+    return;
+  }
 
-  const overdue=live.filter(t=>taskDueIn(t)<0).length;
-  const dueToday=live.filter(t=>taskDueIn(t)===0).length;
-  const ok=live.length-overdue-dueToday;
-  const pct=Math.round(ok/live.length*100);
-  const never=live.filter(t=>!t.last_done).length;
+  const never   = live.filter(t=>!t.last_done).length;
+  const overdue = live.filter(t=>t.last_done&&taskDueIn(t)<0).length;
+  const today   = live.filter(t=>t.last_done&&taskDueIn(t)===0).length;
+  const ok      = live.filter(t=>t.last_done&&taskDueIn(t)>0).length;
+  const dueNow  = never+overdue+today;
 
-  const bar=(lbl,n,col)=>n?`<div class="th-seg" style="flex:${n};background:${col}" title="${lbl}: ${n}"></div>`:'';
+  const segs=[
+    {lbl:'Overdue',     n:overdue, c:'#A32D2D'},
+    {lbl:'Due today',   n:today,   c:'#D8952E'},
+    {lbl:'Not started', n:never,   c:'#B9B7B0'},
+    {lbl:'On schedule', n:ok,      c:'#34453E'}
+  ].filter(s=>s.n>0);
 
-  el.innerHTML=`
-    <div class="th-score ${pct>=80?'good':pct>=50?'mid':'bad'}">${pct}%</div>
-    <div class="th-sub">on schedule</div>
-    <div class="th-bar">${bar('Overdue',overdue,'#A32D2D')}${bar('Due today',dueToday,'#D8952E')}${bar('On schedule',ok,'#34453E')}</div>
-    <div class="stat-row" style="margin-top:14px"><span class="stat-label">Overdue</span><span class="stat-val" style="color:${overdue?'#A32D2D':'#888'}">${overdue}</span></div>
-    <div class="stat-row"><span class="stat-label">Due today</span><span class="stat-val">${dueToday}</span></div>
-    <div class="stat-row"><span class="stat-label">On schedule</span><span class="stat-val" style="color:#34453E">${ok}</span></div>
-    <div class="stat-row"><span class="stat-label">Never done</span><span class="stat-val" style="color:${never?'#7D4B0A':'#888'}">${never}</span></div>`;
+  centre.innerHTML=`<div class="th-num ${overdue?'bad':dueNow?'mid':'good'}">${dueNow}</div>
+                    <div class="th-cap">due now</div>`;
+
+  key.innerHTML=segs.map(s=>`
+    <div class="th-krow">
+      <span class="th-kdot" style="background:${s.c}"></span>
+      <span class="th-klbl">${s.lbl}</span>
+      <span class="th-kval">${s.n}</span>
+    </div>`).join('') +
+    `<div class="th-foot">${ok+today+overdue?`${Math.round(ok/(live.length)*100)}% of tasks are on schedule`:'Nothing has been ticked off yet'}</div>`;
+
+  mktHealthChart=new Chart(ctx,{type:'doughnut',
+    data:{labels:segs.map(s=>s.lbl),datasets:[{data:segs.map(s=>s.n),backgroundColor:segs.map(s=>s.c),borderWidth:0}]},
+    options:{responsive:true,maintainAspectRatio:false,cutout:'74%',
+      plugins:{legend:{display:false},tooltip:{callbacks:{label:c=>' '+c.label+': '+c.raw}}}}});
 }
 
 /* ── Task CRUD ── */
