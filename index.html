@@ -494,24 +494,21 @@ body.dark .bg-bar span{color:#44444e}
 .bg-month-r{font-size:12px;font-weight:700;color:#2D7A55;flex-shrink:0}
 .bg-month-r.v-over{color:#A32D2D}
 
-.sg-wrap{margin-top:18px;display:flex;flex-direction:column;gap:9px}
-.sg{display:flex;gap:11px;padding:12px 14px;border-radius:11px;border:1px solid #F0EFEC;background:#FCFCFB}
-.sg>i{font-size:17px;flex-shrink:0;margin-top:1px}
-.sg-body{min-width:0}
-.sg-t{font-size:13px;font-weight:600;color:#1a1a1a;line-height:1.45}
-.sg-s{font-size:11.5px;color:#a8a6a0;line-height:1.6;margin-top:3px}
-.sg-go{border-color:#DCE7E0;background:#F7FBF8}
-.sg-go>i{color:#2D7A55}
-.sg-warn{border-color:#F3E3C6;background:#FEFBF4}
-.sg-warn>i{color:#D8952E}
-.sg-note{border-color:#F0EFEC;background:#FBFBFA}
-.sg-note>i{color:#c4c2bc}
-.sg-note .sg-t{color:#888;font-weight:600}
-.sg-alloc{display:flex;align-items:center;gap:8px;margin-top:6px;font-size:12px}
-.sg-ch{min-width:120px;color:#888}
-.sg-now{color:#c4c2bc}
-.sg-alloc i{font-size:13px;color:#ccc}
-.sg-new{font-weight:700;color:#34453E}
+.bl{display:flex;align-items:center;gap:9px;flex-wrap:wrap;margin-top:14px;padding-top:13px;border-top:1px solid #F2F1EE;
+  font-size:12px;color:#a8a6a0}
+.bl-act{display:inline-flex;align-items:center;gap:6px;color:#2D7A55;font-weight:500}
+.bl-act strong{font-weight:700}
+.bl-act i{font-size:14px}
+.bl-act.over{color:#A32D2D}
+.bl-act.ok{color:#2D7A55}
+.bl-note{display:inline-flex;align-items:center;gap:5px;color:#c4c2bc;cursor:help}
+.bl-note i{font-size:13px}
+.bl-sep{color:#e0ded8}
+body.dark .bl{border-top-color:#28282e;color:#58586a}
+body.dark .bl-act{color:#5ab880}
+body.dark .bl-act.over{color:#e06060}
+body.dark .bl-note{color:#44444e}
+body.dark .bl-sep{color:#33333b}
 .svc-dash{display:inline-block;width:14px;height:0;border-top:1.5px dashed #A32D2D}
 
 @media(max-width:900px){.bg-top{grid-template-columns:1fr;gap:20px}}
@@ -543,19 +540,6 @@ body.dark .bg-mfill{background:#4a6a5a}
 body.dark .bg-mfill.over{background:#c0392b}
 body.dark .bg-month-r{color:#5ab880}
 body.dark .bg-month-r.v-over{color:#e06060}
-body.dark .sg{background:#1e1e22;border-color:#2a2a32}
-body.dark .sg-t{color:#d8d8e8}
-body.dark .sg-s{color:#58586a}
-body.dark .sg-go{background:#1c2420;border-color:#2a3a30}
-body.dark .sg-go>i{color:#5ab880}
-body.dark .sg-warn{background:#241f14;border-color:#3a2f18}
-body.dark .sg-warn>i{color:#c09040}
-body.dark .sg-note{background:#1e1e22;border-color:#2a2a32}
-body.dark .sg-note>i{color:#44444e}
-body.dark .sg-note .sg-t{color:#58586a}
-body.dark .sg-ch{color:#58586a}
-body.dark .sg-now{color:#44444e}
-body.dark .sg-new{color:#7ab890}
 
 /* ── Marketing: task cards ── */
 .tc-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(228px,1fr));gap:10px}
@@ -2351,57 +2335,27 @@ function renderBudget(){
       }).join('')}
     </div>
 
-    ${suggestions(gapMonthly,mBudget,mSpent,avgRev,tgt)}`;
+    ${budgetLine(gapMonthly,mBudget,avgRev,tgt)}`;
 }
 
-/** Honest suggestions. We can size the gap; we cannot rank channels without attribution. */
-function suggestions(gapMonthly,mBudget,mSpent,avgRev,tgt){
-  const by=spendByChannelWindow();
-  const chans=Object.keys(by);
-  const total=chans.reduce((a,c)=>a+by[c],0);
+/** One line, not three cards. Sizes the gap; says plainly what it cannot know. */
+function budgetLine(gapMonthly,mBudget,avgRev,tgt){
   const n=basisMonths();
-  const rows=[];
+  const winSpend=spendWindow();
+  const parts=[];
 
-  if(gapMonthly<=0){
-    rows.push({i:'ti-alert-triangle',c:'warn',
-      t:`You are about ${fmt(-gapMonthly)} a month above the ${tgt}% target.`,
-      s:'Not necessarily wrong — but it should be a deliberate choice rather than a drift.'});
+  if(gapMonthly>0.5){
+    parts.push(`<span class="bl-act"><i class="ti ti-trending-up"></i>Increase spend by ~<strong>${fmt(gapMonthly)}/month</strong> to reach ${tgt}%</span>`);
+  }else if(gapMonthly<-0.5){
+    parts.push(`<span class="bl-act over"><i class="ti ti-alert-triangle"></i><strong>${fmt(-gapMonthly)}/month</strong> above the ${tgt}% target</span>`);
   }else{
-    rows.push({i:'ti-trending-up',c:'go',
-      t:`Increase spend by about ${fmt(gapMonthly)} a month to reach ${tgt}%.`,
-      s:`That takes you to ${fmt(mBudget)} a month, or ${fmt(mBudget*12)} a year, against a ${fmt(avgRev)} monthly run rate.`});
-
-    if(!total){
-      rows.push({i:'ti-player-play',c:'go',
-        t:`Nothing logged yet. Start with one channel and one number: ${fmt(mBudget)} a month.`,
-        s:'Google Ads is the usual first move for local trade — it buys enquiries immediately, and the search-terms report tells you what people actually type. Log the spend here each month so this panel stays honest.'});
-    }else{
-      const lines=chans.sort((a,b)=>by[b]-by[a]).map(c=>{
-        const share=by[c]/total;
-        return `<div class="sg-alloc"><span class="sg-ch">${c}</span>
-          <span class="sg-now">${fmt(by[c]/n)}/m</span>
-          <i class="ti ti-arrow-narrow-right"></i>
-          <span class="sg-new">${fmt(mBudget*share)}/m</span></div>`;
-      }).join('');
-      rows.push({i:'ti-scale',c:'go',t:'Holding your current channel mix, that lands as:',s:lines});
-    }
+    parts.push(`<span class="bl-act ok"><i class="ti ti-check"></i>On target at ${tgt}%</span>`);
   }
 
-  if(mBudget>0&&mSpent<mBudget*0.5&&new Date().getDate()>20){
-    rows.push({i:'ti-clock',c:'warn',
-      t:`Only ${fmt(mSpent)} spent this month against a ${fmt(mBudget)} budget.`,
-      s:'Underspend does not roll over in practice — the enquiries simply never happen.'});
-  }
+  if(!winSpend) parts.push(`<span class="bl-note">no spend in the last ${n} months</span>`);
+  parts.push(`<span class="bl-note" title="Splitting a budget increase across channels assumes the current mix is right. Ranking channels on cost per won job needs a source field on enquiries."><i class="ti ti-info-circle"></i>no attribution data</span>`);
 
-  rows.push({i:'ti-info-circle',c:'note',
-    t:'This cannot tell you which channel to back.',
-    s:'Splitting the increase by current spend assumes the existing mix is right. To know whether Google Ads beats SEO on cost per won job, enquiries need a <strong>source</strong> field. Until then, treat the split above as a placeholder, not a recommendation.'});
-
-  return `<div class="sg-wrap">${rows.map(r=>`
-    <div class="sg sg-${r.c}">
-      <i class="ti ${r.i}"></i>
-      <div class="sg-body"><div class="sg-t">${r.t}</div><div class="sg-s">${r.s}</div></div>
-    </div>`).join('')}</div>`;
+  return `<div class="bl">${parts.join('<span class="bl-sep">·</span>')}</div>`;
 }
 
 const MKT_COLORS=['#34453E','#185FA5','#854F0B','#2D7A55','#4E44B5','#A32D2D','#5a8a70','#7D4B0A','#9a9a94'];
