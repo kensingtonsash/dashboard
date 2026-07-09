@@ -624,6 +624,20 @@ body.dark .tk-clear i{color:#5ab880}
 body.dark .tk-clear-t{color:#7ab890}
 body.dark .tk-clear-s{color:#505060}
 
+/* ── Quote pipeline stage ── */
+.stg{display:inline-block;margin-left:6px;font-size:9.5px;font-weight:700;text-transform:uppercase;letter-spacing:.04em;
+  padding:2px 7px;border-radius:20px;white-space:nowrap;vertical-align:1px}
+.stg-live{background:#EAF0EC;color:#34453E}
+.stg-follow{background:#FEF1DC;color:#7D4B0A}
+.stg-dormant{background:#EFEFEC;color:#999}
+.stg-tail{background:#F4F4F2;color:#bbb}
+.stg-rev{background:#DFF0CE;color:#356310}
+body.dark .stg-live{background:#1e2e24;color:#7ab890}
+body.dark .stg-follow{background:#3a2a10;color:#c09040}
+body.dark .stg-dormant{background:#28282e;color:#58586a}
+body.dark .stg-tail{background:#232329;color:#44444e}
+body.dark .stg-rev{background:#1a3020;color:#5ab870}
+
 /* ── Left sidebar navigation ── */
 body{padding-left:224px}
 .tabs{
@@ -1169,7 +1183,7 @@ function renderHome(){
   const ti=allItems().length;
   document.getElementById('kpi-home').innerHTML=`
     <div class="kpi" style="cursor:pointer" onclick="switchTab('projects',document.querySelectorAll('.tab')[6])" title="Go to Projects"><div class="kpi-label">Active projects</div><div class="kpi-val">${ap.length}</div><div class="kpi-sub">in progress</div></div>
-    <div class="kpi" style="cursor:pointer" onclick="switchTab('quotes',document.querySelectorAll('.tab')[3])" title="Go to Quotes"><div class="kpi-label">Open quotes</div><div class="kpi-val">${open.length}</div><div class="kpi-sub">${fmt(open.reduce((s,x)=>s+(Number(x.value)||0),0))} pipeline</div></div>
+    <div class="kpi" style="cursor:pointer" onclick="switchTab('quotes',document.querySelectorAll('.tab')[3])" title="Quoted within the last 90 days. Older quotes are dormant, not lost."><div class="kpi-label">Live pipeline</div><div class="kpi-val">${fmt(stageValue(e,'live')+stageValue(e,'follow'))}</div><div class="kpi-sub">${e.filter(x=>['live','follow'].includes(quoteStage(x)?.k)).length} quotes under 90 days</div></div>
     <div class="kpi" style="cursor:pointer" onclick="switchTab('invoices',document.querySelectorAll('.tab')[4])" title="Go to Invoices"><div class="kpi-label">Collected YTD</div><div class="kpi-val">${fmt(coll)}</div><div class="kpi-sub green">net excl. VAT</div></div>
     <div class="kpi" style="cursor:pointer" onclick="goToOverdueInvoices()" title="View overdue invoices"><div class="kpi-label">Outstanding</div><div class="kpi-val">${fmt(out)}</div><div class="kpi-sub ${out>0?'red':''}">${ovd.length>0?ovd.length+' overdue':'all current'}</div></div>`;
   const alerts=[];
@@ -1416,6 +1430,34 @@ async function updateEnqStatus(id,status){
   renderRequests();renderQuotes();renderHome();
 }
 
+/* ── Pipeline stage ──
+   Derived from the quote date. No data entry, so it can never go stale.
+   A quote is only Lost when a client says so — silence is not a decision. */
+const DAY_MS=86400000;
+const quoteAge=x=>x.date?Math.floor((Date.now()-new Date(x.date))/DAY_MS):null;
+const isOpen=x=>['Sent','Quoted'].includes(x.status);
+
+function quoteStage(x){
+  if(!isOpen(x))return null;
+  const d=quoteAge(x);
+  if(d===null)      return {k:'live',   l:'Live'};
+  if(d<=30)         return {k:'live',   l:'Live'};
+  if(d<=90)         return {k:'follow', l:'Following up'};
+  if(d<=730)        return {k:'dormant',l:'Dormant'};
+  return {k:'tail', l:'Long tail'};
+}
+
+const stageValue=(list,k)=>list.filter(x=>quoteStage(x)?.k===k)
+  .reduce((s,x)=>s+(Number(x.total_inc_vat)||0),0);
+
+/** Win rate on quotes old enough to have been decided.
+    All-time won/total punishes you for quoting hard this month. */
+function cohortWinRate(list){
+  const mature=list.filter(x=>x.date&&quoteAge(x)>90);
+  if(!mature.length)return null;
+  return Math.round(mature.filter(x=>x.status==='Won').length/mature.length*100);
+}
+
 function renderQuotes(){
   const qSearch=(document.getElementById('quote-search')?.value||'').toLowerCase();
   const e=[...DATA.enq.filter(x=>(!qSearch||((x.client||'')+(x.quote_no||'')+(x.address||'')+(x.job_type||'')).toLowerCase().includes(qSearch)))].sort((a,b)=>{
@@ -1427,11 +1469,17 @@ function renderQuotes(){
   const open=e.filter(x=>['Quoted','Sent'].includes(x.status));
   const lost=e.filter(x=>x.status==='Lost');
   const archived=e.filter(x=>x.status==='Archived');
+  const all=DATA.enq;
+  const cwr=cohortWinRate(all);
+  const liveVal=stageValue(all,'live')+stageValue(all,'follow');
+  const dormVal=stageValue(all,'dormant')+stageValue(all,'tail');
+  const dormCount=all.filter(x=>['dormant','tail'].includes(quoteStage(x)?.k)).length;
   document.getElementById('kpi-quotes').innerHTML=`
     <div class="kpi"><div class="kpi-label">Total quotes</div><div class="kpi-val">${e.length}</div><div class="kpi-sub">${open.length} open</div></div>
-    <div class="kpi"><div class="kpi-label">Won</div><div class="kpi-val">${won.length}</div><div class="kpi-sub green">${fmt(won.reduce((s,x)=>s+(Number(x.value)||0),0))} secured</div></div>
-    <div class="kpi"><div class="kpi-label">Win rate</div><div class="kpi-val">${e.length?Math.round(won.length/e.length*100):0}%</div><div class="kpi-sub">of all quotes</div></div>
-    <div class="kpi"><div class="kpi-label">Archived</div><div class="kpi-val">${archived.length}</div><div class="kpi-sub">not converted</div></div>`;
+    <div class="kpi"><div class="kpi-label">Won</div><div class="kpi-val">${won.length}</div><div class="kpi-sub green">${fmt(won.reduce((s,x)=>s+(Number(x.total_inc_vat)||0),0))} secured</div></div>
+    <div class="kpi" title="Quotes issued more than 90 days ago — old enough to have been decided"><div class="kpi-label">Win rate</div><div class="kpi-val">${cwr===null?'—':cwr+'%'}</div><div class="kpi-sub">90-day cohort</div></div>
+    <div class="kpi"><div class="kpi-label">Live pipeline</div><div class="kpi-val">${fmt(liveVal)}</div><div class="kpi-sub">quoted within 90 days</div></div>
+    <div class="kpi" title="Silent past 90 days. Not lost — heritage work often returns."><div class="kpi-label">Dormant</div><div class="kpi-val">${fmt(dormVal)}</div><div class="kpi-sub">${dormCount} quote${dormCount===1?'':'s'}</div></div>`;
   const b=document.getElementById('quotes-list');
   if(!e.length){b.innerHTML='<tr><td colspan="7" class="empty" style="padding:10px 0">No quotes yet.</td></tr>';return;}
   b.innerHTML=e.map(x=>{
@@ -1441,7 +1489,7 @@ function renderQuotes(){
       <td>${x.drive_url?`<a href="${x.drive_url}" target="_blank" style="color:#185FA5;font-weight:500;text-decoration:none" onmouseover="this.style.textDecoration='underline'" onmouseout="this.style.textDecoration='none'">#${(x.quote_no||'').replace('KS-','')}</a>`:`<span style="color:#185FA5;font-weight:500">#${(x.quote_no||'').replace('KS-','')}</span>`}</td>
       <td style="color:#555;font-size:12px">${x.address||''}</td>
       <td style="color:#888;font-size:12px;white-space:nowrap">${dateStr}</td>
-      <td>${badge(x.status)}</td>
+      <td>${badge(x.status)}${(()=>{const s=quoteStage(x);return s?`<span class="stg stg-${s.k}">${s.l}</span>`:'';})()}${x.revived_from_dormant?'<span class="stg stg-rev" title="Won after 90+ days dormant">revived</span>':''}</td>
       <td style="text-align:right;font-weight:600">${fmt(Number(x.total_inc_vat||0))}</td>
       <td><select onchange="updateQuoteStatus('${x.quote_no}',this.value)" style="font-size:11px;padding:2px 6px;border-radius:20px;border:0.5px solid #ddd;background:#fff;color:#666;font-family:inherit;cursor:pointer;outline:none">
         <option value="" disabled selected>Status</option>
