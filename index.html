@@ -430,6 +430,107 @@ body.dark .tk-ai:hover{background:#2e3a34;color:#7ab890}
 #kpi-mkt .kpi:nth-child(4)::before{background:#2D7A55}
 #tab-marketing .chart-wrap{height:200px}
 
+/* ── Marketing: budget panel ── */
+.bg-target{display:flex;align-items:center;gap:7px;font-size:11.5px;color:#999}
+.bg-pct-input{width:62px;padding:5px 8px;border:1px solid #E8E6E1;border-radius:8px;font-size:13px;font-weight:700;
+  font-family:inherit;text-align:center;outline:none;color:#34453E;background:#fff}
+.bg-pct-input:focus{border-color:#34453E}
+
+.bg-top{display:grid;grid-template-columns:270px 1fr;gap:26px;align-items:center}
+.bg-hero{min-width:0}
+.bg-big{font-size:52px;font-weight:700;line-height:1;letter-spacing:-.03em;color:#1a1a1a}
+.bg-big span{font-size:24px;font-weight:600;margin-left:2px;color:#c4c2bc}
+.bg-big.under{color:#D8952E}.bg-big.on{color:#2D7A55}.bg-big.over{color:#A32D2D}
+.bg-verdict{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.07em;margin-top:6px}
+.bg-verdict.under{color:#D8952E}.bg-verdict.on{color:#2D7A55}.bg-verdict.over{color:#A32D2D}
+.bg-track{position:relative;height:8px;border-radius:5px;background:#F2F1EE;margin-top:14px;overflow:hidden}
+.bg-fill{height:100%;border-radius:5px;transition:width .5s ease}
+.bg-fill.under{background:linear-gradient(90deg,#E5B063,#D8952E)}
+.bg-fill.on{background:linear-gradient(90deg,#34453E,#2D7A55)}
+.bg-fill.over{background:linear-gradient(90deg,#c0574a,#A32D2D)}
+.bg-scale{display:flex;justify-content:space-between;font-size:10px;color:#c4c2bc;margin-top:5px;font-weight:600}
+
+.bg-stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(130px,1fr));gap:14px}
+.bg-stat{min-width:0}
+.bg-l{font-size:10px;color:#bbb;text-transform:uppercase;letter-spacing:.06em;font-weight:700;margin-bottom:6px}
+.bg-v{font-size:19px;font-weight:700;color:#1a1a1a;line-height:1}
+.bg-v.v-under{color:#D8952E}.bg-v.v-over{color:#A32D2D}
+.bg-s{font-size:10.5px;color:#c4c2bc;margin-top:4px}
+
+.bg-month{display:flex;align-items:center;gap:14px;margin:20px 0 0;padding:12px 14px;background:#FAFAF8;border-radius:11px;flex-wrap:wrap}
+.bg-month-l{flex-shrink:0}
+.bg-month-t{font-size:10px;color:#bbb;text-transform:uppercase;letter-spacing:.06em;font-weight:700}
+.bg-month-v{font-size:14px;font-weight:700;color:#1a1a1a;margin-top:2px}
+.bg-month-of{font-weight:500;color:#c4c2bc;font-size:12px}
+.bg-mtrack{flex:1;min-width:120px;height:6px;background:#EAE9E5;border-radius:4px;overflow:hidden}
+.bg-mfill{height:100%;background:#34453E;border-radius:4px;transition:width .4s}
+.bg-mfill.over{background:#A32D2D}
+.bg-month-r{font-size:12px;font-weight:700;color:#2D7A55;flex-shrink:0}
+.bg-month-r.v-over{color:#A32D2D}
+
+.sg-wrap{margin-top:18px;display:flex;flex-direction:column;gap:9px}
+.sg{display:flex;gap:11px;padding:12px 14px;border-radius:11px;border:1px solid #F0EFEC;background:#FCFCFB}
+.sg>i{font-size:17px;flex-shrink:0;margin-top:1px}
+.sg-body{min-width:0}
+.sg-t{font-size:13px;font-weight:600;color:#1a1a1a;line-height:1.45}
+.sg-s{font-size:11.5px;color:#a8a6a0;line-height:1.6;margin-top:3px}
+.sg-go{border-color:#DCE7E0;background:#F7FBF8}
+.sg-go>i{color:#2D7A55}
+.sg-warn{border-color:#F3E3C6;background:#FEFBF4}
+.sg-warn>i{color:#D8952E}
+.sg-note{border-color:#F0EFEC;background:#FBFBFA}
+.sg-note>i{color:#c4c2bc}
+.sg-note .sg-t{color:#888;font-weight:600}
+.sg-alloc{display:flex;align-items:center;gap:8px;margin-top:6px;font-size:12px}
+.sg-ch{min-width:120px;color:#888}
+.sg-now{color:#c4c2bc}
+.sg-alloc i{font-size:13px;color:#ccc}
+.sg-new{font-weight:700;color:#34453E}
+.svc-dash{display:inline-block;width:14px;height:0;border-top:1.5px dashed #A32D2D}
+
+@media(max-width:900px){.bg-top{grid-template-columns:1fr;gap:20px}}
+
+body.dark .bg-target{color:#58586a}
+body.dark .bg-pct-input{background:#1e1e22;border-color:#2e2e34;color:#7ab890}
+body.dark .bg-pct-input:focus{border-color:#4a6a5a}
+body.dark .bg-big{color:#e8e8f0}
+body.dark .bg-big span{color:#44444e}
+body.dark .bg-big.under{color:#c09040}
+body.dark .bg-big.on{color:#5ab880}
+body.dark .bg-big.over{color:#e06060}
+body.dark .bg-verdict.under{color:#c09040}
+body.dark .bg-verdict.on{color:#5ab880}
+body.dark .bg-verdict.over{color:#e06060}
+body.dark .bg-track{background:#2a2a32}
+body.dark .bg-scale{color:#44444e}
+body.dark .bg-l{color:#505060}
+body.dark .bg-v{color:#e8e8f0}
+body.dark .bg-v.v-under{color:#c09040}
+body.dark .bg-v.v-over{color:#e06060}
+body.dark .bg-s{color:#44444e}
+body.dark .bg-month{background:#1e1e22}
+body.dark .bg-month-t{color:#505060}
+body.dark .bg-month-v{color:#d8d8e8}
+body.dark .bg-month-of{color:#44444e}
+body.dark .bg-mtrack{background:#2a2a32}
+body.dark .bg-mfill{background:#4a6a5a}
+body.dark .bg-mfill.over{background:#c0392b}
+body.dark .bg-month-r{color:#5ab880}
+body.dark .bg-month-r.v-over{color:#e06060}
+body.dark .sg{background:#1e1e22;border-color:#2a2a32}
+body.dark .sg-t{color:#d8d8e8}
+body.dark .sg-s{color:#58586a}
+body.dark .sg-go{background:#1c2420;border-color:#2a3a30}
+body.dark .sg-go>i{color:#5ab880}
+body.dark .sg-warn{background:#241f14;border-color:#3a2f18}
+body.dark .sg-warn>i{color:#c09040}
+body.dark .sg-note{background:#1e1e22;border-color:#2a2a32}
+body.dark .sg-note>i{color:#44444e}
+body.dark .sg-note .sg-t{color:#58586a}
+body.dark .sg-ch{color:#58586a}
+body.dark .sg-now{color:#44444e}
+body.dark .sg-new{color:#7ab890}
+
 /* ── Marketing: task cards ── */
 .tc-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(232px,1fr));gap:9px}
 
@@ -740,6 +841,18 @@ body.dark .tabs{background:#222226;border-right:1px solid #2e2e34}
     <div class="kpi-grid" id="kpi-mkt"></div>
 
     <div class="card">
+      <div style="display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:16px;flex-wrap:wrap">
+        <div class="card-title" style="margin-bottom:0"><i class="ti ti-target-arrow"></i> Marketing budget vs revenue</div>
+        <div class="bg-target">
+          <span>Target</span>
+          <input type="number" id="bg-pct" min="0" max="20" step="0.5" class="bg-pct-input" onchange="saveTargetPct(this.value)">
+          <span>% of revenue</span>
+        </div>
+      </div>
+      <div id="bg-body"></div>
+    </div>
+
+    <div class="card">
       <div style="display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:14px;flex-wrap:wrap">
         <div class="card-title" style="margin-bottom:0"><i class="ti ti-checkup-list"></i> This week</div>
         <div style="display:flex;gap:4px;flex-wrap:wrap;align-items:center">
@@ -960,7 +1073,7 @@ function getProjectChecklist(proj){
   return sections;
 }
 
-let DATA={enq:[],inv:[],jobs:[],proj:[],clients:[],sub:[],mat:[],mtask:[],camp:[],spend:[]};
+let DATA={enq:[],inv:[],jobs:[],proj:[],clients:[],sub:[],mat:[],mtask:[],camp:[],spend:[],cfg:null};
 let svcChart=null,clientFilter='all';
 const allItems=()=>getProjectChecklist({job_type:'Full Replacement',payment_schedule:'A',ironmongery:true}).flatMap(s=>s.items);
 const fmt=n=>'£'+Number(n).toLocaleString('en-GB',{minimumFractionDigits:0,maximumFractionDigits:0});
@@ -996,7 +1109,7 @@ function toggleDark(){
 async function loadAll(){
   setStatus('Loading...');
   try{
-    const [enq,inv,jobs,proj,clients,sub,mat,mtask,camp,spend]=await Promise.all([
+    const [enq,inv,jobs,proj,clients,sub,mat,mtask,camp,spend,cfg]=await Promise.all([
       sb('enquiries','GET',null,'?order=quote_no.desc'),
       sb('invoices','GET',null,'?order=invoice_no.desc'),
       sb('jobs','GET',null,'?order=created_at.desc'),
@@ -1006,9 +1119,10 @@ async function loadAll(){
       sb('materials','GET',null,'?order=sort_order.asc').catch(()=>[]),
       sb('marketing_tasks','GET',null,'?order=sort_order.asc').catch(()=>[]),
       sb('marketing_campaigns','GET',null,'?order=created_at.desc').catch(()=>[]),
-      sb('marketing_spend','GET',null,'?order=month.desc').catch(()=>[])
+      sb('marketing_spend','GET',null,'?order=month.desc').catch(()=>[]),
+      sb('marketing_config','GET',null,'?id=eq.default').catch(()=>[])
     ]);
-    DATA.enq=enq||[];DATA.inv=inv||[];DATA.jobs=jobs||[];DATA.proj=proj||[];DATA.clients=clients||[];DATA.sub=sub||[];DATA.mat=mat||[];DATA.mtask=mtask||[];DATA.camp=camp||[];DATA.spend=spend||[];
+    DATA.enq=enq||[];DATA.inv=inv||[];DATA.jobs=jobs||[];DATA.proj=proj||[];DATA.clients=clients||[];DATA.sub=sub||[];DATA.mat=mat||[];DATA.mtask=mtask||[];DATA.camp=camp||[];DATA.spend=spend||[];DATA.cfg=(cfg&&cfg[0])||{target_pct:3};
     render();
     setStatus('Updated '+new Date().toLocaleTimeString('en-GB',{hour:'2-digit',minute:'2-digit'}));
   }catch(e){setStatus('Error: '+e.message);}
@@ -1921,7 +2035,7 @@ function renderMarketing(){
   const overdue=tasks.filter(t=>t.active!==false&&taskDueIn(t)<0);
   const activeCamps=camps.filter(c=>c.status==='Active');
   const thisMonth=new Date().toISOString().slice(0,7);
-  const spendThisMonth=spend.filter(s=>(s.month||'').slice(0,7)===thisMonth).reduce((a,s)=>a+Number(s.amount||0),0);
+  const mtdSpend=spend.filter(s=>(s.month||'').slice(0,7)===thisMonth).reduce((a,s)=>a+Number(s.amount||0),0);
   const thisYear=new Date().getFullYear();
   const spendYTD=spend.filter(s=>new Date(s.month).getFullYear()===thisYear).reduce((a,s)=>a+Number(s.amount||0),0);
 
@@ -1929,7 +2043,7 @@ function renderMarketing(){
   if(k)k.innerHTML=`
     <div class="kpi"><div class="kpi-label">Tasks due</div><div class="kpi-val">${due.length}</div><div class="kpi-sub ${overdue.length?'red':''}">${overdue.length?overdue.length+' overdue':'nothing late'}</div></div>
     <div class="kpi"><div class="kpi-label">Active campaigns</div><div class="kpi-val">${activeCamps.length}</div><div class="kpi-sub">${camps.length} total</div></div>
-    <div class="kpi"><div class="kpi-label">Spend this month</div><div class="kpi-val">${fmt(spendThisMonth)}</div><div class="kpi-sub">net excl. VAT</div></div>
+    <div class="kpi"><div class="kpi-label">Spend this month</div><div class="kpi-val">${fmt(mtdSpend)}</div><div class="kpi-sub">net excl. VAT</div></div>
     <div class="kpi"><div class="kpi-label">Spend YTD</div><div class="kpi-val">${fmt(spendYTD)}</div><div class="kpi-sub">net excl. VAT · ${thisYear}</div></div>`;
 
   // ── Tasks ──
@@ -1982,6 +2096,7 @@ function renderMarketing(){
       :'<tr><td colspan="5" class="empty">No spend logged yet.</td></tr>';
   }
 
+  renderBudget();
   drawSpendChart(spend);
   drawSplitChart(spend);
   drawGanttChart(camps);
@@ -2024,6 +2139,149 @@ function taskCard(t){
 }
 
 /* ── Charts ── *//* ── Charts ── *//* ── Charts ── */
+/* ── Budget engine ── */
+const targetPct=()=>Number(DATA.cfg?.target_pct ?? 3);
+const netOf=i=>Number(i.ex_vat||0)||Number(i.amount||0)/1.2;
+
+/** Rolling 12-month collected revenue, net of VAT. Only paid invoices count. */
+function revenue12(){
+  const cut=new Date();cut.setMonth(cut.getMonth()-12);
+  return (DATA.inv||[])
+    .filter(i=>i.status==='Paid'&&i.paid_date&&new Date(i.paid_date)>=cut)
+    .reduce((a,i)=>a+netOf(i),0);
+}
+function spend12(){
+  const cut=new Date();cut.setMonth(cut.getMonth()-12);
+  return (DATA.spend||[]).filter(s=>s.month&&new Date(s.month)>=cut)
+    .reduce((a,s)=>a+Number(s.amount||0),0);
+}
+function spendByChannel12(){
+  const cut=new Date();cut.setMonth(cut.getMonth()-12);
+  const by={};
+  (DATA.spend||[]).filter(s=>s.month&&new Date(s.month)>=cut)
+    .forEach(s=>{by[s.channel]=(by[s.channel]||0)+Number(s.amount||0);});
+  return by;
+}
+function spendThisMonth(){
+  const m=new Date().toISOString().slice(0,7);
+  return (DATA.spend||[]).filter(s=>(s.month||'').slice(0,7)===m)
+    .reduce((a,s)=>a+Number(s.amount||0),0);
+}
+/** Monthly budget = target% of trailing-12m revenue, over 12. Smoothed, not spiky. */
+const monthlyBudget=()=>revenue12()*targetPct()/100/12;
+
+async function saveTargetPct(v){
+  const pct=Math.max(0,Number(v)||0);
+  try{
+    await sb('marketing_config','PATCH',{target_pct:pct},'?id=eq.default');
+    DATA.cfg={...(DATA.cfg||{}),target_pct:pct};
+    renderMarketing();
+  }catch(e){alert('Could not save target: '+e.message);}
+}
+
+function renderBudget(){
+  const el=document.getElementById('bg-body');
+  const inp=document.getElementById('bg-pct');
+  if(!el)return;
+  if(inp&&document.activeElement!==inp)inp.value=targetPct();
+
+  const rev=revenue12(), sp=spend12(), tgt=targetPct();
+  if(rev<=0||!tgt){
+    el.innerHTML=`<div class="chart-empty" style="display:flex">
+      <i class="ti ti-receipt-off"></i>
+      <div class="ce-t">${rev<=0?'No collected revenue yet':'Set a target above 0%'}</div>
+      <div class="ce-s">${rev<=0?'Budget is a percentage of revenue — mark an invoice paid and this comes alive':'The budget is a share of revenue'}</div></div>`;
+    return;
+  }
+
+  const targetSpend=rev*tgt/100;
+  const actualPct=sp/rev*100;
+  const gap=targetSpend-sp;
+  const mBudget=monthlyBudget();
+  const mSpent=spendThisMonth();
+  const mLeft=mBudget-mSpent;
+  const fill=Math.min(actualPct/tgt*100,100);
+
+  const st = (actualPct>=tgt*0.9&&actualPct<=tgt*1.1) ? 'on' : actualPct<tgt ? 'under' : 'over';
+  const verdict = st==='on' ? 'On target' : st==='under' ? 'Underspending' : 'Overspending';
+
+  el.innerHTML=`
+    <div class="bg-top">
+      <div class="bg-hero">
+        <div class="bg-big ${st}">${actualPct.toFixed(1)}<span>%</span></div>
+        <div class="bg-verdict ${st}">${verdict}</div>
+        <div class="bg-track"><div class="bg-fill ${st}" style="width:${fill}%"></div></div>
+        <div class="bg-scale"><span>0%</span><span>${tgt}% target</span></div>
+      </div>
+      <div class="bg-stats">
+        <div class="bg-stat"><div class="bg-l">Revenue · 12m</div><div class="bg-v">${fmt(rev)}</div><div class="bg-s">net, collected</div></div>
+        <div class="bg-stat"><div class="bg-l">Budget at ${tgt}%</div><div class="bg-v">${fmt(targetSpend)}</div><div class="bg-s">${fmt(mBudget)} per month</div></div>
+        <div class="bg-stat"><div class="bg-l">Spent · 12m</div><div class="bg-v">${fmt(sp)}</div><div class="bg-s">${sp?actualPct.toFixed(1)+'% of revenue':'nothing logged'}</div></div>
+        <div class="bg-stat"><div class="bg-l">${gap>=0?'Shortfall':'Over budget'}</div><div class="bg-v ${gap>=0?'v-under':'v-over'}">${fmt(Math.abs(gap))}</div><div class="bg-s">${gap>=0?'room to invest':'above target'}</div></div>
+      </div>
+    </div>
+
+    <div class="bg-month">
+      <div class="bg-month-l">
+        <div class="bg-month-t">This month</div>
+        <div class="bg-month-v">${fmt(mSpent)} <span class="bg-month-of">of ${fmt(mBudget)}</span></div>
+      </div>
+      <div class="bg-mtrack"><div class="bg-mfill ${mSpent>mBudget?'over':''}" style="width:${Math.min(mBudget?mSpent/mBudget*100:0,100)}%"></div></div>
+      <div class="bg-month-r ${mLeft<0?'v-over':''}">${mLeft>=0?fmt(mLeft)+' left':fmt(-mLeft)+' over'}</div>
+    </div>
+
+    ${suggestions(gap,mBudget,mSpent,rev,tgt)}`;
+}
+
+/** Honest suggestions. We can size the gap; we cannot rank channels without attribution. */
+function suggestions(gap,mBudget,mSpent,rev,tgt){
+  const by=spendByChannel12();
+  const chans=Object.keys(by);
+  const total=chans.reduce((a,c)=>a+by[c],0);
+  const rows=[];
+
+  if(gap<=0){
+    rows.push({i:'ti-alert-triangle',c:'warn',
+      t:`You are ${fmt(-gap)} above the ${tgt}% target over twelve months.`,
+      s:'Not necessarily wrong — but it should be a deliberate choice rather than a drift.'});
+  }else{
+    rows.push({i:'ti-trending-up',c:'go',
+      t:`Increase spend by about ${fmt(gap/12)} a month to reach ${tgt}%.`,
+      s:`That is ${fmt(gap)} over the next twelve months, against ${fmt(rev)} of collected revenue.`});
+
+    if(!total){
+      rows.push({i:'ti-player-play',c:'go',
+        t:`Nothing logged yet. Start with one channel and one number: ${fmt(mBudget)} a month.`,
+        s:'Google Ads is the usual first move for local trade — it buys enquiries immediately, and the search-terms report tells you what people actually type. Log the spend here each month so this panel stays honest.'});
+    }else{
+      const lines=chans.sort((a,b)=>by[b]-by[a]).map(c=>{
+        const share=by[c]/total;
+        return `<div class="sg-alloc"><span class="sg-ch">${c}</span>
+          <span class="sg-now">${fmt(by[c]/12)}/m</span>
+          <i class="ti ti-arrow-narrow-right"></i>
+          <span class="sg-new">${fmt(mBudget*share)}/m</span></div>`;
+      }).join('');
+      rows.push({i:'ti-scale',c:'go',t:'Holding your current channel mix, that lands as:',s:lines});
+    }
+  }
+
+  if(mBudget>0&&mSpent<mBudget*0.5&&new Date().getDate()>20){
+    rows.push({i:'ti-clock',c:'warn',
+      t:`Only ${fmt(mSpent)} spent this month against a ${fmt(mBudget)} budget.`,
+      s:'Underspend does not roll over in practice — the enquiries simply never happen.'});
+  }
+
+  rows.push({i:'ti-info-circle',c:'note',
+    t:'This cannot tell you which channel to back.',
+    s:'Splitting the increase by current spend assumes the existing mix is right. To know whether Google Ads beats SEO on cost per won job, enquiries need a <strong>source</strong> field. Until then, treat the split above as a placeholder, not a recommendation.'});
+
+  return `<div class="sg-wrap">${rows.map(r=>`
+    <div class="sg sg-${r.c}">
+      <i class="ti ${r.i}"></i>
+      <div class="sg-body"><div class="sg-t">${r.t}</div><div class="sg-s">${r.s}</div></div>
+    </div>`).join('')}</div>`;
+}
+
 const MKT_COLORS=['#34453E','#185FA5','#854F0B','#2D7A55','#4E44B5','#A32D2D','#5a8a70','#7D4B0A','#9a9a94'];
 const chanColor=(c,i)=>MKT_COLORS[i%MKT_COLORS.length];
 const isDark=()=>document.body.classList.contains('dark');
@@ -2044,7 +2302,7 @@ function toggleEmpty(canvasId,emptyId,hasData){
 function drawSpendChart(spend){
   mktSpendChart=killChart(mktSpendChart);
   const legend=document.getElementById('mkt-legend');
-  if(!toggleEmpty('mkt-spend-chart','mkt-spend-empty',spend.length)){
+  if(!toggleEmpty('mkt-spend-chart','mkt-spend-empty',spend.length||monthlyBudget()>0)){
     if(legend)legend.innerHTML='';
     return;
   }
@@ -2061,10 +2319,20 @@ function drawSpendChart(spend){
                        .reduce((a,s)=>a+Number(s.amount||0),0)),
     backgroundColor:chanColor(ch,i),
     stack:'s',
-    borderRadius:3
+    borderRadius:3,
+    order:2
   }));
+
+  // Target line: monthly budget derived from trailing-12m revenue
+  const mb=monthlyBudget();
+  if(mb>0){
+    datasets.push({type:'line',label:`${targetPct()}% target`,data:keys.map(()=>Math.round(mb)),
+      borderColor:'#A32D2D',borderWidth:1.5,borderDash:[5,4],pointRadius:0,fill:false,order:1});
+  }
+
   if(legend)legend.innerHTML=channels.map((ch,i)=>
-    `<span><span class="svc-dot" style="background:${chanColor(ch,i)}"></span>${ch}</span>`).join('');
+    `<span><span class="svc-dot" style="background:${chanColor(ch,i)}"></span>${ch}</span>`).join('')
+    +(mb>0?`<span><span class="svc-dash"></span>${targetPct()}% target · ${fmt(mb)}/m</span>`:'');
 
   const ctx=document.getElementById('mkt-spend-chart');
   if(!ctx)return;
