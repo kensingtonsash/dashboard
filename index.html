@@ -375,6 +375,83 @@ body.dark .mat-link{color:#5a90d0}
 body.dark .mat-select,body.dark .mat-qty{background:#1e1e22;border-color:#2e2e34;color:#d8d8e8}
 body.dark .mat-qty:focus,body.dark .mat-select:focus{border-color:#4a6a5a}
 
+/* ── Shared form fields ── */
+.ff{width:100%;padding:7px 10px;border:1px solid #E8E6E1;border-radius:8px;font-size:13px;font-family:inherit;outline:none;background:#fff;color:#1a1a1a}
+.ff:focus{border-color:#34453E}
+.ff-lbl{font-size:11px;color:#888;margin-bottom:4px}
+body.dark .ff{background:#1e1e22;border-color:#2e2e34;color:#d8d8e8}
+body.dark .ff:focus{border-color:#4a6a5a}
+body.dark .ff-lbl{color:#58586a}
+
+/* ── AI draft modal ── */
+.ai-overlay{position:fixed;inset:0;background:rgba(20,20,18,.45);backdrop-filter:blur(2px);z-index:1200;display:none;align-items:center;justify-content:center;padding:24px}
+.ai-overlay.open{display:flex}
+.ai-modal{background:#fff;border:1px solid #E8E6E1;border-radius:16px;width:min(720px,100%);max-height:82vh;display:flex;flex-direction:column;box-shadow:0 16px 48px rgba(0,0,0,.22)}
+.ai-head{display:flex;align-items:center;justify-content:space-between;padding:15px 20px;border-bottom:1px solid #F2F1EE;background:#FAFAF8;border-radius:16px 16px 0 0;flex-shrink:0}
+.ai-title{font-size:13px;font-weight:700;color:#34453E;display:flex;align-items:center;gap:8px;text-transform:uppercase;letter-spacing:.05em}
+.ai-body{flex:1;overflow-y:auto;padding:20px;font-size:13.5px;line-height:1.7;color:#1a1a1a;white-space:pre-wrap}
+.ai-foot{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:13px 20px;border-top:1px solid #F2F1EE;flex-shrink:0;flex-wrap:wrap}
+.ai-note{font-size:11px;color:#aaa}
+.ai-loading{color:#bbb;font-style:italic;display:flex;align-items:center;gap:8px}
+.ai-loading i{animation:spin 1s linear infinite;display:inline-block}
+@keyframes spin{to{transform:rotate(360deg)}}
+.ai-err{color:#A32D2D;font-size:13px}
+.ai-foot .btn-sm:disabled{opacity:.35;cursor:not-allowed}
+.tk-ai:hover{background:#EAF0EC;color:#34453E}
+body.dark .ai-overlay{background:rgba(0,0,0,.62)}
+body.dark .ai-modal{background:#222226;border-color:#2e2e34;box-shadow:0 16px 48px rgba(0,0,0,.6)}
+body.dark .ai-head{background:#1e1e22;border-bottom-color:#2e2e34}
+body.dark .ai-title{color:#7ab890}
+body.dark .ai-body{color:#d8d8e8}
+body.dark .ai-foot{border-top-color:#2e2e34}
+body.dark .ai-note{color:#505060}
+body.dark .ai-err{color:#e06060}
+body.dark .tk-ai:hover{background:#2e3a34;color:#7ab890}
+
+/* ── Marketing: task health ── */
+.th-score{font-size:40px;font-weight:700;line-height:1;letter-spacing:-.02em}
+.th-score.good{color:#2D7A55}.th-score.mid{color:#D8952E}.th-score.bad{color:#A32D2D}
+.th-sub{font-size:11px;color:#bbb;text-transform:uppercase;letter-spacing:.07em;margin-top:5px;font-weight:600}
+.th-bar{display:flex;gap:2px;height:8px;margin-top:14px;border-radius:5px;overflow:hidden;background:#F2F1EE}
+.th-seg{height:100%;border-radius:2px}
+body.dark .th-sub{color:#505060}
+body.dark .th-bar{background:#2a2a32}
+body.dark .th-score.good{color:#5ab880}
+body.dark .th-score.mid{color:#c09040}
+body.dark .th-score.bad{color:#e06060}
+
+/* ── Marketing: recurring tasks ── */
+.tk-row{display:flex;align-items:flex-start;gap:12px;padding:12px 0;border-bottom:1px solid #F2F1EE}
+.tk-row:last-child{border-bottom:none}
+.tk-row:hover{background:#FAFAF8}
+.tk-tick{flex-shrink:0;width:24px;height:24px;margin-top:1px;border-radius:50%;border:1.5px solid #D8D6D0;background:#fff;color:transparent;cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:13px;transition:all .15s}
+.tk-tick:hover{border-color:#34453E;background:#34453E;color:#fff}
+.tk-main{flex:1;min-width:0}
+.tk-title{font-size:13px;font-weight:600;color:#1a1a1a;display:flex;align-items:center;gap:6px}
+.tk-link{color:#c4c4c0;text-decoration:none;font-size:12px;display:inline-flex}
+.tk-link:hover{color:#185FA5}
+.tk-detail{font-size:11.5px;color:#aaa;line-height:1.5;margin-top:3px}
+.tk-side{display:flex;flex-direction:column;align-items:flex-end;gap:2px;flex-shrink:0;text-align:right}
+.tk-due{font-size:11.5px;font-weight:600;white-space:nowrap}
+.td-over{color:#A32D2D}.td-now{color:#7D4B0A}.td-soon{color:#7D4B0A}.td-ok{color:#bbb}
+.tk-cad{font-size:10.5px;color:#bbb;text-transform:uppercase;letter-spacing:.05em}
+.tk-last{font-size:10.5px;color:#ccc}
+.tk-acts{display:flex;gap:2px;flex-shrink:0}
+.tk-acts .mat-ico{opacity:0}
+.tk-row:hover .tk-acts .mat-ico{opacity:1}
+body.dark .tk-row{border-bottom-color:#28282e}
+body.dark .tk-row:hover{background:#28282e}
+body.dark .tk-tick{background:#1e1e22;border-color:#3a3a42}
+body.dark .tk-tick:hover{background:#34453E;border-color:#4a6a5a;color:#fff}
+body.dark .tk-title{color:#d8d8e8}
+body.dark .tk-detail{color:#58586a}
+body.dark .td-over{color:#e06060}
+body.dark .td-now,body.dark .td-soon{color:#c09040}
+body.dark .td-ok{color:#505060}
+body.dark .tk-cad,body.dark .tk-last{color:#3f3f48}
+body.dark .tk-link{color:#3a3a42}
+body.dark .tk-link:hover{color:#5a90d0}
+
 /* ── Left sidebar navigation ── */
 body{padding-left:224px}
 .tabs{
@@ -420,6 +497,7 @@ body.dark .tabs{background:#222226;border-right:1px solid #2e2e34}
       <button class="tab" onclick="switchTab('schedule',this)">Schedule</button>
       <button class="tab" onclick="switchTab('subcontractors',this)">Subcontractors</button>
       <button class="tab" onclick="switchTab('materials',this)">Materials</button>
+      <button class="tab" onclick="switchTab('marketing',this)">Marketing</button>
     </div>
   </div>
 
@@ -599,6 +677,148 @@ body.dark .tabs{background:#222226;border-right:1px solid #2e2e34}
       </div>
     </div>
   </div>
+
+  <div id="tab-marketing" class="section">
+    <div class="kpi-grid" id="kpi-mkt"></div>
+
+    <div class="home-grid">
+      <div class="card">
+        <div class="card-title"><i class="ti ti-chart-bar"></i> Ad spend by month</div>
+        <div id="mkt-legend" class="svc-legend"></div>
+        <div class="chart-wrap"><canvas id="mkt-spend-chart"></canvas></div>
+        <div id="mkt-spend-empty" class="empty" style="display:none">No spend logged yet. Add a row below and it'll chart here.</div>
+      </div>
+      <div class="card">
+        <div class="card-title"><i class="ti ti-chart-donut"></i> Spend split — this year</div>
+        <div class="chart-wrap"><canvas id="mkt-split-chart"></canvas></div>
+        <div id="mkt-split-empty" class="empty" style="display:none">Nothing to split yet.</div>
+      </div>
+    </div>
+
+    <div class="home-grid">
+      <div class="card">
+        <div class="card-title"><i class="ti ti-timeline-event"></i> Campaign timeline</div>
+        <div class="chart-wrap" id="mkt-gantt-wrap"><canvas id="mkt-gantt-chart"></canvas></div>
+        <div id="mkt-gantt-empty" class="empty" style="display:none">No campaigns with start dates yet.</div>
+      </div>
+      <div class="card">
+        <div class="card-title"><i class="ti ti-progress-check"></i> Task health</div>
+        <div id="mkt-health"></div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div style="display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:14px;flex-wrap:wrap">
+        <div class="card-title" style="margin-bottom:0"><i class="ti ti-checkup-list"></i> Recurring tasks</div>
+        <div style="display:flex;gap:4px;flex-wrap:wrap;align-items:center">
+          <button class="inv-pill active" onclick="setTaskFilter('due')" data-tfilter="due">Due now</button>
+          <button class="inv-pill" onclick="setTaskFilter('all')" data-tfilter="all">All</button>
+          <button class="btn-sm" style="margin-left:6px" onclick="showAddTask()">+ Add task</button>
+        </div>
+      </div>
+      <div id="mkt-tasks"></div>
+    </div>
+
+    <div id="task-form" style="display:none" class="card">
+      <div class="card-title"><i class="ti ti-list-check"></i> <span id="task-form-title">Add task</span></div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px">
+        <div><div class="ff-lbl">Title</div><input id="tf-title" class="ff"></div>
+        <div><div class="ff-lbl">Repeat every</div>
+          <select id="tf-cadence" class="ff">
+            <option value="1">Day</option><option value="7" selected>Week</option>
+            <option value="14">Fortnight</option><option value="30">Month</option>
+            <option value="90">Quarter</option><option value="365">Year</option>
+          </select>
+        </div>
+      </div>
+      <div style="margin-top:10px"><div class="ff-lbl">Detail</div><textarea id="tf-detail" rows="2" class="ff" style="resize:vertical"></textarea></div>
+      <div style="margin-top:10px"><div class="ff-lbl">Link <span style="color:#bbb">(optional)</span></div><input id="tf-link" class="ff" placeholder="https://..."></div>
+      <div style="margin-top:10px"><div class="ff-lbl">AI brief <span style="color:#bbb">(optional — adds a "Draft with AI" button to this task)</span></div><textarea id="tf-prompt" rows="4" class="ff" style="resize:vertical;font-size:12px;line-height:1.6" placeholder="Instructions for Claude. Be specific about tone, length, and what to avoid."></textarea></div>
+      <div style="display:flex;gap:8px;margin-top:12px">
+        <button class="btn-main" onclick="saveTask()">Save</button>
+        <button class="btn-main" style="border-color:#ddd;color:#888" onclick="cancelTask()">Cancel</button>
+      </div>
+    </div>
+
+    <div class="card">
+      <div style="display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:14px;flex-wrap:wrap">
+        <div class="card-title" style="margin-bottom:0"><i class="ti ti-speakerphone"></i> Campaigns</div>
+        <button class="btn-sm" onclick="showAddCamp()">+ Add campaign</button>
+      </div>
+      <div style="overflow-x:auto"><table class="mat-table">
+        <thead><tr><th>Campaign</th><th>Channel</th><th>Dates</th><th style="text-align:right">Budget</th><th>Status</th><th>Notes</th><th></th></tr></thead>
+        <tbody id="mkt-camps"></tbody>
+      </table></div>
+    </div>
+
+    <div id="camp-form" style="display:none" class="card">
+      <div class="card-title"><i class="ti ti-speakerphone"></i> <span id="camp-form-title">Add campaign</span></div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px">
+        <div><div class="ff-lbl">Name</div><input id="cf-name" class="ff"></div>
+        <div><div class="ff-lbl">Channel</div><input id="cf-channel" list="mkt-channels" class="ff" placeholder="Google Ads"></div>
+        <div><div class="ff-lbl">Start date</div><input id="cf-start" type="date" class="ff"></div>
+        <div><div class="ff-lbl">End date</div><input id="cf-end" type="date" class="ff"></div>
+        <div><div class="ff-lbl">Budget (net, ex VAT)</div><input id="cf-budget" type="number" min="0" step="1" class="ff"></div>
+        <div><div class="ff-lbl">Status</div>
+          <select id="cf-status" class="ff"><option>Planned</option><option>Active</option><option>Paused</option><option>Ended</option></select>
+        </div>
+      </div>
+      <div style="margin-top:10px"><div class="ff-lbl">Notes</div><textarea id="cf-notes" rows="2" class="ff" style="resize:vertical"></textarea></div>
+      <div style="display:flex;gap:8px;margin-top:12px">
+        <button class="btn-main" onclick="saveCamp()">Save</button>
+        <button class="btn-main" style="border-color:#ddd;color:#888" onclick="cancelCamp()">Cancel</button>
+      </div>
+    </div>
+
+    <div class="card">
+      <div style="display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:14px;flex-wrap:wrap">
+        <div class="card-title" style="margin-bottom:0"><i class="ti ti-currency-pound"></i> Ad spend</div>
+        <button class="btn-sm" onclick="showAddSpend()">+ Log spend</button>
+      </div>
+      <div style="overflow-x:auto"><table class="mat-table">
+        <thead><tr><th>Month</th><th>Channel</th><th style="text-align:right">Amount</th><th>Note</th><th></th></tr></thead>
+        <tbody id="mkt-spend"></tbody>
+      </table></div>
+    </div>
+
+    <div id="spend-form" style="display:none" class="card">
+      <div class="card-title"><i class="ti ti-currency-pound"></i> <span id="spend-form-title">Log spend</span></div>
+      <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px">
+        <div><div class="ff-lbl">Month</div><input id="sp-month" type="month" class="ff"></div>
+        <div><div class="ff-lbl">Channel</div><input id="sp-channel" list="mkt-channels" class="ff" placeholder="Google Ads"></div>
+        <div><div class="ff-lbl">Amount (net, ex VAT)</div><input id="sp-amount" type="number" min="0" step="0.01" class="ff"></div>
+      </div>
+      <div style="margin-top:10px"><div class="ff-lbl">Note</div><input id="sp-note" class="ff"></div>
+      <div style="display:flex;gap:8px;margin-top:12px">
+        <button class="btn-main" onclick="saveSpend()">Save</button>
+        <button class="btn-main" style="border-color:#ddd;color:#888" onclick="cancelSpend()">Cancel</button>
+      </div>
+    </div>
+
+    <datalist id="mkt-channels">
+      <option value="Google Ads"></option><option value="Google Business Profile"></option><option value="Meta Ads"></option>
+      <option value="Instagram"></option><option value="SEO"></option><option value="Directory"></option><option value="Print"></option>
+      <option value="Referral fee"></option><option value="Other"></option>
+    </datalist>
+  </div>
+
+</div>
+
+<div class="ai-overlay" id="ai-overlay" onclick="if(event.target===this)closeDraft()">
+  <div class="ai-modal">
+    <div class="ai-head">
+      <div class="ai-title"><i class="ti ti-sparkles"></i> <span id="ai-task-title">Draft</span></div>
+      <button class="chat-close" onclick="closeDraft()"><i class="ti ti-x"></i></button>
+    </div>
+    <div class="ai-body" id="ai-body"></div>
+    <div class="ai-foot">
+      <div class="ai-note" id="ai-note"></div>
+      <div style="display:flex;gap:8px">
+        <button class="btn-sm" id="ai-regen" onclick="regenDraft()"><i class="ti ti-refresh" style="font-size:11px;margin-right:3px"></i>Regenerate</button>
+        <button class="btn-sm" id="ai-copy" onclick="copyDraft()"><i class="ti ti-copy" style="font-size:11px;margin-right:3px"></i>Copy</button>
+      </div>
+    </div>
+  </div>
 </div>
 
 <button class="chat-fab" onclick="toggleChat()" title="Ask Claude"><i class="ti ti-message-circle"></i></button>
@@ -664,7 +884,7 @@ function getProjectChecklist(proj){
   return sections;
 }
 
-let DATA={enq:[],inv:[],jobs:[],proj:[],clients:[],sub:[],mat:[]};
+let DATA={enq:[],inv:[],jobs:[],proj:[],clients:[],sub:[],mat:[],mtask:[],camp:[],spend:[]};
 let svcChart=null,clientFilter='all';
 const allItems=()=>getProjectChecklist({job_type:'Full Replacement',payment_schedule:'A',ironmongery:true}).flatMap(s=>s.items);
 const fmt=n=>'£'+Number(n).toLocaleString('en-GB',{minimumFractionDigits:0,maximumFractionDigits:0});
@@ -681,10 +901,11 @@ const badge=s=>`<span class="badge ${BC[s]||'b-complete'}">${s}</span>`;
 function setStatus(msg){document.getElementById('sync-status').textContent=msg;}
 
 function toggleDark(){
-  const isDark=document.body.classList.toggle('dark');
-  localStorage.setItem('ks-dark-mode', isDark?'1':'0');
+  const dark=document.body.classList.toggle('dark');
+  localStorage.setItem('ks-dark-mode', dark?'1':'0');
   const icon=document.getElementById('dark-icon');
-  if(icon)icon.className=isDark?'ti ti-sun':'ti ti-moon';
+  if(icon)icon.className=dark?'ti ti-sun':'ti ti-moon';
+  if(typeof renderMarketing==='function'&&DATA.mtask)renderMarketing();
 }
 
 // Apply saved dark mode preference on load
@@ -699,22 +920,25 @@ function toggleDark(){
 async function loadAll(){
   setStatus('Loading...');
   try{
-    const [enq,inv,jobs,proj,clients,sub,mat]=await Promise.all([
+    const [enq,inv,jobs,proj,clients,sub,mat,mtask,camp,spend]=await Promise.all([
       sb('enquiries','GET',null,'?order=quote_no.desc'),
       sb('invoices','GET',null,'?order=invoice_no.desc'),
       sb('jobs','GET',null,'?order=created_at.desc'),
       sb('projects','GET',null,'?order=created_at.desc'),
       sb('clients','GET',null,'?order=created_at.desc'),
       sb('subcontractors','GET',null,'?order=name.asc'),
-      sb('materials','GET',null,'?order=sort_order.asc').catch(()=>[])
+      sb('materials','GET',null,'?order=sort_order.asc').catch(()=>[]),
+      sb('marketing_tasks','GET',null,'?order=sort_order.asc').catch(()=>[]),
+      sb('marketing_campaigns','GET',null,'?order=created_at.desc').catch(()=>[]),
+      sb('marketing_spend','GET',null,'?order=month.desc').catch(()=>[])
     ]);
-    DATA.enq=enq||[];DATA.inv=inv||[];DATA.jobs=jobs||[];DATA.proj=proj||[];DATA.clients=clients||[];DATA.sub=sub||[];DATA.mat=mat||[];
+    DATA.enq=enq||[];DATA.inv=inv||[];DATA.jobs=jobs||[];DATA.proj=proj||[];DATA.clients=clients||[];DATA.sub=sub||[];DATA.mat=mat||[];DATA.mtask=mtask||[];DATA.camp=camp||[];DATA.spend=spend||[];
     render();
     setStatus('Updated '+new Date().toLocaleTimeString('en-GB',{hour:'2-digit',minute:'2-digit'}));
   }catch(e){setStatus('Error: '+e.message);}
 }
 
-function render(){renderHome();renderClients();renderRequests();renderQuotes();renderInv();renderJobs();renderProj();renderSub();renderMaterials();}
+function render(){renderHome();renderClients();renderRequests();renderQuotes();renderInv();renderJobs();renderProj();renderSub();renderMaterials();renderMarketing();}
 
 function mKey(d){return d.getFullYear()+''+String(d.getMonth()+1).padStart(2,'0');}
 function gPct(c,p){if(!p)return null;return Math.round(((c-p)/p)*100);}
@@ -1583,6 +1807,545 @@ async function deleteMat(id){
 }
 
 function cancelMat(){editingMatId=null;document.getElementById('mat-form').style.display='none';}
+
+/* ── MARKETING ── */
+let taskFilter='due',editingTaskId=null,editingCampId=null,editingSpendId=null;
+
+const DAY=86400000;
+const CADENCE_LBL={1:'Daily',7:'Weekly',14:'Fortnightly',30:'Monthly',90:'Quarterly',365:'Yearly'};
+const todayISO=()=>new Date().toISOString().slice(0,10);
+
+/** Days until due. Negative = overdue. Never done = due today. */
+function taskDueIn(t){
+  if(!t.last_done)return 0;
+  const due=new Date(t.last_done).getTime()+(t.cadence_days||7)*DAY;
+  return Math.ceil((due-Date.now())/DAY);
+}
+function dueLabel(n){
+  if(n<0)   return {txt:Math.abs(n)+'d overdue',cls:'td-over'};
+  if(n===0) return {txt:'due today',cls:'td-now'};
+  if(n===1) return {txt:'due tomorrow',cls:'td-soon'};
+  return {txt:'in '+n+' days',cls:'td-ok'};
+}
+
+function setTaskFilter(f){
+  taskFilter=f;
+  document.querySelectorAll('[data-tfilter]').forEach(p=>p.classList.toggle('active',p.dataset.tfilter===f));
+  renderMarketing();
+}
+
+const monthLbl=m=>m?new Date(m).toLocaleDateString('en-GB',{month:'short',year:'numeric'}):'—';
+const dateLbl =d=>d?new Date(d).toLocaleDateString('en-GB',{day:'numeric',month:'short',year:'numeric'}):'—';
+const CAMP_BADGE={Planned:'b-quoted',Active:'b-active',Paused:'b-pending',Ended:'b-complete'};
+
+function renderMarketing(){
+  const tasks=DATA.mtask||[],camps=DATA.camp||[],spend=DATA.spend||[];
+
+  const due=tasks.filter(t=>t.active!==false&&taskDueIn(t)<=0);
+  const overdue=tasks.filter(t=>t.active!==false&&taskDueIn(t)<0);
+  const activeCamps=camps.filter(c=>c.status==='Active');
+  const thisMonth=new Date().toISOString().slice(0,7);
+  const spendThisMonth=spend.filter(s=>(s.month||'').slice(0,7)===thisMonth).reduce((a,s)=>a+Number(s.amount||0),0);
+  const thisYear=new Date().getFullYear();
+  const spendYTD=spend.filter(s=>new Date(s.month).getFullYear()===thisYear).reduce((a,s)=>a+Number(s.amount||0),0);
+
+  const k=document.getElementById('kpi-mkt');
+  if(k)k.innerHTML=`
+    <div class="kpi"><div class="kpi-label">Tasks due</div><div class="kpi-val">${due.length}</div><div class="kpi-sub ${overdue.length?'red':''}">${overdue.length?overdue.length+' overdue':'nothing late'}</div></div>
+    <div class="kpi"><div class="kpi-label">Active campaigns</div><div class="kpi-val">${activeCamps.length}</div><div class="kpi-sub">${camps.length} total</div></div>
+    <div class="kpi"><div class="kpi-label">Spend this month</div><div class="kpi-val">${fmt(spendThisMonth)}</div><div class="kpi-sub">net excl. VAT</div></div>
+    <div class="kpi"><div class="kpi-label">Spend YTD</div><div class="kpi-val">${fmt(spendYTD)}</div><div class="kpi-sub">net excl. VAT · ${thisYear}</div></div>`;
+
+  // ── Tasks ──
+  const tl=document.getElementById('mkt-tasks');
+  if(tl){
+    let rows=tasks.filter(t=>t.active!==false);
+    if(taskFilter==='due')rows=rows.filter(t=>taskDueIn(t)<=0);
+    rows.sort((a,b)=>taskDueIn(a)-taskDueIn(b));
+    if(!tasks.length){
+      tl.innerHTML='<div class="empty">No tasks yet.</div>';
+    }else if(!rows.length){
+      tl.innerHTML='<div class="empty" style="color:#34453E;display:flex;align-items:center;gap:6px"><i class="ti ti-check" style="font-size:13px"></i> Nothing due. All caught up.</div>';
+    }else{
+      tl.innerHTML=rows.map(t=>{
+        const n=taskDueIn(t),d=dueLabel(n);
+        return `<div class="tk-row">
+          <button class="tk-tick" title="Mark done today" onclick="doneTask('${t.id}')"><i class="ti ti-check"></i></button>
+          <div class="tk-main">
+            <div class="tk-title">${t.title}
+              ${t.link?`<a href="${t.link}" target="_blank" rel="noopener" class="tk-link" title="Open"><i class="ti ti-external-link"></i></a>`:''}
+            </div>
+            ${t.detail?`<div class="tk-detail">${t.detail}</div>`:''}
+          </div>
+          <div class="tk-side">
+            <span class="tk-due ${d.cls}">${d.txt}</span>
+            <span class="tk-cad">${CADENCE_LBL[t.cadence_days]||('every '+t.cadence_days+'d')}</span>
+            <span class="tk-last">${t.last_done?'last '+dateLbl(t.last_done):'never done'}</span>
+          </div>
+          <div class="tk-acts">
+            ${t.prompt?`<button class="mat-ico tk-ai" title="Draft with AI" onclick="draftTask('${t.id}')"><i class="ti ti-sparkles"></i></button>`:''}
+            <button class="mat-ico" title="Edit" onclick="editTask('${t.id}')"><i class="ti ti-pencil"></i></button>
+            <button class="mat-ico mat-ico-del" title="Delete" onclick="deleteTask('${t.id}')"><i class="ti ti-trash"></i></button>
+          </div>
+        </div>`;
+      }).join('');
+    }
+  }
+
+  // ── Campaigns ──
+  const cl=document.getElementById('mkt-camps');
+  if(cl){
+    cl.innerHTML=camps.length?camps.map(c=>`<tr>
+      <td class="mat-name">${c.name}</td>
+      <td class="mat-sup">${c.channel||'<span class="mat-none">—</span>'}</td>
+      <td class="mat-sup" style="white-space:nowrap">${dateLbl(c.start_date)} → ${c.end_date?dateLbl(c.end_date):'ongoing'}</td>
+      <td style="text-align:right;font-weight:600">${c.budget?fmt(Number(c.budget)):'<span class="mat-none">—</span>'}</td>
+      <td>${badge(c.status||'Planned')}</td>
+      <td class="mat-note">${c.notes||''}</td>
+      <td class="mat-actions">
+        <button class="mat-ico" title="Edit" onclick="editCamp('${c.id}')"><i class="ti ti-pencil"></i></button>
+        <button class="mat-ico mat-ico-del" title="Delete" onclick="deleteCamp('${c.id}')"><i class="ti ti-trash"></i></button>
+      </td></tr>`).join('')
+      :'<tr><td colspan="7" class="empty">No campaigns yet.</td></tr>';
+  }
+
+  // ── Spend ──
+  const sl=document.getElementById('mkt-spend');
+  if(sl){
+    sl.innerHTML=spend.length?spend.map(s=>`<tr>
+      <td class="mat-name" style="white-space:nowrap">${monthLbl(s.month)}</td>
+      <td class="mat-sup">${s.channel||''}</td>
+      <td style="text-align:right;font-weight:600">${fmt(Number(s.amount||0))}</td>
+      <td class="mat-note">${s.note||''}</td>
+      <td class="mat-actions">
+        <button class="mat-ico" title="Edit" onclick="editSpend('${s.id}')"><i class="ti ti-pencil"></i></button>
+        <button class="mat-ico mat-ico-del" title="Delete" onclick="deleteSpend('${s.id}')"><i class="ti ti-trash"></i></button>
+      </td></tr>`).join('')
+      :'<tr><td colspan="5" class="empty">No spend logged yet.</td></tr>';
+  }
+
+  drawSpendChart(spend);
+  drawSplitChart(spend);
+  drawGanttChart(camps);
+  drawTaskHealth(tasks);
+}
+
+/* ── Charts ── */
+const MKT_COLORS=['#34453E','#185FA5','#854F0B','#2D7A55','#4E44B5','#A32D2D','#5a8a70','#7D4B0A','#9a9a94'];
+const chanColor=(c,i)=>MKT_COLORS[i%MKT_COLORS.length];
+const isDark=()=>document.body.classList.contains('dark');
+const gridCol=()=>isDark()?'#2a2a32':'#f0f0ee';
+const tickCol=()=>isDark()?'#58586a':'#999';
+
+let mktSpendChart=null,mktSplitChart=null,mktGanttChart=null;
+function killChart(c){if(c){c.destroy();}return null;}
+
+function toggleEmpty(canvasId,emptyId,hasData){
+  const cv=document.getElementById(canvasId),em=document.getElementById(emptyId);
+  if(cv)cv.parentElement.style.display=hasData?'':'none';
+  if(em)em.style.display=hasData?'none':'block';
+  return hasData;
+}
+
+/** Stacked bar: last 6 months, one dataset per channel. */
+function drawSpendChart(spend){
+  mktSpendChart=killChart(mktSpendChart);
+  const legend=document.getElementById('mkt-legend');
+  if(!toggleEmpty('mkt-spend-chart','mkt-spend-empty',spend.length)){
+    if(legend)legend.innerHTML='';
+    return;
+  }
+  const now=new Date(),keys=[],labels=[];
+  for(let i=5;i>=0;i--){
+    const d=new Date(now.getFullYear(),now.getMonth()-i,1);
+    keys.push(d.toISOString().slice(0,7));
+    labels.push(d.toLocaleDateString('en-GB',{month:'short'}));
+  }
+  const channels=[...new Set(spend.map(s=>s.channel).filter(Boolean))];
+  const datasets=channels.map((ch,i)=>({
+    label:ch,
+    data:keys.map(k=>spend.filter(s=>(s.month||'').slice(0,7)===k&&s.channel===ch)
+                       .reduce((a,s)=>a+Number(s.amount||0),0)),
+    backgroundColor:chanColor(ch,i),
+    stack:'s',
+    borderRadius:3
+  }));
+  if(legend)legend.innerHTML=channels.map((ch,i)=>
+    `<span><span class="svc-dot" style="background:${chanColor(ch,i)}"></span>${ch}</span>`).join('');
+
+  const ctx=document.getElementById('mkt-spend-chart');
+  if(!ctx)return;
+  mktSpendChart=new Chart(ctx,{type:'bar',data:{labels,datasets},options:{
+    responsive:true,maintainAspectRatio:false,
+    plugins:{legend:{display:false},tooltip:{callbacks:{label:c=>' '+c.dataset.label+': '+fmt(c.raw)}}},
+    scales:{
+      x:{stacked:true,ticks:{font:{size:11},color:tickCol()},grid:{display:false}},
+      y:{stacked:true,beginAtZero:true,ticks:{font:{size:11},color:tickCol(),callback:v=>'£'+v},grid:{color:gridCol()}}
+    }}});
+}
+
+/** Doughnut: this year's spend by channel. */
+function drawSplitChart(spend){
+  mktSplitChart=killChart(mktSplitChart);
+  const yr=new Date().getFullYear();
+  const rows=spend.filter(s=>s.month&&new Date(s.month).getFullYear()===yr&&Number(s.amount)>0);
+  if(!toggleEmpty('mkt-split-chart','mkt-split-empty',rows.length))return;
+
+  const by={};
+  rows.forEach(s=>{by[s.channel]=(by[s.channel]||0)+Number(s.amount||0);});
+  const labels=Object.keys(by),vals=labels.map(l=>by[l]);
+  const total=vals.reduce((a,b)=>a+b,0);
+
+  const ctx=document.getElementById('mkt-split-chart');
+  if(!ctx)return;
+  mktSplitChart=new Chart(ctx,{type:'doughnut',
+    data:{labels,datasets:[{data:vals,backgroundColor:labels.map(chanColor),borderWidth:0}]},
+    options:{responsive:true,maintainAspectRatio:false,cutout:'62%',
+      plugins:{
+        legend:{position:'right',labels:{font:{size:11},color:tickCol(),boxWidth:10,boxHeight:10,usePointStyle:true,pointStyle:'circle'}},
+        tooltip:{callbacks:{label:c=>' '+c.label+': '+fmt(c.raw)+' ('+Math.round(c.raw/total*100)+'%)'}}
+      }}});
+}
+
+/** Horizontal floating bars: campaign start → end. */
+function drawGanttChart(camps){
+  mktGanttChart=killChart(mktGanttChart);
+  const rows=camps.filter(c=>c.start_date);
+  if(!toggleEmpty('mkt-gantt-chart','mkt-gantt-empty',rows.length))return;
+
+  const STATUS_COL={Active:'#2D7A55',Planned:'#185FA5',Paused:'#854F0B',Ended:'#9a9a94'};
+  const now=Date.now();
+  const bars=rows.map(c=>{
+    const s=new Date(c.start_date).getTime();
+    const e=c.end_date?new Date(c.end_date).getTime():Math.max(now,s+14*86400000);
+    return {label:c.name,range:[s,e],col:STATUS_COL[c.status]||'#9a9a94'};
+  });
+
+  const wrap=document.getElementById('mkt-gantt-wrap');
+  if(wrap)wrap.style.height=Math.max(140,bars.length*34+40)+'px';
+
+  const ctx=document.getElementById('mkt-gantt-chart');
+  if(!ctx)return;
+  mktGanttChart=new Chart(ctx,{type:'bar',
+    data:{labels:bars.map(b=>b.label),
+      datasets:[{data:bars.map(b=>b.range),backgroundColor:bars.map(b=>b.col),borderRadius:4,barPercentage:.6}]},
+    options:{indexAxis:'y',responsive:true,maintainAspectRatio:false,
+      plugins:{legend:{display:false},tooltip:{callbacks:{label:c=>{
+        const [a,b]=c.raw;
+        return ' '+new Date(a).toLocaleDateString('en-GB',{day:'numeric',month:'short'})+
+               ' → '+new Date(b).toLocaleDateString('en-GB',{day:'numeric',month:'short',year:'numeric'});
+      }}}},
+      scales:{
+        x:{type:'linear',ticks:{font:{size:10},color:tickCol(),maxTicksLimit:6,
+             callback:v=>new Date(v).toLocaleDateString('en-GB',{month:'short',year:'2-digit'})},
+           grid:{color:gridCol()}},
+        y:{ticks:{font:{size:11},color:tickCol()},grid:{display:false}}
+      }}});
+}
+
+/** Not a chart — a progress readout of how on-top-of-it you are. */
+function drawTaskHealth(tasks){
+  const el=document.getElementById('mkt-health');
+  if(!el)return;
+  const live=tasks.filter(t=>t.active!==false);
+  if(!live.length){el.innerHTML='<div class="empty">No tasks yet.</div>';return;}
+
+  const overdue=live.filter(t=>taskDueIn(t)<0).length;
+  const dueToday=live.filter(t=>taskDueIn(t)===0).length;
+  const ok=live.length-overdue-dueToday;
+  const pct=Math.round(ok/live.length*100);
+  const never=live.filter(t=>!t.last_done).length;
+
+  const bar=(lbl,n,col)=>n?`<div class="th-seg" style="flex:${n};background:${col}" title="${lbl}: ${n}"></div>`:'';
+
+  el.innerHTML=`
+    <div class="th-score ${pct>=80?'good':pct>=50?'mid':'bad'}">${pct}%</div>
+    <div class="th-sub">on schedule</div>
+    <div class="th-bar">${bar('Overdue',overdue,'#A32D2D')}${bar('Due today',dueToday,'#D8952E')}${bar('On schedule',ok,'#34453E')}</div>
+    <div class="stat-row" style="margin-top:14px"><span class="stat-label">Overdue</span><span class="stat-val" style="color:${overdue?'#A32D2D':'#888'}">${overdue}</span></div>
+    <div class="stat-row"><span class="stat-label">Due today</span><span class="stat-val">${dueToday}</span></div>
+    <div class="stat-row"><span class="stat-label">On schedule</span><span class="stat-val" style="color:#34453E">${ok}</span></div>
+    <div class="stat-row"><span class="stat-label">Never done</span><span class="stat-val" style="color:${never?'#7D4B0A':'#888'}">${never}</span></div>`;
+}
+
+/* ── Task CRUD ── */
+async function doneTask(id){
+  const t=(DATA.mtask||[]).find(x=>x.id===id);if(!t)return;
+  const d=todayISO();
+  try{
+    await sb('marketing_tasks','PATCH',{last_done:d},`?id=eq.${id}`);
+    t.last_done=d;renderMarketing();
+  }catch(e){alert('Failed: '+e.message);}
+}
+
+function showAddTask(){
+  editingTaskId=null;
+  document.getElementById('task-form-title').textContent='Add task';
+  ['title','detail','link','prompt'].forEach(f=>document.getElementById('tf-'+f).value='');
+  document.getElementById('tf-cadence').value='7';
+  document.getElementById('task-form').style.display='block';
+  document.getElementById('tf-title').focus();
+}
+
+function editTask(id){
+  const t=(DATA.mtask||[]).find(x=>x.id===id);if(!t)return;
+  editingTaskId=id;
+  document.getElementById('task-form-title').textContent='Edit task';
+  document.getElementById('tf-title').value=t.title||'';
+  document.getElementById('tf-detail').value=t.detail||'';
+  document.getElementById('tf-link').value=t.link||'';
+  document.getElementById('tf-prompt').value=t.prompt||'';
+  document.getElementById('tf-cadence').value=String(t.cadence_days||7);
+  document.getElementById('task-form').style.display='block';
+  document.getElementById('tf-title').focus();
+}
+
+async function saveTask(){
+  const payload={
+    title:document.getElementById('tf-title').value.trim(),
+    detail:document.getElementById('tf-detail').value.trim(),
+    link:document.getElementById('tf-link').value.trim()||null,
+    prompt:document.getElementById('tf-prompt').value.trim()||null,
+    cadence_days:parseInt(document.getElementById('tf-cadence').value)||7
+  };
+  if(!payload.title)return alert('Title is required.');
+  try{
+    if(editingTaskId){
+      await sb('marketing_tasks','PATCH',payload,`?id=eq.${editingTaskId}`);
+      const i=DATA.mtask.findIndex(x=>x.id===editingTaskId);
+      if(i>-1)DATA.mtask[i]={...DATA.mtask[i],...payload};
+    }else{
+      payload.sort_order=(DATA.mtask||[]).length?Math.max(...DATA.mtask.map(x=>x.sort_order||0))+10:10;
+      const res=await sb('marketing_tasks','POST',payload);
+      if(res&&res[0])DATA.mtask=[...(DATA.mtask||[]),res[0]];
+    }
+    cancelTask();renderMarketing();
+  }catch(e){alert('Save failed: '+e.message);}
+}
+
+async function deleteTask(id){
+  const t=(DATA.mtask||[]).find(x=>x.id===id);if(!t)return;
+  if(!confirm(`Delete "${t.title}"? This cannot be undone.`))return;
+  try{
+    await sb('marketing_tasks','DELETE',null,`?id=eq.${id}`);
+    DATA.mtask=DATA.mtask.filter(x=>x.id!==id);
+    if(editingTaskId===id)cancelTask();
+    renderMarketing();
+  }catch(e){alert('Delete failed: '+e.message);}
+}
+function cancelTask(){editingTaskId=null;document.getElementById('task-form').style.display='none';}
+
+/* ── Campaign CRUD ── */
+function showAddCamp(){
+  editingCampId=null;
+  document.getElementById('camp-form-title').textContent='Add campaign';
+  ['name','channel','start','end','budget','notes'].forEach(f=>document.getElementById('cf-'+f).value='');
+  document.getElementById('cf-status').value='Planned';
+  document.getElementById('camp-form').style.display='block';
+  document.getElementById('cf-name').focus();
+}
+
+function editCamp(id){
+  const c=(DATA.camp||[]).find(x=>x.id===id);if(!c)return;
+  editingCampId=id;
+  document.getElementById('camp-form-title').textContent='Edit campaign';
+  document.getElementById('cf-name').value=c.name||'';
+  document.getElementById('cf-channel').value=c.channel||'';
+  document.getElementById('cf-start').value=c.start_date||'';
+  document.getElementById('cf-end').value=c.end_date||'';
+  document.getElementById('cf-budget').value=c.budget||'';
+  document.getElementById('cf-status').value=c.status||'Planned';
+  document.getElementById('cf-notes').value=c.notes||'';
+  document.getElementById('camp-form').style.display='block';
+  document.getElementById('cf-name').focus();
+}
+
+async function saveCamp(){
+  const payload={
+    name:document.getElementById('cf-name').value.trim(),
+    channel:document.getElementById('cf-channel').value.trim(),
+    start_date:document.getElementById('cf-start').value||null,
+    end_date:document.getElementById('cf-end').value||null,
+    budget:document.getElementById('cf-budget').value?Number(document.getElementById('cf-budget').value):null,
+    status:document.getElementById('cf-status').value,
+    notes:document.getElementById('cf-notes').value.trim()
+  };
+  if(!payload.name)return alert('Campaign name is required.');
+  try{
+    if(editingCampId){
+      await sb('marketing_campaigns','PATCH',payload,`?id=eq.${editingCampId}`);
+      const i=DATA.camp.findIndex(x=>x.id===editingCampId);
+      if(i>-1)DATA.camp[i]={...DATA.camp[i],...payload};
+    }else{
+      const res=await sb('marketing_campaigns','POST',payload);
+      if(res&&res[0])DATA.camp=[res[0],...(DATA.camp||[])];
+    }
+    cancelCamp();renderMarketing();
+  }catch(e){alert('Save failed: '+e.message);}
+}
+
+async function deleteCamp(id){
+  const c=(DATA.camp||[]).find(x=>x.id===id);if(!c)return;
+  if(!confirm(`Delete "${c.name}"? This cannot be undone.`))return;
+  try{
+    await sb('marketing_campaigns','DELETE',null,`?id=eq.${id}`);
+    DATA.camp=DATA.camp.filter(x=>x.id!==id);
+    if(editingCampId===id)cancelCamp();
+    renderMarketing();
+  }catch(e){alert('Delete failed: '+e.message);}
+}
+function cancelCamp(){editingCampId=null;document.getElementById('camp-form').style.display='none';}
+
+/* ── Spend CRUD ── */
+function showAddSpend(){
+  editingSpendId=null;
+  document.getElementById('spend-form-title').textContent='Log spend';
+  ['channel','amount','note'].forEach(f=>document.getElementById('sp-'+f).value='');
+  document.getElementById('sp-month').value=new Date().toISOString().slice(0,7);
+  document.getElementById('spend-form').style.display='block';
+  document.getElementById('sp-channel').focus();
+}
+
+function editSpend(id){
+  const s=(DATA.spend||[]).find(x=>x.id===id);if(!s)return;
+  editingSpendId=id;
+  document.getElementById('spend-form-title').textContent='Edit spend';
+  document.getElementById('sp-month').value=(s.month||'').slice(0,7);
+  document.getElementById('sp-channel').value=s.channel||'';
+  document.getElementById('sp-amount').value=s.amount||'';
+  document.getElementById('sp-note').value=s.note||'';
+  document.getElementById('spend-form').style.display='block';
+  document.getElementById('sp-channel').focus();
+}
+
+async function saveSpend(){
+  const m=document.getElementById('sp-month').value;
+  if(!m)return alert('Month is required.');
+  const payload={
+    month:m+'-01',
+    channel:document.getElementById('sp-channel').value.trim(),
+    amount:Number(document.getElementById('sp-amount').value)||0,
+    note:document.getElementById('sp-note').value.trim()
+  };
+  if(!payload.channel)return alert('Channel is required.');
+  try{
+    if(editingSpendId){
+      await sb('marketing_spend','PATCH',payload,`?id=eq.${editingSpendId}`);
+      const i=DATA.spend.findIndex(x=>x.id===editingSpendId);
+      if(i>-1)DATA.spend[i]={...DATA.spend[i],...payload};
+    }else{
+      const res=await sb('marketing_spend','POST',payload);
+      if(res&&res[0])DATA.spend=[res[0],...(DATA.spend||[])];
+    }
+    cancelSpend();renderMarketing();
+  }catch(e){
+    alert(/duplicate|unique/i.test(e.message)
+      ? 'Spend for that month and channel already exists — edit the existing row instead.'
+      : 'Save failed: '+e.message);
+  }
+}
+
+async function deleteSpend(id){
+  if(!confirm('Delete this spend row? This cannot be undone.'))return;
+  try{
+    await sb('marketing_spend','DELETE',null,`?id=eq.${id}`);
+    DATA.spend=DATA.spend.filter(x=>x.id!==id);
+    if(editingSpendId===id)cancelSpend();
+    renderMarketing();
+  }catch(e){alert('Delete failed: '+e.message);}
+}
+function cancelSpend(){editingSpendId=null;document.getElementById('spend-form').style.display='none';}
+
+/* ── AI drafting for marketing tasks ── */
+let draftTaskId=null,draftText='';
+
+/** Recent completed work, so the model writes about real jobs. No client names. */
+function jobContext(){
+  const done=(DATA.proj||[])
+    .filter(p=>p.status==='Closed'||(p.checked&&p.checked['Installation complete']))
+    .slice(0,6)
+    .map(p=>({address:p.address||'',job_type:p.job_type||'',install:p.install_date||''}));
+  const recent=(DATA.proj||[]).filter(p=>p.status!=='Closed').slice(0,4)
+    .map(p=>({address:p.address||'',job_type:p.job_type||''}));
+  return {recently_completed:done,in_progress:recent};
+}
+
+async function draftTask(id){
+  const t=(DATA.mtask||[]).find(x=>x.id===id);
+  if(!t||!t.prompt)return;
+  draftTaskId=id;
+  document.getElementById('ai-task-title').textContent=t.title;
+  document.getElementById('ai-overlay').classList.add('open');
+  await runDraft(t);
+}
+
+function regenDraft(){
+  const t=(DATA.mtask||[]).find(x=>x.id===draftTaskId);
+  if(t)runDraft(t);
+}
+
+async function runDraft(t){
+  const body=document.getElementById('ai-body');
+  const note=document.getElementById('ai-note');
+  const copy=document.getElementById('ai-copy');
+  const regen=document.getElementById('ai-regen');
+  body.innerHTML='<div class="ai-loading"><i class="ti ti-loader-2"></i> Drafting…</div>';
+  note.textContent='';
+  copy.disabled=true;regen.disabled=true;
+
+  const sys=`You are drafting marketing content for Kensington Sash (Windows) Ltd, a London timber sash window specialist working on heritage and listed buildings across Kensington, Chelsea and the surrounding boroughs. Founder and surveyor: Luke Robertson. Office: 1st Floor, 239 Kensington High Street, W8 6SN.
+
+Services: sash window restoration and draughtproofing; new sashes and casements into existing frames; full replacement traditional windows and doors.
+Materials: engineered redwood, Red Grandis hardwood, FSC Accoya.
+Finishes: spray-applied Teknos microporous system in RAL, Farrow & Ball, Little Greene or NCS.
+Glazing: single, laminated, double, slimline double, vacuum (FINEO).
+Ironmongery: Mighton for sash furniture, From the Anvil for premium and door hardware.
+
+HARD RULES
+- Never name a client. Refer to a street or borough only, never a house number.
+- British English. Plain, confident trade language. No marketing froth, no exclamation marks.
+- Never invent a job, a testimonial, a statistic, or an accreditation. If you lack a specific detail, leave a clearly marked [PLACEHOLDER] rather than inventing one.
+- Do not claim energy savings, U-values, or timescales unless given them.
+
+RECENT WORK (use for real specifics; addresses may be shortened to street or borough)
+${JSON.stringify(jobContext())}
+
+Output only the content requested. No preamble, no explanation, no markdown headings unless the brief asks for structure.`;
+
+  try{
+    const res=await fetch('/api/chat',{method:'POST',headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({model:'claude-sonnet-4-6',max_tokens:1500,system:sys,
+        messages:[{role:'user',content:t.prompt}]})});
+    const d=await res.json();
+    draftText=d.content?.find(b=>b.type==='text')?.text||'';
+    if(!draftText)throw new Error('Empty response');
+    body.textContent=draftText;
+    note.textContent='Read it before you post it. Check any [PLACEHOLDER].';
+    copy.disabled=false;
+  }catch(e){
+    body.innerHTML=`<div class="ai-err">Couldn't draft: ${e.message}</div>`;
+    note.textContent='';
+  }
+  regen.disabled=false;
+}
+
+function copyDraft(){
+  if(!draftText)return;
+  navigator.clipboard.writeText(draftText).then(()=>{
+    const b=document.getElementById('ai-copy');
+    b.innerHTML='<i class="ti ti-check" style="font-size:11px;margin-right:3px"></i>Copied';
+    setTimeout(()=>{b.innerHTML='<i class="ti ti-copy" style="font-size:11px;margin-right:3px"></i>Copy';},1600);
+  });
+}
+
+function closeDraft(){
+  document.getElementById('ai-overlay').classList.remove('open');
+  draftTaskId=null;draftText='';
+}
+
+document.addEventListener('keydown',e=>{
+  if(e.key==='Escape'&&document.getElementById('ai-overlay')?.classList.contains('open'))closeDraft();
+});
 
 let chatHistory=[],chatBusy=false;
 
