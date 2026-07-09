@@ -6,6 +6,7 @@
 <title>Kensington Sash — Dashboard</title>
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@latest/dist/tabler-icons.min.css">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <style>
 /* ── Reset & base ── */
 *{box-sizing:border-box;margin:0;padding:0}
@@ -705,7 +706,31 @@ body.dark .ins-soon{background:#3a2a10;color:#c09040}
 body.dark .ins-now{background:#1a3020;color:#5ab870}
 body.dark .ins-past{background:#28282e;color:#58586a}
 
-/* ── Left sidebar navigation ── *//* ── Left sidebar navigation ── */
+/* ── Auth gate ── */
+.auth-gate{position:fixed;inset:0;z-index:2000;display:none;align-items:center;justify-content:center;
+  background:#EDECE9;padding:24px}
+body.dark .auth-gate{background:#18181A}
+.auth-card{width:100%;max-width:360px;background:#fff;border:1px solid #E8E6E1;border-radius:16px;
+  padding:34px 30px 28px;box-shadow:0 8px 32px rgba(0,0,0,.07);text-align:center}
+.auth-logo{height:34px;width:auto;margin-bottom:22px}
+.auth-title{font-size:15px;font-weight:700;color:#1a1a1a;letter-spacing:-.01em}
+.auth-sub{font-size:12.5px;color:#aaa;margin:5px 0 22px}
+.auth-input{width:100%;padding:11px 13px;margin-bottom:10px;border:1px solid #E8E6E1;border-radius:10px;
+  font-size:13.5px;font-family:inherit;outline:none;background:#FAFAF8;color:#1a1a1a}
+.auth-input:focus{border-color:#34453E;background:#fff}
+.auth-btn{width:100%;padding:11px;border:none;border-radius:10px;background:#34453E;color:#fff;
+  font-size:13.5px;font-weight:600;font-family:inherit;cursor:pointer;margin-top:4px;transition:background .15s}
+.auth-btn:hover{background:#2a3830}
+.auth-btn:disabled{opacity:.5;cursor:not-allowed}
+.auth-err{font-size:12px;color:#A32D2D;margin-top:12px;min-height:16px;line-height:1.4}
+body.dark .auth-card{background:#222226;border-color:#2e2e34;box-shadow:0 8px 32px rgba(0,0,0,.5)}
+body.dark .auth-title{color:#e8e8f0}
+body.dark .auth-sub{color:#505060}
+body.dark .auth-input{background:#1e1e22;border-color:#2e2e34;color:#d8d8e8}
+body.dark .auth-input:focus{border-color:#4a6a5a;background:#222226}
+body.dark .auth-err{color:#e06060}
+
+/* ── Left sidebar navigation ── */
 body{padding-left:224px}
 .tabs{
   position:fixed;left:0;top:0;bottom:0;width:224px;
@@ -729,7 +754,19 @@ body.dark .tabs{background:#222226;border-right:1px solid #2e2e34}
 </style>
 </head>
 <body>
-<div class="shell">
+<div class="auth-gate" id="auth-gate">
+  <div class="auth-card">
+    <img src="/Logo%20slogan%202.png" alt="Kensington Sash" class="auth-logo">
+    <div class="auth-title">Operations Dashboard</div>
+    <div class="auth-sub">Sign in to continue</div>
+    <input type="email" id="auth-email" class="auth-input" placeholder="you@kensingtonsash.co.uk" autocomplete="username">
+    <input type="password" id="auth-pass" class="auth-input" placeholder="Password" autocomplete="current-password" onkeydown="if(event.key==='Enter')signIn()">
+    <button class="auth-btn" id="auth-btn" onclick="signIn()">Sign in</button>
+    <div class="auth-err" id="auth-err"></div>
+  </div>
+</div>
+
+<div class="shell" id="app-shell" style="display:none">
   <div class="topbar">
     <div class="logo">
       <img src="/Logo%20slogan%202.png" alt="Kensington Sash" style="height:42px;width:auto;display:block">
@@ -738,6 +775,7 @@ body.dark .tabs{background:#222226;border-right:1px solid #2e2e34}
       <span class="sync-status" id="sync-status"></span>
       <button class="dark-toggle" onclick="toggleDark()" id="dark-toggle-btn" title="Toggle dark mode"><i class="ti ti-moon" id="dark-icon"></i></button>
       <button class="sync-btn" onclick="loadAll()"><i class="ti ti-refresh" style="font-size:13px"></i> Refresh</button>
+      <button class="sync-btn" onclick="signOut()" title="Sign out"><i class="ti ti-logout" style="font-size:13px"></i></button>
     </div>
     <div class="tabs">
       <button class="tab active" onclick="switchTab('home',this)"><i class="ti ti-home" style="font-size:13px;vertical-align:-1px;margin-right:3px"></i>Overview</button>
@@ -766,11 +804,9 @@ body.dark .tabs{background:#222226;border-right:1px solid #2e2e34}
       <div class="card"><div class="card-title"><i class="ti ti-chart-line"></i> Growth</div><div id="home-growth"></div></div>
     </div>
     <div class="card">
-      <div class="card-title"><i class="ti ti-chart-bar"></i> Revenue by service type — quarterly</div>
+      <div class="card-title"><i class="ti ti-chart-bar"></i> Collected revenue — quarterly</div>
       <div class="svc-legend">
-        <span><span class="svc-dot" style="background:#34453E"></span>Sash Repairs</span>
-        <span><span class="svc-dot" style="background:#185FA5"></span>New Sashes into Existing Frames</span>
-        <span><span class="svc-dot" style="background:#854F0B"></span>Full Replacement</span>
+        <span><span class="svc-dot" style="background:#34453E"></span>Net of VAT, by payment date</span>
       </div>
       <div class="chart-wrap"><canvas id="svc-chart"></canvas></div>
     </div>
@@ -1127,15 +1163,73 @@ body.dark .tabs{background:#222226;border-right:1px solid #2e2e34}
 
 <script>
 const SUPABASE_URL='https://wuzcvgucszxoefcscqkd.supabase.co';
+/* The anon key is designed to be public. It identifies the project, it does not
+   grant access — row level security decides that, and every table now requires
+   an authenticated session. */
 const SUPABASE_KEY='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Ind1emN2Z3Vjc3p4b2VmY3NjcWtkIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODI0ODU3NjAsImV4cCI6MjA5ODA2MTc2MH0.rnibj12j6stQHFbS3lkKhNSvKYmCi_sM5s-vLLmTg88';
 
+const SB=window.supabase.createClient(SUPABASE_URL,SUPABASE_KEY,{
+  auth:{persistSession:true,autoRefreshToken:true,storageKey:'ks-auth'}
+});
+
+/** Every request carries the signed-in user's token, not the anon key. */
+async function authToken(){
+  const {data:{session}}=await SB.auth.getSession();
+  if(!session)throw new Error('Not signed in');
+  return session.access_token;
+}
+
 async function sb(table,method='GET',body=null,filter=''){
+  const token=await authToken();
   const res=await fetch(`${SUPABASE_URL}/rest/v1/${table}${filter}`,{
-    method,headers:{'Content-Type':'application/json','apikey':SUPABASE_KEY,'Authorization':'Bearer '+SUPABASE_KEY,'Prefer':method==='POST'?'return=representation':''},
+    method,headers:{'Content-Type':'application/json','apikey':SUPABASE_KEY,'Authorization':'Bearer '+token,'Prefer':method==='POST'?'return=representation':''},
     body:body?JSON.stringify(body):null
   });
+  if(res.status===401){await signOut();throw new Error('Session expired');}
   if(!res.ok)throw new Error(await res.text());
   const txt=await res.text();return txt?JSON.parse(txt):null;
+}
+
+/* ── Auth gate ── */
+function showApp(){
+  document.getElementById('auth-gate').style.display='none';
+  document.getElementById('app-shell').style.display='';
+  document.querySelector('.chat-fab').style.display='';
+}
+function showLogin(msg){
+  document.getElementById('auth-gate').style.display='flex';
+  document.getElementById('app-shell').style.display='none';
+  document.querySelector('.chat-fab').style.display='none';
+  document.getElementById('chat-panel').classList.remove('open');
+  if(msg)document.getElementById('auth-err').textContent=msg;
+}
+
+async function signIn(){
+  const email=document.getElementById('auth-email').value.trim();
+  const pass=document.getElementById('auth-pass').value;
+  const btn=document.getElementById('auth-btn');
+  const err=document.getElementById('auth-err');
+  err.textContent='';
+  if(!email||!pass){err.textContent='Email and password required.';return;}
+  btn.disabled=true;btn.textContent='Signing in…';
+  const {error}=await SB.auth.signInWithPassword({email,password:pass});
+  btn.disabled=false;btn.textContent='Sign in';
+  if(error){err.textContent=error.message;return;}
+  document.getElementById('auth-pass').value='';
+  showApp();loadAll();
+}
+
+async function signOut(){
+  await SB.auth.signOut();
+  DATA={enq:[],inv:[],jobs:[],proj:[],clients:[],sub:[],mat:[],mtask:[],camp:[],spend:[],cfg:null};
+  chatHistory=[];
+  showLogin();
+}
+
+async function boot(){
+  const {data:{session}}=await SB.auth.getSession();
+  if(session){showApp();loadAll();}
+  else showLogin();
 }
 
 const CHECKLIST_TEMPLATE=[
@@ -1274,7 +1368,7 @@ function renderHome(){
           <i class="ti ti-arrow-right" style="font-size:11px;color:#888"></i>
         </div>
         <div class="home-proj-next" style="color:#888"><i class="ti ti-map-pin" style="font-size:11px"></i> ${p.address||''} ${p.job_type?'· '+p.job_type:''}</div>
-        <div class="home-proj-next">${(()=>{const s=installState(p);return `<span class="ins-chip ins-${s.k}" style="margin:3px 0 0">${s.l}</span>`;})()}</div>
+        <div class="home-proj-next">${(()=>{const s=installState(p);return `<span class="ins-chip ins-${s.k}" style="margin:3px 0 0" title="${p.install_start?dateLbl(p.install_start):'No install date set'}">${s.l}</span>`;})()}</div>
       </div>
       <div class="home-proj-bar"><div class="progress-bar"><div class="progress-fill" style="width:${pct}%"></div></div>
       <div class="home-proj-pct">${pct}%</div></div></div>`;
@@ -1307,7 +1401,7 @@ function renderHome(){
     <div class="stat-row"><span class="stat-label">Collected YTD <span class="stat-note">net</span></span><span class="stat-val" style="color:#34453E">${fmt(coll)}</span></div>
     <div class="stat-row"><span class="stat-label">Outstanding <span class="stat-note">inc. VAT</span></span><span class="stat-val" style="color:${out>0?'#A32D2D':'#888'}">${fmt(out)}</span></div>
     <div class="stat-row"><span class="stat-label">Jobs won</span><span class="stat-val">${won.length}</span></div>
-    <div class="stat-row"><span class="stat-label">Win rate</span><span class="stat-val">${e.length?Math.round(won.length/e.length*100):0}%</span></div>`;
+    <div class="stat-row"><span class="stat-label">Win rate <span class="stat-note">90d cohort</span></span><span class="stat-val">${cohortWinRate(e)===null?'—':cohortWinRate(e)+'%'}</span></div>`;
   const now=new Date();
   const invByMonth={};
   DATA.inv.filter(i=>i.status==='Paid'&&i.paid_date).forEach(i=>{
@@ -1366,7 +1460,7 @@ function renderClients(){
     const detail=hasDetail?`
       <tr class="cl-detail" id="cd-${CSS.escape(c.name)}" style="display:none"><td colspan="5" style="padding:8px 0 12px 0;background:#fafaf9">
         ${cQuotes.length?`<div style="font-size:11px;font-weight:500;color:#888;text-transform:uppercase;letter-spacing:.04em;margin-bottom:6px">Quotes</div>
-        ${cQuotes.map(q=>`<div style="display:flex;justify-content:space-between;font-size:12px;padding:3px 0;border-bottom:0.5px solid #eee"><span class="cl-jump-link" onclick="event.stopPropagation();if('${q.drive_url}'){window.open('${q.drive_url}','_blank')}else{goToQuote('${q.quote_no}')}">${q.quote_no}</span><span style="color:#555">${q.address||''}</span><span>${badge(q.status)}</span><span style="font-weight:500">${fmt(Number(q.value||0))}</span></div>`).join('')}`:''}
+        ${cQuotes.map(q=>`<div style="display:flex;justify-content:space-between;font-size:12px;padding:3px 0;border-bottom:0.5px solid #eee"><span class="cl-jump-link" onclick="event.stopPropagation();if('${q.drive_url}'){window.open('${q.drive_url}','_blank')}else{goToQuote('${q.quote_no}')}">${q.quote_no}</span><span style="color:#555">${q.address||''}</span><span>${badge(q.status)}</span><span style="font-weight:500">${fmt(Number(q.total_inc_vat||0))}</span></div>`).join('')}`:''}
         ${cInv.length?`<div style="font-size:11px;font-weight:500;color:#888;text-transform:uppercase;letter-spacing:.04em;margin:${cQuotes.length?'10px':0} 0 6px">Invoices</div>
         ${cInv.map(i=>`<div style="display:flex;justify-content:space-between;font-size:12px;padding:3px 0;border-bottom:0.5px solid #eee"><span class="cl-jump-link" onclick="event.stopPropagation();if('${i.drive_url}'){window.open('${i.drive_url}','_blank')}else{goToInvoice('${i.invoice_no}')}">${i.invoice_no}</span><span style="color:#555">${i.subject||''}</span><span>${badge(i.status==='Overdue'?'Overdue':i.status)}</span><span style="font-weight:500">${fmt(Number(i.amount||0))}</span></div>`).join('')}`:''}
       </td></tr>`:'';
@@ -1651,7 +1745,7 @@ function renderJobs(){
   document.getElementById('kpi-jobs').innerHTML=`
     <div class="kpi"><div class="kpi-label">Active jobs</div><div class="kpi-val">${j.filter(x=>x.status!=='Complete').length}</div><div class="kpi-sub">scheduled or in progress</div></div>
     <div class="kpi"><div class="kpi-label">Completed</div><div class="kpi-val">${j.filter(x=>x.status==='Complete').length}</div><div class="kpi-sub">this period</div></div>
-    <div class="kpi"><div class="kpi-label">Teams in field</div><div class="kpi-val">2</div><div class="kpi-sub">Fitter + Labourer each</div></div>
+    <div class="kpi"><div class="kpi-label">Active subcontractors</div><div class="kpi-val">${(DATA.sub||[]).filter(s=>s.status==='Active').length}</div><div class="kpi-sub">available to book</div></div>
     <div class="kpi"><div class="kpi-label">Total jobs</div><div class="kpi-val">${j.length}</div><div class="kpi-sub">on record</div></div>`;
   const l=document.getElementById('job-list');
   if(!j.length){l.innerHTML='<div class="empty">No jobs yet.</div>';return;}
@@ -1724,7 +1818,7 @@ function installTile(p){
   return `<div class="cal cal-${st.k}" title="${dateLbl(p.install_start)}${p.install_days?' · '+p.install_days+' day booking':''}${st.k==='now'?' · '+st.s:''}">
     <div class="cal-m">${mon}</div>
     <div class="cal-d">${day}</div>
-    <div class="cal-note">${st.k==='now'?st.s:st.l}</div>
+    <div class="cal-note">${st.l}</div>
     <div class="cal-dow">${dow}</div>
   </div>`;
 }
@@ -1778,7 +1872,7 @@ function renderProj(){
           <div class="proj-client"><span style="cursor:pointer;border-bottom:1px dashed #ccc" onclick="event.stopPropagation();goToClient('${proj.client.replace(/'/g,"\\'")}')" title="View client">${proj.client}</span> <span style="font-weight:400;color:#888;font-size:12px">— ${quoteUrl?`<a href="${quoteUrl}" target="_blank" onclick="event.stopPropagation()" style="color:#185FA5;font-weight:500;text-decoration:none" onmouseover="this.style.textDecoration='underline'" onmouseout="this.style.textDecoration='none'">${proj.quote_no}</a>`:proj.quote_no}</span></div>
           <div class="proj-addr">${proj.address} · ${proj.job_type}</div>
           <div class="progress-wrap"><div class="progress-bar"><div class="progress-fill" style="width:${pct}%"></div></div>
-          <div class="progress-label">${done} of ${allSteps.length} steps · ${pct}%${isClosed?'':(()=>{const s=installState(proj);return s.k==='none'?'':` <span class="pl-sep">·</span> <span class="pl-ins pl-${s.k}">${s.l}${s.s?' · '+s.s:''}</span>`;})()}</div></div>
+          <div class="progress-label">${done} of ${allSteps.length} steps · ${pct}%${isClosed?'':(()=>{const s=installState(proj);return s.k==='none'?'':` <span class="pl-sep">·</span> <span class="pl-ins pl-${s.k}">${s.l}${s.s&&s.k!=='now'?' · '+s.s:''}</span>`;})()}</div></div>
         </div>
         <div class="proj-header-right">${isClosed?'':installTile(proj)}${badge(isClosed?'Closed':proj.status)}<i class="ti ti-chevron-down proj-chevron" id="chev-${proj.id}"></i></div>
       </div>
@@ -2868,7 +2962,7 @@ function jobContext(){
   const done=(DATA.proj||[])
     .filter(p=>p.status==='Closed'||(p.checked&&p.checked['Installation complete']))
     .slice(0,6)
-    .map(p=>({address:p.address||'',job_type:p.job_type||'',install:p.install_date||''}));
+    .map(p=>({address:p.address||'',job_type:p.job_type||'',install:p.install_start||''}));
   const recent=(DATA.proj||[]).filter(p=>p.status!=='Closed').slice(0,4)
     .map(p=>({address:p.address||'',job_type:p.job_type||''}));
   return {recently_completed:done,in_progress:recent};
@@ -3114,7 +3208,7 @@ function toggleReq(id){
   if(chev)chev.style.transform=isHidden?'rotate(180deg)':'rotate(0deg)';
 }
 
-loadAll();
+boot();
 </script>
 </body>
 </html>
