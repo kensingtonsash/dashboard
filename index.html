@@ -636,6 +636,42 @@ body.dark .stg-tail{background:#232329;color:#44444e}
 body.dark .stg-rev{background:#1a3020;color:#5ab870}
 
 /* ── Install schedule ── */
+/* Calendar tile — the first thing your eye lands on */
+.cal{position:relative;width:76px;flex-shrink:0;border-radius:10px;padding:6px 4px 5px;text-align:center;
+  border:1px solid #E8E6E1;background:#fff;line-height:1;overflow:hidden}
+.cal::before{content:'';position:absolute;left:0;right:0;top:0;height:3px;background:#D6D4CE}
+.cal-m{font-size:8.5px;font-weight:800;letter-spacing:.1em;color:#b4b2ac;margin-bottom:3px}
+.cal-d{font-size:22px;font-weight:700;color:#1a1a1a;letter-spacing:-.02em}
+.cal-dow{font-size:8.5px;color:#c4c2bc;font-weight:600;margin-top:2px}
+.cal-note{font-size:8.5px;font-weight:700;text-transform:uppercase;letter-spacing:.03em;margin-top:4px;
+  white-space:nowrap;overflow:hidden;text-overflow:ellipsis;padding:0 2px}
+
+.cal-future::before{background:#5a7fa0}
+.cal-future .cal-note{color:#5a7fa0}
+.cal-soon::before{background:#D8952E}
+.cal-soon .cal-note{color:#8A5410}
+.cal-soon{border-color:#EFDCB8;background:#FFFDF8}
+.cal-now::before{background:#2D7A55}
+.cal-now .cal-note{color:#2D7A55}
+.cal-now{border-color:#C4E0CC;background:#FAFEFB}
+.cal-past::before{background:#D6D4CE}
+.cal-past{opacity:.6}
+.cal-past .cal-note{color:#b4b2ac}
+.cal-none{border-style:dashed;background:#FBFBFA}
+.cal-none::before{display:none}
+.cal-none .cal-d{color:#d6d4ce;font-size:18px;padding-top:2px}
+.cal-none .cal-m{color:#c4c2bc}
+.cal-none .cal-note{color:#c4c2bc}
+
+/* Countdown appended to the progress label */
+.pl-sep{color:#e0ded8;margin:0 2px}
+.pl-ins{font-weight:600}
+.pl-future{color:#5a7fa0}
+.pl-soon{color:#8A5410}
+.pl-now{color:#2D7A55}
+.pl-past{color:#c4c2bc}
+
+/* Chip, still used on the Overview panel */
 .ins-chip{display:inline-flex;align-items:center;font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.04em;
   padding:3px 9px;border-radius:20px;white-space:nowrap;margin-right:7px}
 .ins-none{background:#F2F1EE;color:#b4b2ac}
@@ -644,31 +680,32 @@ body.dark .stg-rev{background:#1a3020;color:#5ab870}
 .ins-now{background:#DFF0CE;color:#356310}
 .ins-past{background:#EFEFEC;color:#999}
 
-.ins-row{display:flex;align-items:flex-end;gap:14px;flex-wrap:wrap;margin-bottom:16px;padding:11px 13px;
-  background:#FAFAF8;border:1px solid #F0EFEC;border-radius:11px}
-.ins-row>i{font-size:16px;color:#34453E;margin-bottom:7px;flex-shrink:0}
-.ins-f{display:flex;flex-direction:column;gap:4px}
-.ins-f label{font-size:10px;color:#bbb;text-transform:uppercase;letter-spacing:.05em;font-weight:700}
-.ins-f input{padding:6px 9px;border:1px solid #E8E6E1;border-radius:8px;font-size:12.5px;font-family:inherit;
-  outline:none;background:#fff;color:#1a1a1a}
-.ins-f input:focus{border-color:#34453E}
-.ins-f input[type=number]{width:78px}
-.ins-state{margin-left:auto;align-self:center;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.04em;
-  padding:5px 11px;border-radius:20px;display:flex;flex-direction:column;align-items:center;gap:1px}
-.ins-state span{font-size:9.5px;font-weight:600;text-transform:none;letter-spacing:0;opacity:.75}
+@media(max-width:640px){.cal{width:64px}.cal-d{font-size:19px}}
 
+body.dark .cal{background:#222226;border-color:#2e2e34}
+body.dark .cal::before{background:#33333b}
+body.dark .cal-m{color:#4e4e58}
+body.dark .cal-d{color:#e8e8f0}
+body.dark .cal-dow{color:#3f3f48}
+body.dark .cal-future::before{background:#4a6b8a}
+body.dark .cal-future .cal-note{color:#6a90b0}
+body.dark .cal-soon{background:#262015;border-color:#3a2f18}
+body.dark .cal-soon .cal-note{color:#c09040}
+body.dark .cal-now{background:#1b2620;border-color:#2f4a38}
+body.dark .cal-now .cal-note{color:#5ab880}
+body.dark .cal-none{background:#1e1e22;border-color:#2e2e34}
+body.dark .cal-none .cal-d,body.dark .cal-none .cal-m,body.dark .cal-none .cal-note{color:#3a3a42}
+body.dark .pl-sep{color:#33333b}
+body.dark .pl-future{color:#6a90b0}
+body.dark .pl-soon{color:#c09040}
+body.dark .pl-now{color:#5ab880}
+body.dark .pl-past{color:#44444e}
 body.dark .ins-none{background:#28282e;color:#4e4e58}
-body.dark .ins-future{background:#1c2530;color:#6a90b0}
 body.dark .ins-soon{background:#3a2a10;color:#c09040}
 body.dark .ins-now{background:#1a3020;color:#5ab870}
 body.dark .ins-past{background:#28282e;color:#58586a}
-body.dark .ins-row{background:#1e1e22;border-color:#2a2a32}
-body.dark .ins-row>i{color:#7ab890}
-body.dark .ins-f label{color:#505060}
-body.dark .ins-f input{background:#222226;border-color:#2e2e34;color:#d8d8e8}
-body.dark .ins-f input:focus{border-color:#4a6a5a}
 
-/* ── Left sidebar navigation ── */
+/* ── Left sidebar navigation ── *//* ── Left sidebar navigation ── */
 body{padding-left:224px}
 .tabs{
   position:fixed;left:0;top:0;bottom:0;width:224px;
@@ -1662,6 +1699,26 @@ function installState(p){
   return {k:'past', l, s:dateLbl(p.install_start)};
 }
 
+/** Calendar tile for the card header. Reads at a glance from across the room. */
+function installTile(p){
+  const st=installState(p);
+  if(!p.install_start){
+    return `<div class="cal cal-none" title="No install date set">
+      <div class="cal-m">TBC</div><div class="cal-d">—</div>
+      <div class="cal-note">not scheduled</div></div>`;
+  }
+  const d=new Date(p.install_start);
+  const mon=d.toLocaleDateString('en-GB',{month:'short'}).toUpperCase();
+  const day=d.getDate();
+  const dow=d.toLocaleDateString('en-GB',{weekday:'short'});
+  return `<div class="cal cal-${st.k}" title="${dateLbl(p.install_start)}${p.install_days?' · '+p.install_days+' days on site':''}">
+    <div class="cal-m">${mon}</div>
+    <div class="cal-d">${day}</div>
+    <div class="cal-note">${st.k==='now'?st.s:st.l}</div>
+    <div class="cal-dow">${dow}</div>
+  </div>`;
+}
+
 /** Sort: on site first, then soonest, unscheduled last. */
 function installSort(a,b){
   const av=a.install_start?daysUntil(a.install_start):9e5;
@@ -1669,35 +1726,6 @@ function installSort(a,b){
   const ao=(a.install_start&&av<=0)?-1e5+av:av;
   const bo=(b.install_start&&bv<=0)?-1e5+bv:bv;
   return ao-bo;
-}
-
-async function saveInstall(id){
-  const start=document.getElementById('ins-start-'+id).value||null;
-  const days=document.getElementById('ins-days-'+id).value;
-  const payload={install_start:start,install_days:days?parseInt(days):null};
-  try{
-    await sb('projects','PATCH',payload,`?id=eq.${id}`);
-    const i=DATA.proj.findIndex(x=>x.id===id);
-    if(i>-1)DATA.proj[i]={...DATA.proj[i],...payload};
-    const open=[...document.querySelectorAll('.proj-body.open')].map(e=>e.id.replace('pb-',''));
-    renderProj();renderHome();
-    open.forEach(o=>{
-      const b=document.getElementById('pb-'+o),c=document.getElementById('chev-'+o);
-      if(b){b.classList.add('open');if(c)c.classList.add('open');}
-    });
-  }catch(e){alert('Could not save install date: '+e.message);}
-}
-
-function installEditor(p){
-  const st=installState(p);
-  return `<div class="ins-row">
-    <i class="ti ti-calendar-event"></i>
-    <div class="ins-f"><label>Install starts</label>
-      <input type="date" id="ins-start-${p.id}" value="${p.install_start||''}" onchange="saveInstall('${p.id}')"></div>
-    <div class="ins-f"><label>Days on site</label>
-      <input type="number" min="1" id="ins-days-${p.id}" value="${p.install_days||''}" placeholder="—" onchange="saveInstall('${p.id}')"></div>
-    <div class="ins-state ins-${st.k}">${st.l}${st.s?`<span>${st.s}</span>`:''}</div>
-  </div>`;
 }
 
 function renderProj(){
@@ -1740,12 +1768,11 @@ function renderProj(){
           <div class="proj-client"><span style="cursor:pointer;border-bottom:1px dashed #ccc" onclick="event.stopPropagation();goToClient('${proj.client.replace(/'/g,"\\'")}')" title="View client">${proj.client}</span> <span style="font-weight:400;color:#888;font-size:12px">— ${quoteUrl?`<a href="${quoteUrl}" target="_blank" onclick="event.stopPropagation()" style="color:#185FA5;font-weight:500;text-decoration:none" onmouseover="this.style.textDecoration='underline'" onmouseout="this.style.textDecoration='none'">${proj.quote_no}</a>`:proj.quote_no}</span></div>
           <div class="proj-addr">${proj.address} · ${proj.job_type}</div>
           <div class="progress-wrap"><div class="progress-bar"><div class="progress-fill" style="width:${pct}%"></div></div>
-          <div class="progress-label">${done} of ${allSteps.length} steps · ${pct}%</div></div>
+          <div class="progress-label">${done} of ${allSteps.length} steps · ${pct}%${isClosed?'':(()=>{const s=installState(proj);return s.k==='none'?'':` <span class="pl-sep">·</span> <span class="pl-ins pl-${s.k}">${s.l}${s.s&&s.k!=='now'?' · '+s.s:s.k==='now'?' · '+s.s:''}</span>`;})()}</div></div>
         </div>
-        <div class="proj-header-right">${(()=>{const s=installState(proj);return isClosed?'':`<span class="ins-chip ins-${s.k}">${s.l}</span>`;})()}${badge(isClosed?'Closed':proj.status)}<i class="ti ti-chevron-down proj-chevron" id="chev-${proj.id}"></i></div>
+        <div class="proj-header-right">${isClosed?'':installTile(proj)}${badge(isClosed?'Closed':proj.status)}<i class="ti ti-chevron-down proj-chevron" id="chev-${proj.id}"></i></div>
       </div>
       <div class="proj-body" id="pb-${proj.id}">
-        ${isClosed?'':installEditor(proj)}
         ${clHTML}
         ${readyBanner}
       </div></div>`;
