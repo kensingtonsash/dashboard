@@ -114,8 +114,6 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Inter',system-ui,sans-serif;b
 .cl-item:hover{color:#34453E}
 .cl-item input[type=checkbox]{accent-color:#34453E;width:15px;height:15px;cursor:pointer;flex-shrink:0}
 .cl-item.checked{color:#bbb;text-decoration:line-through}
-.proj-install{font-size:12px;color:#999;display:flex;align-items:center;gap:5px;margin-bottom:12px}
-.proj-install i{font-size:13px;color:#34453E}
 
 /* ── Home grid ── */
 .home-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:14px}
@@ -307,7 +305,6 @@ body.dark .pay-label{color:#505060}
 body.dark .ps{border-color:#2e2e34;color:#505060}
 body.dark .ps.done{background:#34453E;color:#d4ede0;border-color:#34453E}
 body.dark .ps.warn{background:#3a2a10;color:#c09040;border-color:#6a4a20}
-body.dark .proj-install{color:#58586a}
 body.dark .alert-title{color:#e06060}
 body.dark .alert-row:hover{background:#2e1e1e !important}
 body.dark #archived-jobs-section > div{border-bottom-color:#28282e}
@@ -637,6 +634,39 @@ body.dark .stg-follow{background:#3a2a10;color:#c09040}
 body.dark .stg-dormant{background:#28282e;color:#58586a}
 body.dark .stg-tail{background:#232329;color:#44444e}
 body.dark .stg-rev{background:#1a3020;color:#5ab870}
+
+/* ── Install schedule ── */
+.ins-chip{display:inline-flex;align-items:center;font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.04em;
+  padding:3px 9px;border-radius:20px;white-space:nowrap;margin-right:7px}
+.ins-none{background:#F2F1EE;color:#b4b2ac}
+.ins-future{background:#EFF3F7;color:#4a6b8a}
+.ins-soon{background:#FEF1DC;color:#7D4B0A}
+.ins-now{background:#DFF0CE;color:#356310}
+.ins-past{background:#EFEFEC;color:#999}
+
+.ins-row{display:flex;align-items:flex-end;gap:14px;flex-wrap:wrap;margin-bottom:16px;padding:11px 13px;
+  background:#FAFAF8;border:1px solid #F0EFEC;border-radius:11px}
+.ins-row>i{font-size:16px;color:#34453E;margin-bottom:7px;flex-shrink:0}
+.ins-f{display:flex;flex-direction:column;gap:4px}
+.ins-f label{font-size:10px;color:#bbb;text-transform:uppercase;letter-spacing:.05em;font-weight:700}
+.ins-f input{padding:6px 9px;border:1px solid #E8E6E1;border-radius:8px;font-size:12.5px;font-family:inherit;
+  outline:none;background:#fff;color:#1a1a1a}
+.ins-f input:focus{border-color:#34453E}
+.ins-f input[type=number]{width:78px}
+.ins-state{margin-left:auto;align-self:center;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.04em;
+  padding:5px 11px;border-radius:20px;display:flex;flex-direction:column;align-items:center;gap:1px}
+.ins-state span{font-size:9.5px;font-weight:600;text-transform:none;letter-spacing:0;opacity:.75}
+
+body.dark .ins-none{background:#28282e;color:#4e4e58}
+body.dark .ins-future{background:#1c2530;color:#6a90b0}
+body.dark .ins-soon{background:#3a2a10;color:#c09040}
+body.dark .ins-now{background:#1a3020;color:#5ab870}
+body.dark .ins-past{background:#28282e;color:#58586a}
+body.dark .ins-row{background:#1e1e22;border-color:#2a2a32}
+body.dark .ins-row>i{color:#7ab890}
+body.dark .ins-f label{color:#505060}
+body.dark .ins-f input{background:#222226;border-color:#2e2e34;color:#d8d8e8}
+body.dark .ins-f input:focus{border-color:#4a6a5a}
 
 /* ── Left sidebar navigation ── */
 body{padding-left:224px}
@@ -1197,7 +1227,7 @@ function renderHome(){
     </div>`).join('')}</div>`:'';
   const hp=document.getElementById('home-projects');
   if(!ap.length){hp.innerHTML='<div class="empty">No active projects.</div>';}
-  else hp.innerHTML=ap.map(p=>{
+  else hp.innerHTML=[...ap].sort(installSort).map(p=>{
     const ck=p.checked||{};const done=allItems().filter(i=>ck[i]).length;
     const pct=Math.round(done/ti*100);const next=allItems().find(i=>!ck[i]);
     return `<div class="home-proj-row" style="cursor:pointer" onclick="goToProject('${p.id}')" title="View project">
@@ -1207,6 +1237,7 @@ function renderHome(){
           <i class="ti ti-arrow-right" style="font-size:11px;color:#888"></i>
         </div>
         <div class="home-proj-next" style="color:#888"><i class="ti ti-map-pin" style="font-size:11px"></i> ${p.address||''} ${p.job_type?'· '+p.job_type:''}</div>
+        <div class="home-proj-next">${(()=>{const s=installState(p);return `<span class="ins-chip ins-${s.k}" style="margin:3px 0 0">${s.l}</span>`;})()}</div>
       </div>
       <div class="home-proj-bar"><div class="progress-bar"><div class="progress-fill" style="width:${pct}%"></div></div>
       <div class="home-proj-pct">${pct}%</div></div></div>`;
@@ -1600,6 +1631,75 @@ function renderJobs(){
   }).join('');
 }
 
+/* ── Install schedule ──
+   install_date was free text and always said "TBC". install_start is a real date,
+   so the countdown is derived and can never disagree with the field beside it. */
+const D_MS=86400000;
+const midnight=d=>{const x=new Date(d);x.setHours(0,0,0,0);return x;};
+const daysUntil=iso=>Math.round((midnight(iso)-midnight(new Date()))/D_MS);
+
+/** Working days including the start day, so "day 2 of 4" reads correctly on site. */
+function installState(p){
+  if(!p.install_start)return {k:'none',l:'Not scheduled',s:''};
+  const d=daysUntil(p.install_start);
+  const len=Math.max(parseInt(p.install_days)||1,1);
+  const endsIn=d+len-1;
+
+  if(d>0){
+    const wks=Math.round(d/7);
+    const l = d===1 ? 'Tomorrow'
+            : d<=6  ? `In ${d} days`
+            : d<=10 ? 'Next week'
+            : `In ${wks} weeks`;
+    return {k: d<=7?'soon':'future', l, s:dateLbl(p.install_start)};
+  }
+  if(endsIn>=0){
+    const day=Math.min(1-d,len);
+    return {k:'now', l:'On site', s:`day ${day} of ${len}`};
+  }
+  const ago=-endsIn;
+  const l = ago===0?'Finished today' : ago<7?`Finished ${ago}d ago` : `Finished ${Math.round(ago/7)}w ago`;
+  return {k:'past', l, s:dateLbl(p.install_start)};
+}
+
+/** Sort: on site first, then soonest, unscheduled last. */
+function installSort(a,b){
+  const av=a.install_start?daysUntil(a.install_start):9e5;
+  const bv=b.install_start?daysUntil(b.install_start):9e5;
+  const ao=(a.install_start&&av<=0)?-1e5+av:av;
+  const bo=(b.install_start&&bv<=0)?-1e5+bv:bv;
+  return ao-bo;
+}
+
+async function saveInstall(id){
+  const start=document.getElementById('ins-start-'+id).value||null;
+  const days=document.getElementById('ins-days-'+id).value;
+  const payload={install_start:start,install_days:days?parseInt(days):null};
+  try{
+    await sb('projects','PATCH',payload,`?id=eq.${id}`);
+    const i=DATA.proj.findIndex(x=>x.id===id);
+    if(i>-1)DATA.proj[i]={...DATA.proj[i],...payload};
+    const open=[...document.querySelectorAll('.proj-body.open')].map(e=>e.id.replace('pb-',''));
+    renderProj();renderHome();
+    open.forEach(o=>{
+      const b=document.getElementById('pb-'+o),c=document.getElementById('chev-'+o);
+      if(b){b.classList.add('open');if(c)c.classList.add('open');}
+    });
+  }catch(e){alert('Could not save install date: '+e.message);}
+}
+
+function installEditor(p){
+  const st=installState(p);
+  return `<div class="ins-row">
+    <i class="ti ti-calendar-event"></i>
+    <div class="ins-f"><label>Install starts</label>
+      <input type="date" id="ins-start-${p.id}" value="${p.install_start||''}" onchange="saveInstall('${p.id}')"></div>
+    <div class="ins-f"><label>Days on site</label>
+      <input type="number" min="1" id="ins-days-${p.id}" value="${p.install_days||''}" placeholder="—" onchange="saveInstall('${p.id}')"></div>
+    <div class="ins-state ins-${st.k}">${st.l}${st.s?`<span>${st.s}</span>`:''}</div>
+  </div>`;
+}
+
 function renderProj(){
   const p=DATA.proj;
   const active=p.filter(x=>x.status!=='Closed');
@@ -1642,10 +1742,10 @@ function renderProj(){
           <div class="progress-wrap"><div class="progress-bar"><div class="progress-fill" style="width:${pct}%"></div></div>
           <div class="progress-label">${done} of ${allSteps.length} steps · ${pct}%</div></div>
         </div>
-        <div class="proj-header-right">${badge(isClosed?'Closed':proj.status)}<i class="ti ti-chevron-down proj-chevron" id="chev-${proj.id}"></i></div>
+        <div class="proj-header-right">${(()=>{const s=installState(proj);return isClosed?'':`<span class="ins-chip ins-${s.k}">${s.l}</span>`;})()}${badge(isClosed?'Closed':proj.status)}<i class="ti ti-chevron-down proj-chevron" id="chev-${proj.id}"></i></div>
       </div>
       <div class="proj-body" id="pb-${proj.id}">
-        ${proj.install_date?`<div class="proj-install"><i class="ti ti-calendar-event"></i> Install: ${proj.install_date}</div>`:''}
+        ${isClosed?'':installEditor(proj)}
         ${clHTML}
         ${readyBanner}
       </div></div>`;
@@ -1653,7 +1753,7 @@ function renderProj(){
 
   const c=document.getElementById('proj-cards');
   if(!active.length){c.innerHTML='<div class="card"><div class="empty">No active projects.</div></div>';}
-  else c.innerHTML='<div class="proj-list">'+active.map(proj=>buildCard(proj,false)).join('')+'</div>';
+  else c.innerHTML='<div class="proj-list">'+[...active].sort(installSort).map(proj=>buildCard(proj,false)).join('')+'</div>';
 
   // Archived section
   const archSection=document.getElementById('archived-jobs-section');
