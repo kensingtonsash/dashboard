@@ -68,13 +68,16 @@ body{
 .g1{margin-bottom:9px}
 
 label{display:block;font-size:11.5px;font-weight:500;color:#888;margin-bottom:3px}
-input,textarea{
+input,textarea,select{
   width:100%;border:1px solid #e8e8e8;border-radius:6px;
   padding:8px 10px;font-size:13.5px;font-family:inherit;
   outline:none;color:#1a1a1a;background:#fafafa;
   transition:border-color .15s,background .15s;
 }
-input:focus,textarea:focus{border-color:#34453E;background:#fff;box-shadow:0 0 0 3px rgba(52,69,62,.06)}
+select{cursor:pointer;appearance:none;
+  background-image:url("data:image/svg+xml;charset=utf8,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6'%3E%3Cpath fill='%23aaa' d='M0 0l5 6 5-6z'/%3E%3C/svg%3E");
+  background-repeat:no-repeat;background-position:right 11px center;padding-right:28px}
+input:focus,textarea:focus,select:focus{border-color:#34453E;background:#fff;box-shadow:0 0 0 3px rgba(52,69,62,.06)}
 input::placeholder,textarea::placeholder{color:#ccc}
 textarea{resize:vertical;min-height:88px;line-height:1.5}
 .req{color:#A32D2D}
@@ -122,11 +125,17 @@ textarea{resize:vertical;min-height:88px;line-height:1.5}
 .submit-btn:disabled{opacity:.5;cursor:not-allowed}
 .submit-note{font-size:12px;color:#bbb}
 
+/* Error */
+.form-err{display:none;margin-top:12px;padding:10px 12px;border-radius:6px;background:#FDEBEB;border:1px solid #f3d5d5;color:#A32D2D;font-size:12.5px;line-height:1.5}
+
 /* Success */
 #success-msg{display:none;text-align:center;padding:3rem 1.5rem}
 #success-msg .s-icon{font-size:36px;margin-bottom:.75rem}
 #success-msg h2{font-size:18px;font-weight:600;color:#34453E;margin-bottom:6px}
 #success-msg p{font-size:13px;color:#777;line-height:1.6}
+
+/* Honeypot — visually gone, still focusable only by a bot */
+.hp{position:absolute;left:-9999px;top:-9999px;height:0;width:0;overflow:hidden}
 
 @media(max-width:640px){
   body{padding:1rem .75rem 2.5rem}
@@ -157,6 +166,13 @@ textarea{resize:vertical;min-height:88px;line-height:1.5}
       <p class="intro">Please provide as much detail as possible — it helps us quote accurately and quickly. Existing clients, email us directly at <a href="mailto:info@kensingtonsash.co.uk">info@kensingtonsash.co.uk</a> instead.</p>
 
       <form id="req-form">
+
+        <!-- Bots fill this in. Humans never see it. -->
+        <div class="hp" aria-hidden="true">
+          <label>Website</label>
+          <input type="text" name="website" tabindex="-1" autocomplete="off">
+        </div>
+
         <div class="form-cols">
 
           <!-- LEFT: Contact + Property -->
@@ -180,6 +196,22 @@ textarea{resize:vertical;min-height:88px;line-height:1.5}
               <div><label>Postcode <span class="req">*</span></label><input type="text" name="postcode" required placeholder="SW1A 1AA"></div>
             </div>
             <div class="g1"><label>County</label><input type="text" name="county" placeholder="County"></div>
+
+            <div class="divider">How did you hear about us?</div>
+            <div class="g1">
+              <select name="source" id="source-select">
+                <option value="">Select one…</option>
+                <option value="Google search">Google search</option>
+                <option value="Google ad">I clicked an advert</option>
+                <option value="Saw your van or signage">Saw your van or signage</option>
+                <option value="Architect or designer">An architect or designer recommended you</option>
+                <option value="Friend or neighbour">A friend or neighbour recommended you</option>
+                <option value="Used you before">I've used you before</option>
+                <option value="Social media">Instagram or social media</option>
+                <option value="Other">Other</option>
+              </select>
+            </div>
+            <p style="font-size:11px;color:#bbb;line-height:1.5">It genuinely helps us — we're a small business and this tells us where to spend our time.</p>
           </div>
 
           <!-- RIGHT: Services + Details + Preferences -->
@@ -227,6 +259,8 @@ textarea{resize:vertical;min-height:88px;line-height:1.5}
           <div class="submit-note">No obligation &nbsp;·&nbsp; We respond within 24 hours</div>
         </div>
 
+        <div class="form-err" id="form-err"></div>
+
       </form>
 
       <div id="success-msg">
@@ -238,10 +272,63 @@ textarea{resize:vertical;min-height:88px;line-height:1.5}
   </div>
 
 <script>
-const SUPABASE_URL='https://wuzcvgucszxoefcscqkd.supabase.co/rest/v1';
 const SUPABASE_BASE='https://wuzcvgucszxoefcscqkd.supabase.co';
+const SUPABASE_URL=SUPABASE_BASE+'/rest/v1';
 const SUPABASE_KEY='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Ind1emN2Z3Vjc3p4b2VmY3NjcWtkIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODI0ODU3NjAsImV4cCI6MjA5ODA2MTc2MH0.rnibj12j6stQHFbS3lkKhNSvKYmCi_sM5s-vLLmTg88';
 
+/* ── Attribution ──────────────────────────────────────────────────
+   Captured silently. Answers "how did they get here", which is not the
+   same question as the dropdown, which asks "what made them come".
+
+   FIRST TOUCH, not last. Someone clicks a Google ad on Monday, thinks
+   about it, and returns by typing the domain on Friday. Last-touch would
+   credit "direct" and the ad would look worthless. We store the first
+   visit's parameters and reuse them for 90 days.
+------------------------------------------------------------------ */
+const ATTR_KEY='ks_attr';
+const ATTR_TTL=90*24*60*60*1000;
+
+function captureAttribution(){
+  let stored=null;
+  try{
+    const raw=localStorage.getItem(ATTR_KEY);
+    if(raw){
+      const parsed=JSON.parse(raw);
+      if(parsed.t && Date.now()-parsed.t < ATTR_TTL) stored=parsed;
+    }
+  }catch(e){/* private browsing, or storage disabled */}
+
+  const p=new URLSearchParams(location.search);
+  const fresh={
+    utm_source:   p.get('utm_source')   || '',
+    utm_medium:   p.get('utm_medium')   || '',
+    utm_campaign: p.get('utm_campaign') || '',
+    gclid:        p.get('gclid')        || '',
+    referrer:     document.referrer     || '',
+    landing_page: location.pathname + location.search,
+    t: Date.now()
+  };
+
+  const hasFresh = fresh.utm_source || fresh.gclid || fresh.referrer;
+
+  // Keep the first touch. Only overwrite if we have new campaign data
+  // and nothing was stored, or the stored record has expired.
+  if(!stored && hasFresh){
+    try{ localStorage.setItem(ATTR_KEY, JSON.stringify(fresh)); }catch(e){}
+    return fresh;
+  }
+  return stored || fresh;
+}
+
+const ATTR = captureAttribution();
+
+/* If they arrived on a paid click, pre-select the dropdown. They can change it. */
+if(ATTR.gclid || ATTR.utm_medium==='cpc'){
+  const sel=document.getElementById('source-select');
+  if(sel) sel.value='Google ad';
+}
+
+/* ── Photos ────────────────────────────────────────────────────── */
 document.getElementById('photo-input').addEventListener('change',function(){
   const p=document.getElementById('photo-preview');p.innerHTML='';
   [...this.files].slice(0,10).forEach(f=>{
@@ -249,72 +336,92 @@ document.getElementById('photo-input').addEventListener('change',function(){
   });
 });
 
+/* ── Submit ────────────────────────────────────────────────────── */
 document.getElementById('req-form').addEventListener('submit',async function(e){
   e.preventDefault();
+
   const btn=document.getElementById('submit-btn');
-  btn.disabled=true;btn.textContent='Sending…';
+  const errBox=document.getElementById('form-err');
+  errBox.style.display='none';
+
   const fd=new FormData(this);
+
+  // Honeypot. A human never sees this field, so anything in it is a bot.
+  // Pretend it worked. Bots that get an error simply try again.
+  if(fd.get('website')){
+    document.getElementById('req-form').style.display='none';
+    document.getElementById('success-msg').style.display='block';
+    return;
+  }
+
+  btn.disabled=true;btn.textContent='Sending…';
+
   const services=[...document.querySelectorAll('input[name=service]:checked')].map(i=>i.value);
   const client=`${fd.get('first_name')||''} ${fd.get('last_name')||''}`.trim();
   const unit=fd.get('unit')?`, ${fd.get('unit')}`:'';
-  const address=`${fd.get('street')||''}${unit}, ${fd.get('city')||''} ${fd.get('postcode')||''}`.trim();
+  const county=fd.get('county')?`, ${fd.get('county')}`:'';
+  const address=`${fd.get('street')||''}${unit}, ${fd.get('city')||''}${county} ${fd.get('postcode')||''}`.replace(/\s+/g,' ').trim();
   const jobType=services.length?services.join(', '):'General Enquiry';
-  const id='req_'+Date.now();
 
+  /* Photos first — they upload to a public bucket, which is unchanged. */
   const photoFiles=[...document.getElementById('photo-input').files].slice(0,10);
   const photoUrls=[];
+  const stamp=Date.now();
   for(const file of photoFiles){
     try{
-      const ext=file.name.split('.').pop();
-      const path=`${id}/${Date.now()}.${ext}`;
+      const ext=(file.name.split('.').pop()||'jpg').replace(/[^a-z0-9]/gi,'').slice(0,5);
+      const path=`req_${stamp}/${Math.random().toString(36).slice(2)}.${ext}`;
       const r=await fetch(`${SUPABASE_BASE}/storage/v1/object/request-photos/${path}`,{
-        method:'POST',headers:{'apikey':SUPABASE_KEY,'Authorization':'Bearer '+SUPABASE_KEY,'Content-Type':file.type},body:file
+        method:'POST',
+        headers:{'apikey':SUPABASE_KEY,'Authorization':'Bearer '+SUPABASE_KEY,'Content-Type':file.type},
+        body:file
       });
       if(r.ok)photoUrls.push(`${SUPABASE_BASE}/storage/v1/object/public/request-photos/${path}`);
     }catch(err){console.warn('Photo upload failed',err);}
   }
 
-  const record={
-    id,quote_no:'TBC',client,address,job_type:jobType,value:0,status:'New',
-    date:new Date().toISOString().split('T')[0],drive_url:'',
-    notes:fd.get('notes')||'',email:fd.get('email')||'',phone:fd.get('phone')||'',
-    company:fd.get('company')||'',window_count:fd.get('window_count')||'',
+  /* One call. The visitor has no read or write access to any table —
+     submit_enquiry runs with elevated rights and whitelists every field,
+     so status, quote_no and totals cannot be set from here. */
+  const payload={
+    client, email:(fd.get('email')||'').trim(), phone:fd.get('phone')||'',
+    company:fd.get('company')||'', address,
+    job_type:jobType, notes:fd.get('notes')||'',
+    window_count:fd.get('window_count')||'',
     survey:document.querySelector('input[name=survey]').checked,
     photo_estimate:document.querySelector('input[name=photo_estimate]').checked,
-    photo_urls:photoUrls.length?photoUrls:null,
+    photo_urls:photoUrls,
+    source:fd.get('source')||'Unknown',
+    utm_source:ATTR.utm_source, utm_medium:ATTR.utm_medium, utm_campaign:ATTR.utm_campaign,
+    gclid:ATTR.gclid, referrer:ATTR.referrer, landing_page:ATTR.landing_page
   };
 
   try{
-    const res=await fetch(`${SUPABASE_URL}/enquiries`,{
+    const res=await fetch(`${SUPABASE_URL}/rpc/submit_enquiry`,{
       method:'POST',
-      headers:{'Content-Type':'application/json','apikey':SUPABASE_KEY,'Authorization':'Bearer '+SUPABASE_KEY,'Prefer':'return=minimal'},
-      body:JSON.stringify(record)
+      headers:{'Content-Type':'application/json','apikey':SUPABASE_KEY,'Authorization':'Bearer '+SUPABASE_KEY},
+      body:JSON.stringify({payload})
     });
-    if(!res.ok)throw new Error(await res.text());
 
-    const today=new Date();
-    const dd=String(today.getDate()).padStart(2,'0');
-    const mm=String(today.getMonth()+1).padStart(2,'0');
-    const yyyy=today.getFullYear();
-    const clientRecord={name:client,company:fd.get('company')||'',email:fd.get('email')||'',phone:fd.get('phone')||'',address,last_activity:`${dd}/${mm}/${yyyy}`};
-    const existing=await fetch(`${SUPABASE_URL}/clients?email=eq.${encodeURIComponent(clientRecord.email)}&limit=1`,{
-      headers:{'apikey':SUPABASE_KEY,'Authorization':'Bearer '+SUPABASE_KEY}
-    });
-    const existingData=await existing.json();
-    if(!existingData.length){
-      await fetch(`${SUPABASE_URL}/clients`,{
-        method:'POST',
-        headers:{'Content-Type':'application/json','apikey':SUPABASE_KEY,'Authorization':'Bearer '+SUPABASE_KEY,'Prefer':'return=minimal'},
-        body:JSON.stringify(clientRecord)
-      });
+    if(!res.ok){
+      let msg='Something went wrong — please try again, or email info@kensingtonsash.co.uk';
+      try{
+        const body=await res.json();
+        if(body && body.message) msg=body.message;   // e.g. "Please enter a valid email address"
+      }catch(_){}
+      throw new Error(msg);
     }
+
+    try{ localStorage.removeItem(ATTR_KEY); }catch(e){}
 
     document.getElementById('req-form').style.display='none';
     document.getElementById('success-msg').style.display='block';
     window.scrollTo({top:0,behavior:'smooth'});
+
   }catch(err){
     btn.disabled=false;btn.textContent='Send Request';
-    alert('Something went wrong — please try again or email info@kensingtonsash.co.uk');
+    errBox.textContent=err.message;
+    errBox.style.display='block';
     console.error(err);
   }
 });
