@@ -3142,6 +3142,9 @@ B Major (Repairs 4+ days): 50% / 25% interim 7 days before / 25% completion
 ## PROJECT CHECKLIST ITEMS (exact strings):
 'Deposit invoice raised' | 'Deposit payment received' | 'Ironmongery selected by client' | 'Paint colour / finish confirmed' | 'Supplier order placed' | 'Supplier order confirmed & ETA received' | 'Ironmongery ordered' | 'Subcontractor booked' | 'Calendar invite sent to client' | 'Interim invoice raised' | 'Interim payment received' | 'Materials delivered to depot' | 'Installation complete' | 'Snagging checked / PC sign-off' | 'Final invoice raised' | 'Final payment received' | 'Warranty / close-out letter sent'
 
+## TODAY
+${new Date().toLocaleDateString('en-GB',{weekday:'long',day:'numeric',month:'long',year:'numeric'})} (${new Date().toISOString().slice(0,10)}). Resolve relative dates like 'next Tuesday' or 'the 14th' against this into YYYY-MM-DD.
+
 ## LIVE DATA
 Enquiries: ${JSON.stringify(DATA.enq)}
 Invoices: ${JSON.stringify(DATA.inv)}
@@ -3158,6 +3161,10 @@ Subcontractors: ${JSON.stringify(DATA.sub||[])}
 - add_subcontractor: {name, company, role, phone, email, pricing, status, notes} -- need phone+email
 - update_subcontractor: {id, ...changes}
 - update_project_checklist: {project_id, item (exact string above), checked true/false}
+- set_install_date: {project_id, install_start YYYY-MM-DD (or null to clear), install_days number of days on site (optional)}
+- update_project: {project_id, ...changes} -- allowed fields only: status ('Active' or 'Closed'), value (net number, ex VAT), job_type, address. Never set install dates here, use set_install_date.
+
+Reference a project by its project_id from Projects in LIVE DATA. Match on client name plus address, never invent an id. You may output several <ACTION> blocks in one reply when asked to do more than one thing.
 
 ## RULES
 1. Always draft emails/messages immediately. Use [PLACEHOLDER] for unknown fields, do not ask.
@@ -3172,19 +3179,22 @@ Subcontractors: ${JSON.stringify(DATA.sub||[])}
     const d=await res.json();
     const reply=d.content?.find(b=>b.type==='text')?.text||'Sorry, no response.';
     chatHistory.push({role:'assistant',content:reply});
-    const actionMatch=reply.match(/<ACTION>([\s\S]*?)<\/ACTION>/);
-    if(actionMatch){
-      try{
-        const parsed=JSON.parse(actionMatch[1].trim());
-        await executeAction(parsed);
-        thinking.className='chat-msg assistant';
-        thinking.textContent=parsed.confirm_message||'Done.';
-      }catch(e){
-        thinking.className='chat-msg assistant';
-        thinking.textContent='Action failed: '+e.message;
+    const actionMatches=[...reply.matchAll(/<ACTION>([\s\S]*?)<\/ACTION>/g)];
+    thinking.className='chat-msg assistant';
+    if(actionMatches.length){
+      const confirms=[];
+      for(const m of actionMatches){
+        try{
+          const parsed=JSON.parse(m[1].trim());
+          await executeAction(parsed);
+          confirms.push(parsed.confirm_message||'Done.');
+        }catch(e){
+          confirms.push('Action failed: '+e.message);
+        }
       }
+      const prose=reply.replace(/<ACTION>[\s\S]*?<\/ACTION>/g,'').trim();
+      thinking.textContent=(prose?prose+'\n\n':'')+confirms.join('\n');
     }else{
-      thinking.className='chat-msg assistant';
       thinking.textContent=reply;
     }
   }catch(err){
@@ -3227,6 +3237,25 @@ async function executeAction(parsed){
     data.checked?ck[data.item]=true:delete ck[data.item];
     await sb('projects','PATCH',{checked:ck},`?id=eq.${data.project_id}`);
     proj.checked=ck;renderProj();renderHome();
+  }else if(action==='set_install_date'){
+    const proj=DATA.proj.find(p=>p.id===data.project_id);if(!proj)throw new Error('Project not found');
+    const patch={};
+    if('install_start' in data)patch.install_start=data.install_start||null;
+    if('install_days' in data)patch.install_days=(data.install_days===''||data.install_days===null||data.install_days===undefined)?null:parseInt(data.install_days);
+    await sb('projects','PATCH',patch,`?id=eq.${data.project_id}`);
+    Object.assign(proj,patch);
+    renderProj();renderHome();
+  }else if(action==='update_project'){
+    const{project_id,...rest}=data;
+    const proj=DATA.proj.find(p=>p.id===project_id);if(!proj)throw new Error('Project not found');
+    const allowed=['status','value','job_type','address'];
+    const patch={};
+    allowed.forEach(f=>{if(f in rest)patch[f]=rest[f];});
+    if('value' in patch&&patch.value!==null&&patch.value!=='')patch.value=Number(patch.value);
+    if(!Object.keys(patch).length)throw new Error('No allowed fields to update');
+    await sb('projects','PATCH',patch,`?id=eq.${project_id}`);
+    Object.assign(proj,patch);
+    renderProj();renderHome();
   }else throw new Error('Unknown action: '+action);
 }
 
