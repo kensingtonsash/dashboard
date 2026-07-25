@@ -222,6 +222,7 @@ const STAFF_BEADS = ['20mm x 15mm','20mm x 20mm','20mm x 24mm','25mm x 15mm',
 const PARTING_BEADS = ['7mm x 25mm','8mm x 25mm','8mm x 28mm'];
 const isSash    = w => /Sash Window$/.test(w.product || '');
 /* sash units in the opening — drives lifts (2 each), cords, pulleys */
+const hasPulleys = w => isSash(w) && w.mechanism !== 'Spiral balance';
 const sashUnits = w => w.product === 'Triple Sash Window' ? 3
                      : w.product === 'Double Sash Window' ? 2
                      : isSash(w) ? 1 : 0;
@@ -285,7 +286,7 @@ function siteRef(j){
 function materialList(ws){
   const rep = ws.filter(w => isRepair(w) && isSash(w));
   const units   = rep.reduce((t,w) => t + sashUnits(w), 0);
-  const pulleys = rep.filter(w => w.newPulleys).reduce((t,w) => t + sashUnits(w), 0);
+  const pulleys = rep.filter(w => w.newPulleys && hasPulleys(w)).reduce((t,w) => t + sashUnits(w), 0);
   const out = [];
   if(units){
     const packs = Math.ceil(units / 2);
@@ -616,7 +617,7 @@ function sSurvey(v,b){
                 <option value="">Select…</option>
                 ${PARTING_BEADS.map(b => `<option${b === w.partingBead ? ' selected' : ''}>${b}</option>`).join('')}
               </select></div>
-            ${isSash(w) ? `<div><span class="wlab">New sash pulleys</span>
+            ${hasPulleys(w) ? `<div><span class="wlab">New sash pulleys</span>
               <select class="inp np" data-i="${i}">
                 <option value=""${w.newPulleys ? '' : ' selected'}>No</option>
                 <option value="1"${w.newPulleys ? ' selected' : ''}>Yes</option>
@@ -655,11 +656,14 @@ function sSurvey(v,b){
     R.querySelectorAll('.pd').forEach(s => s.onchange = () => {
       const i = +s.dataset.i, w = j.windows[i];
       w.product = s.value;
-      if(!isSash(w)) w.mechanism = '';
+      if(!isSash(w)){ w.mechanism = ''; w.newPulleys = false }
       j.synced = false; save(); netLabel(); redrawRow(i);
     });
     R.querySelectorAll('.mc').forEach(s => s.onchange = () => {
-      j.windows[+s.dataset.i].mechanism = s.value; j.synced = false; save(); netLabel();
+      const i = +s.dataset.i, w = j.windows[i];
+      w.mechanism = s.value;
+      if(!hasPulleys(w)) w.newPulleys = false;
+      j.synced = false; save(); netLabel(); redrawRow(i);
     });
     R.querySelectorAll('.sb').forEach(s => s.onchange = () => {
       j.windows[+s.dataset.i].staffBead = s.value; j.synced = false; save();
