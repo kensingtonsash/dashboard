@@ -214,12 +214,17 @@ const LOGO = 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAeAAAABeCAYAAAD7Y8ck
 
 const K_SURVEYS = 'ks_surveys_v3', K_SESSION = 'ks_session_v1', K_BOOKED = 'ks_booked_v1';
 const GLAZING  = ['Single','Laminated','Double','Slimline double','Vacuum'];
-const PRODUCTS = ['Sash Window','Casement Window','Front Door','French Doors','Bifold Doors','Patio Door'];
+const PRODUCTS = ['Sash Window','Double Sash Window','Triple Sash Window',
+                  'Casement Window','Front Door','French Doors','Bifold Doors','Patio Door'];
 const MECHANISMS = ['Cord & weights','Spiral balance'];
 const STAFF_BEADS = ['20mm x 15mm','20mm x 20mm','20mm x 24mm','25mm x 15mm',
                      '28mm x 15mm','28mm x 20mm','33mm x 16mm Scottish Staff Bead'];
 const PARTING_BEADS = ['7mm x 25mm','8mm x 25mm','8mm x 28mm'];
-const isSash    = w => w.product === 'Sash Window';
+const isSash    = w => /Sash Window$/.test(w.product || '');
+/* sash units in the opening — drives lifts (2 each), cords, pulleys */
+const sashUnits = w => w.product === 'Triple Sash Window' ? 3
+                     : w.product === 'Double Sash Window' ? 2
+                     : isSash(w) ? 1 : 0;
 const isRepair  = w => w.service === 'Sash Repairs';
 const SERVICES = [['Sash Repairs','Sash Repairs'],
                   ['Full Replacement','Full Replacement'],
@@ -245,6 +250,7 @@ db.forEach(j => j.windows.forEach(w => {
   if(w.mechanism === undefined) w.mechanism = '';
   if(w.staffBead === undefined) w.staffBead = '';
   if(w.partingBead === undefined) w.partingBead = '';
+  if(w.newPulleys === undefined) w.newPulleys = false;
 }));
 
 function read(k, fb){ try{ const v = JSON.parse(localStorage.getItem(k)); return v == null ? fb : v }catch(e){ return fb } }
@@ -274,6 +280,23 @@ function siteRef(j){
   if(!toks.length) return '';
   return REF_MOD.test(toks[0]) && toks.length > 1 ? toks[0] + ' ' + toks[1] : toks[0];
 }
+/* Materials, derived from the sash windows on repairs.
+   2 lifts + 1 lock per sash unit · 1 pack of 19mm stops per 2 units · 4 pulleys per unit when selected */
+function materialList(ws){
+  const rep = ws.filter(w => isRepair(w) && isSash(w));
+  const units   = rep.reduce((t,w) => t + sashUnits(w), 0);
+  const pulleys = rep.filter(w => w.newPulleys).reduce((t,w) => t + sashUnits(w), 0);
+  const out = [];
+  if(units){
+    const packs = Math.ceil(units / 2);
+    out.push(['Sash lifts', units * 2 + ' no.']);
+    out.push(['Sash locks', units + ' no.']);
+    out.push(['Sash Stops 19mm', packs + (packs === 1 ? ' pack' : ' packs')]);
+  }
+  if(pulleys) out.push(['Sash pulleys', pulleys * 4 + ' no.']);
+  return out;
+}
+
 /* the number the supplier quotes against */
 function requestNo(j){
   return j.quote_no || j.enquiry_id || ('S' + String(j.id).slice(-6));
@@ -439,7 +462,7 @@ function start(src = {}){
     surveyor:src.surveyor || 'Luke Robertson',
     site:{}, spec:{},
     windows:[{ label:'W1', position:'', w:'', h:'', photo:'', notes:'',
-               product:PRODUCTS[0], mechanism:'', staffBead:'', partingBead:'',
+               product:PRODUCTS[0], mechanism:'', staffBead:'', partingBead:'', newPulleys:false,
                service:SERVICE_VALUES.includes(src.service) ? src.service : SERVICE_VALUES[0],
                glazing:'' }],
     synced:false
@@ -514,6 +537,7 @@ function sSurvey(v,b){
     j.windows.push({ label:'W' + (j.windows.length + 1), position:'', w:'', h:'', photo:'', notes:'',
                      product:prev.product || PRODUCTS[0], mechanism:prev.mechanism || '',
                      staffBead:prev.staffBead || '', partingBead:prev.partingBead || '',
+                     newPulleys:!!prev.newPulleys,
                      service:prev.service || SERVICE_VALUES[0], glazing:prev.glazing || '' });
     j.synced = false; save(); rows();
     const last = el('rows').lastElementChild;
@@ -592,6 +616,11 @@ function sSurvey(v,b){
                 <option value="">Select…</option>
                 ${PARTING_BEADS.map(b => `<option${b === w.partingBead ? ' selected' : ''}>${b}</option>`).join('')}
               </select></div>
+            ${isSash(w) ? `<div><span class="wlab">New sash pulleys</span>
+              <select class="inp np" data-i="${i}">
+                <option value=""${w.newPulleys ? '' : ' selected'}>No</option>
+                <option value="1"${w.newPulleys ? ' selected' : ''}>Yes</option>
+              </select></div>` : ''}
           </div>` : ''}
           <div style="margin-top:9px"><span class="wlab">Note</span>
             <input class="wnote" data-i="${i}" value="${esc(w.notes || '')}" placeholder="optional" autocomplete="off"></div>
@@ -634,6 +663,9 @@ function sSurvey(v,b){
     });
     R.querySelectorAll('.sb').forEach(s => s.onchange = () => {
       j.windows[+s.dataset.i].staffBead = s.value; j.synced = false; save();
+    });
+    R.querySelectorAll('.np').forEach(s => s.onchange = () => {
+      j.windows[+s.dataset.i].newPulleys = !!s.value; j.synced = false; save();
     });
     R.querySelectorAll('.pb').forEach(s => s.onchange = () => {
       j.windows[+s.dataset.i].partingBead = s.value; j.synced = false; save();
@@ -811,6 +843,23 @@ function exportPdf(j){
     y += 11; if(y > 262){ d.addPage(); y = M }
     d.setFontSize(6.5); d.setTextColor(...gry); d.text('NOTES', M, y); y += 5;
     d.setFontSize(9); d.setTextColor(...ink); d.text(d.splitTextToSize(j.spec.notes, W - M*2), M, y);
+  }
+
+  const mats = materialList(live);
+  if(mats.length){
+    y += 14; if(y > 235){ d.addPage(); y = M }
+    d.setDrawColor(...grn); d.setLineWidth(.4); d.line(M, y, W - M, y); y += 6;
+    d.setFont('helvetica','bold'); d.setFontSize(9.5); d.setTextColor(...ink);
+    d.text('ORDER LIST', M, y);
+    d.setFont('helvetica','normal'); y += 7.5;
+    mats.forEach(m => {
+      if(y > 280){ d.addPage(); y = M }
+      d.setFontSize(9); d.setTextColor(...ink);
+      d.text(m[0], M, y);
+      d.text(m[1], W - M, y, { align:'right' });
+      d.setDrawColor(...hair); d.setLineWidth(.2); d.line(M, y + 2.4, W - M, y + 2.4);
+      y += 7.5;
+    });
   }
 
   d.save('Survey — ' + (ref || requestNo(j)) + '.pdf');
