@@ -258,13 +258,21 @@ function sqm(w,h){ return (Number(w) > 0 && Number(h) > 0) ? (w*h)/1e6 : 0 }
 function band(a){ return !a ? '' : a <= 1.7 ? 'Band 1' : a <= 2.3 ? 'Band 2' : 'Band 3' }
 function pick(r, keys){ for(const k of keys){ if(r[k]) return r[k] } return '' }
 
-/* 'Flat 2, 14 Elgin Crescent, W11' -> 'Elgin'. Overridden by the Reference field. */
+/* '85 Old Brompton Road, SW7' -> 'Old Brompton'. Overridden by the Reference field. */
+const REF_STOP  = /^(flat|apt|apartment|unit|no|the|ground|first|second|third|floor|basement|maisonette|house)$/i;
+const REF_MOD   = /^(old|new|great|little|north|south|east|west|upper|lower|st|saint)$/i;
+const REF_THORO = /^(road|rd|street|st|crescent|gardens|garden|square|sq|place|pl|mews|lane|avenue|ave|terrace|walk|grove|hill|row|park|close|drive|way|court|villas|rise|vale|embankment|quay|wharf|green|common|bridge|broadway|parade|path|end)$/i;
+const REF_OUT   = /^[A-Z]{1,2}\d[A-Z\d]?$/i;
+
 function siteRef(j){
   if(j.spec && j.spec.ref) return j.spec.ref.trim();
-  const stop = /^(flat|apt|apartment|unit|no|the|ground|lower|upper|basement|floor|house|maisonette)$/i;
-  const word = String(j.address || '').split(/[\s,]+/)
-    .find(t => /^[A-Za-z][A-Za-z'-]{2,}$/.test(t) && !stop.test(t));
-  return word || '';
+  let toks = String(j.address || '').split(/[\s,]+/).filter(Boolean);
+  const pc = toks.findIndex(t => REF_OUT.test(t));
+  if(pc > 0) toks = toks.slice(0, pc);
+  toks = toks.filter(t => /^[A-Za-z][A-Za-z'\u2019-]*$/.test(t) && !REF_STOP.test(t));
+  while(toks.length > 1 && REF_THORO.test(toks[toks.length - 1])) toks.pop();
+  if(!toks.length) return '';
+  return REF_MOD.test(toks[0]) && toks.length > 1 ? toks[0] + ' ' + toks[1] : toks[0];
 }
 /* the number the supplier quotes against */
 function requestNo(j){
