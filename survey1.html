@@ -650,8 +650,7 @@ function exportPdf(j){
 
     ty += 8;
     [['WIDTH', w.w ? w.w + ' mm' : '—'],
-     ['HEIGHT', w.h ? w.h + ' mm' : '—'],
-     ['BAND', band(a) || '—']].forEach((r,c) => {
+     ['HEIGHT', w.h ? w.h + ' mm' : '—']].forEach((r,c) => {
       const x = TX + c * 34;
       d.setFontSize(6.5); d.setTextColor(...gry); d.text(r[0], x, ty);
       d.setFontSize(9.5); d.setTextColor(...ink); d.text(r[1], x, ty + 4.6);
