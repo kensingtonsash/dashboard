@@ -216,6 +216,9 @@ const K_SURVEYS = 'ks_surveys_v3', K_SESSION = 'ks_session_v1', K_BOOKED = 'ks_b
 const GLAZING  = ['Single','Laminated','Double','Slimline double','Vacuum'];
 const PRODUCTS = ['Sash Window','Casement Window','Front Door','French Doors','Bifold Doors','Patio Door'];
 const MECHANISMS = ['Cord & weights','Spiral balance'];
+const STAFF_BEADS = ['20mm x 15mm','20mm x 20mm','20mm x 24mm','25mm x 15mm',
+                     '28mm x 15mm','28mm x 20mm','33mm x 16mm Scottish Staff Bead'];
+const PARTING_BEADS = ['7mm x 25mm','8mm x 25mm','8mm x 28mm'];
 const isSash    = w => w.product === 'Sash Window';
 const isRepair  = w => w.service === 'Sash Repairs';
 const SERVICES = [['Sash Repairs','Repairs'],
@@ -555,10 +558,16 @@ function sSurvey(v,b){
               </select></div>` : ''}
           </div>
           ${isRepair(w) ? `<div class="wsel">
-            <div><span class="wlab">Staff bead (mm)</span>
-              <input class="inp sb" data-i="${i}" inputmode="numeric" value="${esc(w.staffBead || '')}"></div>
-            <div><span class="wlab">Parting bead (mm)</span>
-              <input class="inp pb" data-i="${i}" inputmode="numeric" value="${esc(w.partingBead || '')}"></div>
+            <div><span class="wlab">Staff bead</span>
+              <select class="inp sb" data-i="${i}">
+                <option value="">Select…</option>
+                ${STAFF_BEADS.map(b => `<option${b === w.staffBead ? ' selected' : ''}>${b}</option>`).join('')}
+              </select></div>
+            <div><span class="wlab">Parting bead</span>
+              <select class="inp pb" data-i="${i}">
+                <option value="">Select…</option>
+                ${PARTING_BEADS.map(b => `<option${b === w.partingBead ? ' selected' : ''}>${b}</option>`).join('')}
+              </select></div>
           </div>` : ''}
           <div style="margin-top:9px"><span class="wlab">Note</span>
             <input class="wnote" data-i="${i}" value="${esc(w.notes || '')}" placeholder="optional" autocomplete="off"></div>
@@ -599,13 +608,11 @@ function sSurvey(v,b){
     R.querySelectorAll('.mc').forEach(s => s.onchange = () => {
       j.windows[+s.dataset.i].mechanism = s.value; j.synced = false; save(); netLabel();
     });
-    R.querySelectorAll('.sb').forEach(inp => inp.oninput = () => {
-      inp.value = inp.value.replace(/\D/g,'');
-      j.windows[+inp.dataset.i].staffBead = inp.value; j.synced = false; save();
+    R.querySelectorAll('.sb').forEach(s => s.onchange = () => {
+      j.windows[+s.dataset.i].staffBead = s.value; j.synced = false; save();
     });
-    R.querySelectorAll('.pb').forEach(inp => inp.oninput = () => {
-      inp.value = inp.value.replace(/\D/g,'');
-      j.windows[+inp.dataset.i].partingBead = inp.value; j.synced = false; save();
+    R.querySelectorAll('.pb').forEach(s => s.onchange = () => {
+      j.windows[+s.dataset.i].partingBead = s.value; j.synced = false; save();
     });
     R.querySelectorAll('.sv').forEach(s => s.onchange = () => {
       const i = +s.dataset.i, w = j.windows[i];
@@ -744,11 +751,11 @@ function exportPdf(j){
 
     if(hasBeads){
       ty += 11;
-      [['STAFF BEAD', w.staffBead ? w.staffBead + ' mm' : '—'],
-       ['PARTING BEAD', w.partingBead ? w.partingBead + ' mm' : '—']].forEach((r,c) => {
-        const x = TX + c * 34;
+      [['STAFF BEAD', w.staffBead || '—'],
+       ['PARTING BEAD', w.partingBead || '—']].forEach((r,c) => {
+        const x = TX + c * 44;
         d.setFontSize(6.5); d.setTextColor(...gry); d.text(r[0], x, ty);
-        d.setFontSize(9);   d.setTextColor(...ink); d.text(r[1], x, ty + 4.6);
+        d.setFontSize(9);   d.setTextColor(...ink); d.text(String(r[1]).slice(0,30), x, ty + 4.6);
       });
     }
 
@@ -796,8 +803,8 @@ async function syncJob(j){
       sqm:Number(sqm(w.w,w.h).toFixed(3)), band:band(sqm(w.w,w.h)),
       product:w.product || null, service:w.service || null, glazing:w.glazing || null,
       mechanism:isSash(w) ? (w.mechanism || null) : null,
-      staff_bead:isRepair(w) && w.staffBead ? Number(w.staffBead) : null,
-      parting_bead:isRepair(w) && w.partingBead ? Number(w.partingBead) : null,
+      staff_bead:isRepair(w) ? (w.staffBead || null) : null,
+      parting_bead:isRepair(w) ? (w.partingBead || null) : null,
       notes:w.notes }))
   };
   if(!session){ toast('PDF saved · sign in to send it to the dashboard'); return }
