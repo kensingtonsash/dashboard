@@ -130,13 +130,17 @@ textarea.inp{min-height:70px;resize:vertical}
   font-family:inherit;font-size:13px;color:#444
 }
 .wpos:focus{outline:none;border-bottom-color:#34453E}
-.wdims{display:grid;grid-template-columns:1fr 12px 1fr;gap:6px;align-items:center}
-.wdims .x{text-align:center;color:#c4c0b8;font-size:12px}
+.wlab{
+  display:block;font-size:9.5px;color:#999;text-transform:uppercase;letter-spacing:.07em;
+  font-weight:600;margin-bottom:4px
+}
+.wdims{display:grid;grid-template-columns:1fr 12px 1fr;gap:6px;align-items:end}
+.wdims .x{text-align:center;color:#c4c0b8;font-size:12px;padding-bottom:11px}
 .wdims .inp{padding:9px;text-align:center}
 .wsel{display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-top:6px}
 .wsel .inp{padding:9px 8px;font-size:16px}
 .wnote{
-  width:100%;margin-top:8px;border:0;border-bottom:1px solid #F2F1EE;background:none;
+  width:100%;border:0;border-bottom:1px solid #F2F1EE;background:none;
   padding:5px 0;font-family:inherit;font-size:16px;color:#444
 }
 .wnote:focus{outline:none;border-bottom-color:#34453E}
@@ -210,6 +214,10 @@ const LOGO = 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAeAAAABeCAYAAAD7Y8ck
 
 const K_SURVEYS = 'ks_surveys_v3', K_SESSION = 'ks_session_v1', K_BOOKED = 'ks_booked_v1';
 const GLAZING  = ['Single','Laminated','Double','Slimline double','Vacuum'];
+const PRODUCTS = ['Sash Window','Casement Window','Front Door','French Doors','Bifold Doors','Patio Door'];
+const MECHANISMS = ['Cord & weights','Spiral balance'];
+const isSash    = w => w.product === 'Sash Window';
+const isRepair  = w => w.service === 'Sash Repairs';
 const SERVICES = [['Sash Repairs','Repairs'],
                   ['New Sashes into Existing Frames','New sashes'],
                   ['Full Replacement','Full replacement']];
@@ -229,6 +237,10 @@ let state   = { screen:'list', jobId:null, openSpec:false };
 db.forEach(j => j.windows.forEach(w => {
   if(w.service === undefined) w.service = j.service && j.service !== 'Mixed' ? j.service : 'Sash Repairs';
   if(w.glazing === undefined) w.glazing = (j.spec && j.spec.glazing) || '';
+  if(w.product === undefined) w.product = 'Sash Window';
+  if(w.mechanism === undefined) w.mechanism = '';
+  if(w.staffBead === undefined) w.staffBead = '';
+  if(w.partingBead === undefined) w.partingBead = '';
 }));
 
 function read(k, fb){ try{ const v = JSON.parse(localStorage.getItem(k)); return v == null ? fb : v }catch(e){ return fb } }
@@ -402,6 +414,7 @@ function start(src = {}){
     surveyor:src.surveyor || 'Luke Robertson',
     site:{}, spec:{},
     windows:[{ label:'W1', position:'', w:'', h:'', photo:'', notes:'',
+               product:PRODUCTS[0], mechanism:'', staffBead:'', partingBead:'',
                service:SERVICE_VALUES.includes(src.service) ? src.service : SERVICE_VALUES[0],
                glazing:'' }],
     synced:false
@@ -472,6 +485,8 @@ function sSurvey(v,b){
   function addRow(){
     const prev = j.windows[j.windows.length - 1] || {};
     j.windows.push({ label:'W' + (j.windows.length + 1), position:'', w:'', h:'', photo:'', notes:'',
+                     product:prev.product || PRODUCTS[0], mechanism:prev.mechanism || '',
+                     staffBead:prev.staffBead || '', partingBead:prev.partingBead || '',
                      service:prev.service || SERVICE_VALUES[0], glazing:prev.glazing || '' });
     j.synced = false; save(); rows();
     const last = el('rows').lastElementChild;
@@ -489,7 +504,19 @@ function sSurvey(v,b){
   }
 
   function rows(){
-    el('rows').innerHTML = j.windows.map((w,i) => {
+    el('rows').innerHTML = j.windows.map(rowHtml).join('');
+    stats(); wire(el('rows'));
+  }
+
+  /* redraw one row only — keeps scroll position and the other rows untouched */
+  function redrawRow(i){
+    const R = el('rows'), tmp = document.createElement('div');
+    tmp.innerHTML = rowHtml(j.windows[i], i);
+    R.replaceChild(tmp.firstElementChild, R.children[i]);
+    wire(R.children[i]);
+  }
+
+  function rowHtml(w,i){
       const a = sqm(w.w,w.h);
       return `<div class="wrow">
         <button class="wshot" data-shoot="${i}" aria-label="Photo for ${esc(w.label)}">
@@ -498,23 +525,43 @@ function sSurvey(v,b){
         <div>
           <div class="wtop">
             <span class="wref">${esc(w.label)}</span>
-            <input class="wpos" data-i="${i}" value="${esc(w.position)}" placeholder="position — 2nd floor rear" autocomplete="off">
+            <input class="wpos" data-i="${i}" value="${esc(w.position)}" placeholder="location — 2nd floor rear" autocomplete="off">
           </div>
           <div class="wdims">
-            <input class="inp wf" data-i="${i}" inputmode="numeric" placeholder="width" value="${esc(w.w)}">
+            <div><span class="wlab">Width (mm)</span>
+              <input class="inp wf" data-i="${i}" inputmode="numeric" value="${esc(w.w)}"></div>
             <div class="x">×</div>
-            <input class="inp hf" data-i="${i}" inputmode="numeric" placeholder="height" value="${esc(w.h)}">
+            <div><span class="wlab">Height (mm)</span>
+              <input class="inp hf" data-i="${i}" inputmode="numeric" value="${esc(w.h)}"></div>
           </div>
           <div class="wsel">
-            <select class="inp sv" data-i="${i}">
-              ${SERVICES.map(([v,l]) => `<option value="${v}"${v === w.service ? ' selected' : ''}>${l}</option>`).join('')}
-            </select>
-            <select class="inp gl" data-i="${i}">
-              <option value="">Glazing…</option>
-              ${GLAZING.map(g => `<option${g === w.glazing ? ' selected' : ''}>${g}</option>`).join('')}
-            </select>
+            <div><span class="wlab">Product type</span>
+              <select class="inp pd" data-i="${i}">
+                ${PRODUCTS.map(p => `<option${p === w.product ? ' selected' : ''}>${p}</option>`).join('')}
+              </select></div>
+            <div><span class="wlab">Service required</span>
+              <select class="inp sv" data-i="${i}">
+                ${SERVICES.map(([v,l]) => `<option value="${v}"${v === w.service ? ' selected' : ''}>${l}</option>`).join('')}
+              </select></div>
+            <div><span class="wlab">Glazing</span>
+              <select class="inp gl" data-i="${i}">
+                <option value="">Select…</option>
+                ${GLAZING.map(g => `<option${g === w.glazing ? ' selected' : ''}>${g}</option>`).join('')}
+              </select></div>
+            ${isSash(w) ? `<div><span class="wlab">Mechanism</span>
+              <select class="inp mc" data-i="${i}">
+                <option value="">Select…</option>
+                ${MECHANISMS.map(m => `<option${m === w.mechanism ? ' selected' : ''}>${m}</option>`).join('')}
+              </select></div>` : ''}
           </div>
-          <input class="wnote" data-i="${i}" value="${esc(w.notes || '')}" placeholder="note for this window (optional)" autocomplete="off">
+          ${isRepair(w) ? `<div class="wsel">
+            <div><span class="wlab">Staff bead (mm)</span>
+              <input class="inp sb" data-i="${i}" inputmode="numeric" value="${esc(w.staffBead || '')}"></div>
+            <div><span class="wlab">Parting bead (mm)</span>
+              <input class="inp pb" data-i="${i}" inputmode="numeric" value="${esc(w.partingBead || '')}"></div>
+          </div>` : ''}
+          <div style="margin-top:9px"><span class="wlab">Note</span>
+            <input class="wnote" data-i="${i}" value="${esc(w.notes || '')}" placeholder="optional" autocomplete="off"></div>
           <div class="wfoot">
             <span class="warea">${a ? a.toFixed(2) + ' m²' : '—'}</span>
             ${a ? `<span class="badge b-band">${band(a)}</span>` : ''}
@@ -522,12 +569,9 @@ function sSurvey(v,b){
           </div>
         </div>
       </div>`;
-    }).join('');
-    stats(); wire();
   }
 
-  function wire(){
-    const R = el('rows');
+  function wire(R){
     R.querySelectorAll('.wf, .hf').forEach(inp => inp.oninput = () => {
       const w = j.windows[+inp.dataset.i];
       inp.value = inp.value.replace(/\D/g,'');
@@ -546,8 +590,28 @@ function sSurvey(v,b){
     R.querySelectorAll('.wnote').forEach(inp => inp.oninput = () => {
       j.windows[+inp.dataset.i].notes = inp.value; j.synced = false; save(); netLabel();
     });
+    R.querySelectorAll('.pd').forEach(s => s.onchange = () => {
+      const i = +s.dataset.i, w = j.windows[i];
+      w.product = s.value;
+      if(!isSash(w)) w.mechanism = '';
+      j.synced = false; save(); netLabel(); redrawRow(i);
+    });
+    R.querySelectorAll('.mc').forEach(s => s.onchange = () => {
+      j.windows[+s.dataset.i].mechanism = s.value; j.synced = false; save(); netLabel();
+    });
+    R.querySelectorAll('.sb').forEach(inp => inp.oninput = () => {
+      inp.value = inp.value.replace(/\D/g,'');
+      j.windows[+inp.dataset.i].staffBead = inp.value; j.synced = false; save();
+    });
+    R.querySelectorAll('.pb').forEach(inp => inp.oninput = () => {
+      inp.value = inp.value.replace(/\D/g,'');
+      j.windows[+inp.dataset.i].partingBead = inp.value; j.synced = false; save();
+    });
     R.querySelectorAll('.sv').forEach(s => s.onchange = () => {
-      j.windows[+s.dataset.i].service = s.value; j.synced = false; save(); netLabel();
+      const i = +s.dataset.i, w = j.windows[i];
+      w.service = s.value;
+      if(!isRepair(w)){ w.staffBead = ''; w.partingBead = '' }
+      j.synced = false; save(); netLabel(); redrawRow(i);
     });
     R.querySelectorAll('.gl').forEach(s => s.onchange = () => {
       j.windows[+s.dataset.i].glazing = s.value; j.synced = false; save(); netLabel();
@@ -624,8 +688,10 @@ function exportPdf(j){
 
   live.forEach((w,i) => {
     const a = sqm(w.w,w.h);
-    const hasNote = !!w.notes;
-    const blockH = Math.max(w.photo ? PH : 24, hasNote ? 46 : 36) + 8;
+    const hasNote  = !!w.notes;
+    const hasBeads = isRepair(w) && (w.staffBead || w.partingBead);
+    const textH = 22 + (w.position ? 5 : 0) + 11 + (hasBeads ? 11 : 0) + (hasNote ? 11 : 0) + 3;
+    const blockH = Math.max(w.photo ? PH : 24, textH) + 8;
     if(y + blockH > 278){ d.addPage(); y = M }
     const top = y;
 
@@ -660,18 +726,31 @@ function exportPdf(j){
 
     ty += 8;
     [['WIDTH', w.w ? w.w + ' mm' : '—'],
-     ['HEIGHT', w.h ? w.h + ' mm' : '—']].forEach((r,c) => {
+     ['HEIGHT', w.h ? w.h + ' mm' : '—'],
+     ['PRODUCT', w.product || '—']].forEach((r,c) => {
       const x = TX + c * 34;
       d.setFontSize(6.5); d.setTextColor(...gry); d.text(r[0], x, ty);
       d.setFontSize(9.5); d.setTextColor(...ink); d.text(r[1], x, ty + 4.6);
     });
 
     ty += 11;
-    [['SERVICE', w.service || '—'], ['GLAZING', w.glazing || '—']].forEach((r,c) => {
-      const x = TX + c * 52;
+    const line2 = [['SERVICE', w.service || '—'], ['GLAZING', w.glazing || '—']];
+    if(isSash(w) && w.mechanism) line2.push(['MECHANISM', w.mechanism]);
+    line2.forEach((r,c) => {
+      const x = TX + c * 34;
       d.setFontSize(6.5); d.setTextColor(...gry); d.text(r[0], x, ty);
-      d.setFontSize(9);   d.setTextColor(...ink); d.text(String(r[1]).slice(0,32), x, ty + 4.6);
+      d.setFontSize(9);   d.setTextColor(...ink); d.text(String(r[1]).slice(0,24), x, ty + 4.6);
     });
+
+    if(hasBeads){
+      ty += 11;
+      [['STAFF BEAD', w.staffBead ? w.staffBead + ' mm' : '—'],
+       ['PARTING BEAD', w.partingBead ? w.partingBead + ' mm' : '—']].forEach((r,c) => {
+        const x = TX + c * 34;
+        d.setFontSize(6.5); d.setTextColor(...gry); d.text(r[0], x, ty);
+        d.setFontSize(9);   d.setTextColor(...ink); d.text(r[1], x, ty + 4.6);
+      });
+    }
 
     if(hasNote){
       ty += 11;
@@ -715,7 +794,11 @@ async function syncJob(j){
     windows:j.windows.filter(w => w.w || w.h).map(w => ({
       label:w.label, position:w.position, width:Number(w.w) || null, height:Number(w.h) || null,
       sqm:Number(sqm(w.w,w.h).toFixed(3)), band:band(sqm(w.w,w.h)),
-      service:w.service || null, glazing:w.glazing || null, notes:w.notes }))
+      product:w.product || null, service:w.service || null, glazing:w.glazing || null,
+      mechanism:isSash(w) ? (w.mechanism || null) : null,
+      staff_bead:isRepair(w) && w.staffBead ? Number(w.staffBead) : null,
+      parting_bead:isRepair(w) && w.partingBead ? Number(w.partingBead) : null,
+      notes:w.notes }))
   };
   if(!session){ toast('PDF saved · sign in to send it to the dashboard'); return }
   try{
