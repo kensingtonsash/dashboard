@@ -698,7 +698,7 @@ function exportPdf(j){
   try{ d.addImage(LOGO, 'PNG', M, y, 55, 10.8) }
   catch(e){ d.setFont('helvetica','bold'); d.setFontSize(13); d.setTextColor(...grn); d.text('KENSINGTON SASH', M, y + 7) }
   d.setFont('helvetica','normal'); d.setFontSize(7.5); d.setTextColor(...gry);
-  d.text('QUOTE REQUEST', W - M, y + 4, { align:'right' });
+  d.text('WINDOW SURVEY', W - M, y + 4, { align:'right' });
   d.text(new Date(j.created).toLocaleDateString('en-GB'), W - M, y + 8.4, { align:'right' });
   y += 15.5; d.setDrawColor(...grn); d.setLineWidth(.5); d.line(M, y, W - M, y); y += 9.5;
 
@@ -813,7 +813,7 @@ function exportPdf(j){
     d.setFontSize(9); d.setTextColor(...ink); d.text(d.splitTextToSize(j.spec.notes, W - M*2), M, y);
   }
 
-  d.save('Quote Request — ' + (ref || requestNo(j)) + '.pdf');
+  d.save('Survey — ' + (ref || requestNo(j)) + '.pdf');
   syncJob(j);
 }
 
