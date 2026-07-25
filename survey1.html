@@ -258,6 +258,19 @@ function sqm(w,h){ return (Number(w) > 0 && Number(h) > 0) ? (w*h)/1e6 : 0 }
 function band(a){ return !a ? '' : a <= 1.7 ? 'Band 1' : a <= 2.3 ? 'Band 2' : 'Band 3' }
 function pick(r, keys){ for(const k of keys){ if(r[k]) return r[k] } return '' }
 
+/* 'Flat 2, 14 Elgin Crescent, W11' -> 'Elgin'. Overridden by the Reference field. */
+function siteRef(j){
+  if(j.spec && j.spec.ref) return j.spec.ref.trim();
+  const stop = /^(flat|apt|apartment|unit|no|the|ground|lower|upper|basement|floor|house|maisonette)$/i;
+  const word = String(j.address || '').split(/[\s,]+/)
+    .find(t => /^[A-Za-z][A-Za-z'-]{2,}$/.test(t) && !stop.test(t));
+  return word || '';
+}
+/* the number the supplier quotes against */
+function requestNo(j){
+  return j.quote_no || j.enquiry_id || ('S' + String(j.id).slice(-6));
+}
+
 /* ---------- auth ---------- */
 async function signIn(email, password){
   const r = await fetch(BASE + '/auth/v1/token?grant_type=password', {
@@ -451,6 +464,8 @@ function sSurvey(v,b){
           ${[['conservation','Conservation area'],['listed','Listed'],['scaffold','Scaffold'],['parking','Parking suspension']]
             .map(([k,l]) => `<label><input type="checkbox" data-site="${k}"${j.site[k] ? ' checked' : ''}>${l}</label>`).join('')}
         </div>
+        <div class="field"><label>Reference for supplier</label>
+          <input class="inp" id="ref" value="${esc(j.spec.ref || '')}" placeholder="${esc(siteRef(j) || 'first word of the street')}" autocomplete="off"></div>
         <div class="field"><label>Paint colour</label><input class="inp" id="finish" value="${esc(j.spec.finish || '')}"></div>
         <div class="field"><label>Ironmongery finish</label><input class="inp" id="iron" value="${esc(j.spec.iron || '')}"></div>
         <div class="field"><label>Notes for supplier</label><textarea class="inp" id="snotes">${esc(j.spec.notes || '')}</textarea></div>
@@ -478,7 +493,7 @@ function sSurvey(v,b){
   el('specBody').addEventListener('change', () => {
     j.client = val('client'); j.address = val('address');
     document.querySelectorAll('[data-site]').forEach(c => j.site[c.dataset.site] = c.checked);
-    j.spec = { ...j.spec, finish:val('finish'), iron:val('iron'), notes:val('snotes') };
+    j.spec = { ...j.spec, ref:val('ref'), finish:val('finish'), iron:val('iron'), notes:val('snotes') };
     j.synced = false; save(); netLabel();
   });
 
@@ -675,11 +690,12 @@ function exportPdf(j){
   try{ d.addImage(LOGO, 'PNG', M, y, 55, 10.8) }
   catch(e){ d.setFont('helvetica','bold'); d.setFontSize(13); d.setTextColor(...grn); d.text('KENSINGTON SASH', M, y + 7) }
   d.setFont('helvetica','normal'); d.setFontSize(7.5); d.setTextColor(...gry);
-  d.text('WINDOW SCHEDULE', W - M, y + 4, { align:'right' });
+  d.text('QUOTE REQUEST', W - M, y + 4, { align:'right' });
   d.text(new Date(j.created).toLocaleDateString('en-GB'), W - M, y + 8.4, { align:'right' });
   y += 15.5; d.setDrawColor(...grn); d.setLineWidth(.5); d.line(M, y, W - M, y); y += 9.5;
 
-  const meta = [['Property', j.address || '—'], ['Client', j.client || '—'],
+  const ref = siteRef(j);
+  const meta = [['Reference', ref ? "'" + ref + "'" : '—'], ['Request no.', requestNo(j)],
                 ['Service', jobService(j) || '—'], ['Surveyor', j.surveyor || 'Luke Robertson']]
     .concat([['Paint colour',j.spec.finish],['Ironmongery',j.spec.iron]].filter(r => r[1]))
     .concat(j.quote_no ? [['Reference', j.quote_no]] : []);
@@ -789,8 +805,7 @@ function exportPdf(j){
     d.setFontSize(9); d.setTextColor(...ink); d.text(d.splitTextToSize(j.spec.notes, W - M*2), M, y);
   }
 
-  const tag = (j.address || j.client || 'survey').replace(/[^\w\s-]/g,'').trim().replace(/\s+/g,'-');
-  d.save('Survey — ' + tag + '.pdf');
+  d.save('Quote Request — ' + (ref || requestNo(j)) + '.pdf');
   syncJob(j);
 }
 
