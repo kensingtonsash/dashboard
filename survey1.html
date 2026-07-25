@@ -580,46 +580,83 @@ function exportPdf(j){
   });
   y += Math.ceil(meta.length/2) * 6 + 8;
 
-  const cols = [M, M+22, M+98, M+130, M+160];
-  d.setDrawColor(...hair); d.setLineWidth(.25);
-  d.setFontSize(6.5); d.setTextColor(...gry);
-  ['REF','POSITION','WIDTH','HEIGHT','AREA'].forEach((h,i) => d.text(h, cols[i], y));
-  y += 2.6; d.line(M, y, W - M, y); y += 6;
+  // one block per window: photo left, measurements beside it
+  const PW = 38, PH = 50;           // photo box
+  const TX = M + PW + 8;            // text column
 
-  live.forEach(w => {
-    if(y > 266){ d.addPage(); y = M }
+  live.forEach((w,i) => {
     const a = sqm(w.w,w.h);
-    d.setFontSize(9); d.setTextColor(...ink);
-    d.text(w.label, cols[0], y);
-    d.text(String(w.position || '—').slice(0,40), cols[1], y);
-    d.text(w.w ? w.w + ' mm' : '—', cols[2], y);
-    d.text(w.h ? w.h + ' mm' : '—', cols[3], y);
-    d.text(a ? a.toFixed(2) + ' m²' : '—', cols[4], y);
-    y += 3.2; d.line(M, y, W - M, y); y += 6;
+    const hasNote = !!w.notes;
+    const blockH = (w.photo ? PH : 24) + (hasNote ? 6 : 0) + 8;
+    if(y + blockH > 278){ d.addPage(); y = M }
+    const top = y;
+
+    if(w.photo){
+      try{
+        const p = d.getImageProperties(w.photo);
+        const s = Math.min(PW / p.width, PH / p.height);
+        const iw = p.width * s, ih = p.height * s;
+        d.addImage(w.photo, 'JPEG', M + (PW - iw)/2, top, iw, ih);
+      }catch(e){}
+    } else {
+      d.setDrawColor(...hair); d.setLineWidth(.25);
+      d.rect(M, top, PW, 22);
+      d.setFontSize(6.5); d.setTextColor(...gry);
+      d.text('NO PHOTO', M + PW/2, top + 12.5, { align:'center' });
+    }
+
+    let ty = top + 4.5;
+    d.setFont('helvetica','bold'); d.setFontSize(11); d.setTextColor(...ink);
+    d.text(w.label, TX, ty);
+    if(a){
+      d.setFont('helvetica','bold'); d.setFontSize(10);
+      d.text(a.toFixed(2) + ' m²', W - M, ty, { align:'right' });
+    }
+    d.setFont('helvetica','normal');
+
+    if(w.position){
+      ty += 5;
+      d.setFontSize(8.5); d.setTextColor(...gry);
+      d.text(String(w.position).slice(0,52), TX, ty);
+    }
+
+    ty += 8;
+    [['WIDTH', w.w ? w.w + ' mm' : '—'],
+     ['HEIGHT', w.h ? w.h + ' mm' : '—'],
+     ['BAND', band(a) || '—']].forEach((r,c) => {
+      const x = TX + c * 34;
+      d.setFontSize(6.5); d.setTextColor(...gry); d.text(r[0], x, ty);
+      d.setFontSize(9.5); d.setTextColor(...ink); d.text(r[1], x, ty + 4.6);
+    });
+
+    if(hasNote){
+      ty += 12;
+      d.setFontSize(8); d.setTextColor(...gry);
+      d.text(d.splitTextToSize(String(w.notes), W - TX - M), TX, ty);
+    }
+
+    y = top + blockH;
+    if(i < live.length - 1){
+      d.setDrawColor(...hair); d.setLineWidth(.25);
+      d.line(M, y - 4, W - M, y - 4);
+    }
   });
+
+  // totals
   const tot = live.reduce((t,w) => t + sqm(w.w,w.h), 0);
-  d.setFontSize(8); d.setTextColor(...gry); d.text(live.length + ' units', cols[1], y + 1);
-  d.setTextColor(...ink); d.text(tot.toFixed(2) + ' m²', cols[4], y + 1);
+  if(y > 262){ d.addPage(); y = M }
+  y += 2;
+  d.setDrawColor(...grn); d.setLineWidth(.4); d.line(M, y, W - M, y); y += 6;
+  d.setFont('helvetica','bold'); d.setFontSize(9.5); d.setTextColor(...ink);
+  d.text(live.length + (live.length === 1 ? ' unit' : ' units'), M, y);
+  d.text(tot.toFixed(2) + ' m² total', W - M, y, { align:'right' });
+  d.setFont('helvetica','normal');
 
   if(j.spec.notes){
-    y += 12; if(y > 250){ d.addPage(); y = M }
+    y += 11; if(y > 262){ d.addPage(); y = M }
     d.setFontSize(6.5); d.setTextColor(...gry); d.text('NOTES', M, y); y += 5;
     d.setFontSize(9); d.setTextColor(...ink); d.text(d.splitTextToSize(j.spec.notes, W - M*2), M, y);
   }
-
-  live.filter(w => w.photo).forEach((w,i) => {
-    if(i % 2 === 0){ d.addPage(); y = M }
-    d.setFontSize(10); d.setTextColor(...ink);
-    d.text(w.label + (w.position ? ' — ' + w.position : ''), M, y);
-    if(w.w && w.h){ d.setFontSize(8); d.setTextColor(...gry); d.text(w.w + ' × ' + w.h + ' mm', W - M, y, { align:'right' }) }
-    y += 4;
-    try{
-      const p = d.getImageProperties(w.photo);
-      const s = Math.min((W - M*2) / p.width, 108 / p.height);
-      d.addImage(w.photo, 'JPEG', M, y, p.width * s, p.height * s);
-      y += p.height * s + 12;
-    }catch(e){ y += 6 }
-  });
 
   const tag = (j.address || j.client || 'survey').replace(/[^\w\s-]/g,'').trim().replace(/\s+/g,'-');
   d.save('Survey — ' + tag + '.pdf');
