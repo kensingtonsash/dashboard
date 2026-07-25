@@ -226,7 +226,8 @@ const hasPulleys = w => isSash(w) && w.mechanism !== 'Spiral balance';
 const sashUnits = w => w.product === 'Triple Sash Window' ? 3
                      : w.product === 'Double Sash Window' ? 2
                      : isSash(w) ? 1 : 0;
-const isRepair  = w => w.service === 'Sash Repairs';
+/* frame is retained: same fields and the same order-list counts */
+const isRepair  = w => w.service === 'Sash Repairs' || w.service === 'New Sashes (Keep Frames)';
 const SERVICES = [['Sash Repairs','Sash Repairs'],
                   ['Full Replacement','Full Replacement'],
                   ['New Sashes (Keep Frames)','New Sashes (Keep Frames)']];
@@ -677,7 +678,7 @@ function sSurvey(v,b){
     R.querySelectorAll('.sv').forEach(s => s.onchange = () => {
       const i = +s.dataset.i, w = j.windows[i];
       w.service = s.value;
-      if(!isRepair(w)){ w.staffBead = ''; w.partingBead = '' }
+      if(!isRepair(w)){ w.staffBead = ''; w.partingBead = ''; w.newPulleys = false }
       j.synced = false; save(); netLabel(); redrawRow(i);
     });
     R.querySelectorAll('.gl').forEach(s => s.onchange = () => {
