@@ -221,9 +221,9 @@ const STAFF_BEADS = ['20mm x 15mm','20mm x 20mm','20mm x 24mm','25mm x 15mm',
 const PARTING_BEADS = ['7mm x 25mm','8mm x 25mm','8mm x 28mm'];
 const isSash    = w => w.product === 'Sash Window';
 const isRepair  = w => w.service === 'Sash Repairs';
-const SERVICES = [['Sash Repairs','Repairs'],
-                  ['New Sashes into Existing Frames','New sashes'],
-                  ['Full Replacement','Full replacement']];
+const SERVICES = [['Sash Repairs','Sash Repairs'],
+                  ['Full Replacement','Full Replacement'],
+                  ['New Sashes (Keep Frames)','New Sashes (Keep Frames)']];
 const SERVICE_VALUES = SERVICES.map(s => s[0]);
 /* the job's overall service is derived from its windows */
 function jobService(j){
@@ -239,6 +239,7 @@ let state   = { screen:'list', jobId:null, openSpec:false };
 /* older surveys predate per-window service/glazing — fill them in once */
 db.forEach(j => j.windows.forEach(w => {
   if(w.service === undefined) w.service = j.service && j.service !== 'Mixed' ? j.service : 'Sash Repairs';
+  if(w.service === 'New Sashes into Existing Frames') w.service = 'New Sashes (Keep Frames)';
   if(w.glazing === undefined) w.glazing = (j.spec && j.spec.glazing) || '';
   if(w.product === undefined) w.product = 'Sash Window';
   if(w.mechanism === undefined) w.mechanism = '';
