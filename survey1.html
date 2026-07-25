@@ -135,6 +135,12 @@ textarea.inp{min-height:70px;resize:vertical}
 .wdims .inp{padding:9px;text-align:center}
 .wsel{display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-top:6px}
 .wsel .inp{padding:9px 8px;font-size:16px}
+.wnote{
+  width:100%;margin-top:8px;border:0;border-bottom:1px solid #F2F1EE;background:none;
+  padding:5px 0;font-family:inherit;font-size:16px;color:#444
+}
+.wnote:focus{outline:none;border-bottom-color:#34453E}
+.wnote::placeholder{color:#c4c0b8;font-size:13px}
 .wfoot{display:flex;align-items:center;gap:8px;margin-top:7px}
 .warea{font-size:12px;font-weight:600;color:#1a1a1a}
 .wkill{margin-left:auto;background:none;border:0;color:#c9c5bd;font-size:14px;padding:2px 4px}
@@ -508,6 +514,7 @@ function sSurvey(v,b){
               ${GLAZING.map(g => `<option${g === w.glazing ? ' selected' : ''}>${g}</option>`).join('')}
             </select>
           </div>
+          <input class="wnote" data-i="${i}" value="${esc(w.notes || '')}" placeholder="note for this window (optional)" autocomplete="off">
           <div class="wfoot">
             <span class="warea">${a ? a.toFixed(2) + ' m²' : '—'}</span>
             ${a ? `<span class="badge b-band">${band(a)}</span>` : ''}
@@ -535,6 +542,9 @@ function sSurvey(v,b){
     });
     R.querySelectorAll('.wpos').forEach(inp => inp.oninput = () => {
       j.windows[+inp.dataset.i].position = inp.value; j.synced = false; save();
+    });
+    R.querySelectorAll('.wnote').forEach(inp => inp.oninput = () => {
+      j.windows[+inp.dataset.i].notes = inp.value; j.synced = false; save(); netLabel();
     });
     R.querySelectorAll('.sv').forEach(s => s.onchange = () => {
       j.windows[+s.dataset.i].service = s.value; j.synced = false; save(); netLabel();
