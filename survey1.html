@@ -693,6 +693,10 @@ function sSurvey(v,b){
       <div class="card-title"><i class="ti ti-window"></i>Windows<span class="count" id="wCount"></span></div>
       <div id="rows"></div>
       <button class="addrow" id="add"><i class="ti ti-plus"></i>Add window</button>
+    </div>
+
+    <div style="text-align:center;padding:2px 0 14px">
+      <button class="link-muted" id="del">Delete survey</button>
     </div>`;
 
   b.innerHTML = `<button class="btn-ghost" id="pdf"><i class="ti ti-file-text"></i></button>
@@ -704,6 +708,7 @@ function sSurvey(v,b){
     el('specBody').classList.toggle('open', state.openSpec);
   };
   el('pdf').onclick  = () => exportPdf(j);
+  el('del').onclick  = () => deleteSurvey(j);
   el('add').onclick  = addRow;
   el('done').onclick = () => {
     if(!j.windows.some(w => w.w || w.h)){ toast('Measure at least one window first'); return }
@@ -1151,6 +1156,35 @@ async function syncJob(j){
     await api('rpc/save_survey', { method:'POST', body: JSON.stringify({ payload }) });
     j.synced = true; save(); toast('PDF saved · sent to the dashboard'); netLabel();
   }catch(e){ toast('PDF saved · will send when there is signal') }
+}
+
+/* ---------- delete a survey everywhere (local + shared server) ---------- */
+async function deleteSurvey(j){
+  const onServer = j.synced;
+  const msg = onServer
+    ? 'Delete this survey for everyone? It is removed from the dashboard for all devices and cannot be undone.'
+    : 'Delete this survey? It has not been sent yet.';
+  if(!confirm(msg)) return;
+
+  for(const w of j.windows){ if(w.photo) photoDel(w.photo); }   // drop local photo copies
+  db = db.filter(x => x.id !== j.id);
+  save();
+
+  if(onServer && session){
+    try{
+      await api('surveys?id=eq.' + encodeURIComponent(j.id), { method:'DELETE' });
+      if(j.enquiry_id){                                          // put the booking back so the job isn't lost
+        await api('enquiries?id=eq.' + encodeURIComponent(j.enquiry_id),
+          { method:'PATCH', headers:{ Prefer:'return=minimal' }, body: JSON.stringify({ surveyed_at:null }) });
+      }
+      toast('Survey deleted');
+    }catch(e){ toast('Removed here · could not reach the dashboard'); }
+  } else {
+    toast('Survey deleted');
+  }
+  state.screen = 'list'; render();
+  if(session) await loadBooked();
+  render();
 }
 
 function netLabel(){
