@@ -780,6 +780,18 @@ function sSurvey(v,b){
             <div><span class="wlab">${isSashReplacement(w) ? 'Internal height (mm)' : 'Height (mm)'}</span>
               <input class="inp hf" data-i="${i}" inputmode="numeric" value="${esc(w.h)}"></div>
           </div>
+          ${isSashReplacement(w) ? `<div class="wsel" style="grid-template-columns:1fr 1fr 1fr 1fr;margin-top:8px">
+            <div><span class="wlab">Box left</span>
+              <input class="inp bl" data-i="${i}" inputmode="numeric" value="${esc(w.boxL || '')}" placeholder="75"></div>
+            <div><span class="wlab">Box right</span>
+              <input class="inp br" data-i="${i}" inputmode="numeric" value="${esc(w.boxR || '')}" placeholder="75"></div>
+            <div><span class="wlab">Box top</span>
+              <input class="inp bt" data-i="${i}" inputmode="numeric" value="${esc(w.boxT || '')}" placeholder="75"></div>
+            <div><span class="wlab">Box bottom</span>
+              <div class="inp" style="background:#F2F1EE;color:#999;text-align:center">60</div></div>
+          </div>
+          <div style="margin-top:7px;font-size:11.5px;color:#999">Actual size (incl. box):
+            <span class="ov" data-i="${i}" style="color:#1a1a1a;font-weight:600">${(() => { const o = overallSize(w); return o ? o.w + ' × ' + o.h + ' mm' : '—'; })()}</span></div>` : ''}
           <div class="wsel">
             <div><span class="wlab">Product type</span>
               <select class="inp pd" data-i="${i}">
@@ -817,18 +829,6 @@ function sSurvey(v,b){
                 <option value="1"${w.newPulleys ? ' selected' : ''}>Yes</option>
               </select></div>` : ''}
           </div>` : ''}
-          ${isSashReplacement(w) ? `<div class="wsel" style="grid-template-columns:1fr 1fr 1fr 1fr">
-            <div><span class="wlab">Box left</span>
-              <input class="inp bl" data-i="${i}" inputmode="numeric" value="${esc(w.boxL || '')}" placeholder="75"></div>
-            <div><span class="wlab">Box right</span>
-              <input class="inp br" data-i="${i}" inputmode="numeric" value="${esc(w.boxR || '')}" placeholder="75"></div>
-            <div><span class="wlab">Box top</span>
-              <input class="inp bt" data-i="${i}" inputmode="numeric" value="${esc(w.boxT || '')}" placeholder="75"></div>
-            <div><span class="wlab">Box bottom</span>
-              <input class="inp bb" data-i="${i}" inputmode="numeric" value="${esc(w.boxB || '')}" placeholder="60"></div>
-          </div>
-          <div style="margin-top:7px;font-size:11.5px;color:#999">Actual size (incl. box):
-            <span class="ov" data-i="${i}" style="color:#1a1a1a;font-weight:600">${(() => { const o = overallSize(w); return o ? o.w + ' × ' + o.h + ' mm' : '—'; })()}</span></div>` : ''}
           <div style="margin-top:9px"><span class="wlab">Note</span>
             <input class="wnote" data-i="${i}" value="${esc(w.notes || '')}" placeholder="optional" autocomplete="off"></div>
           <div class="wfoot">
@@ -855,13 +855,13 @@ function sSurvey(v,b){
       if(ov){ const o = overallSize(w); ov.textContent = o ? o.w + ' × ' + o.h + ' mm' : '—'; }
       j.synced = false; save(); stats(); netLabel();
     });
-    R.querySelectorAll('.bl,.br,.bt,.bb').forEach(inp => inp.oninput = () => {
+    R.querySelectorAll('.bl,.br,.bt').forEach(inp => inp.oninput = () => {
       const w = j.windows[+inp.dataset.i];
       inp.value = inp.value.replace(/\D/g,'');
       if(inp.classList.contains('bl')) w.boxL = inp.value;
       else if(inp.classList.contains('br')) w.boxR = inp.value;
-      else if(inp.classList.contains('bt')) w.boxT = inp.value;
-      else w.boxB = inp.value;
+      else w.boxT = inp.value;
+      w.boxB = '';                                  // bottom is always the standard 60
       const ov = inp.closest('.wrow').querySelector('.ov');
       if(ov){ const o = overallSize(w); ov.textContent = o ? o.w + ' × ' + o.h + ' mm' : '—'; }
       j.synced = false; save();
