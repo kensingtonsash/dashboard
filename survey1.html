@@ -609,10 +609,14 @@ function sList(v,b){
       <div class="card-title"><i class="ti ti-ruler-measure"></i>All surveys${db.length ? `<span class="count">${db.length}</span>` : ''}</div>
       ${db.length ? db.map(j => {
         const n = j.windows.filter(w => w.w || w.h).length;
+        const dt = new Date(j.created);
+        const ds = isNaN(dt) ? '' : dt.toLocaleDateString('en-GB',
+          dt.getFullYear() === new Date().getFullYear()
+            ? { day:'numeric', month:'short' } : { day:'numeric', month:'short', year:'numeric' });
         return `<button class="row" data-open="${j.id}">
           <div class="row-left">
             <div class="row-name">${esc(j.client) || 'Untitled survey'}</div>
-            <div class="row-sub">${esc(j.address) || 'No address'} · ${n} ${n === 1 ? 'window' : 'windows'}</div>
+            <div class="row-sub">${esc(j.address) || 'No address'} · ${n} ${n === 1 ? 'window' : 'windows'}${ds ? ' · ' + ds : ''}</div>
           </div>
           <div class="row-actions">
             ${j.synced ? '<span class="badge b-complete">Sent</span>' : '<span class="badge b-pendinsurvey">Unsent</span>'}
