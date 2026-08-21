@@ -593,7 +593,7 @@ function sList(v,b){
       ${todo.map(x => {
         const d = new Date(x.survey_date);
         const isToday = d.toDateString() === today;
-        const tm = isNaN(d) ? '' : d.toLocaleTimeString('en-GB', { hour:'2-digit', minute:'2-digit', timeZone:'UTC' });
+        const tm = isNaN(d) ? '' : d.toLocaleTimeString('en-GB', { hour:'2-digit', minute:'2-digit' });
         const ds = isToday ? 'Today' : d.toLocaleDateString('en-GB', { day:'numeric', month:'short' });
         return `<button class="row" data-book="${esc(x.enquiry_id)}">
           <div class="row-left">
